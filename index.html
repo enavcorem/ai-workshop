@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%97%82%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>חוברת התחנות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#EAEEF4; --surface-3:#E1E7EF; --border:#D7DEE8;
+    --ink:#1C2430; --ink-soft:#5A6373; --ink-faint:#8B93A3;
+    --accent:#DD8A2E; --accent-ink:#8A5613; --accent-soft:#FBE9D2;
+    --hativa:#D9584B; --hativa-soft:#FBE3DF; --tichon:#2A8A8A; --tichon-soft:#DFF1F1;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px -12px rgba(28,36,48,.18);
+    --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+      --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+      --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+      --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+    --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+    --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+    --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); direction:rtl;}
+  h1,h2,.disp{font-family:var(--font-display); text-wrap:balance;}
+  .wrap{max-width:760px; margin:0 auto; padding:44px 26px 70px;}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:26px;}
+  .brand-mark{width:34px; height:34px; border-radius:10px; background:linear-gradient(155deg, var(--accent), var(--hativa)); flex:0 0 auto;}
+  .brand h1{font-size:15px; font-weight:700; margin:0;}
+  .brand span{font-size:11.5px; color:var(--ink-faint); display:block;}
+
+  .hero h2{font-size:26px; font-weight:800; margin:0 0 8px;}
+  .hero p{font-size:14px; line-height:1.65; color:var(--ink-soft); max-width:58ch; margin:0 0 24px;}
+
+  .track-toggle{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:4px; gap:4px; max-width:420px; margin-bottom:30px;}
+  .track-toggle button{flex:1; border:none; background:transparent; border-radius:9px; padding:12px 8px; font-size:14px; font-weight:700; color:var(--ink-faint); font-family:var(--font-display); transition:.15s;}
+  .track-toggle button.active.hativa{background:var(--hativa-soft); color:var(--hativa);}
+  .track-toggle button.active.tichon{background:var(--tichon-soft); color:var(--tichon);}
+
+  .cards{display:flex; flex-direction:column; gap:12px;}
+  .card{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); text-decoration:none; color:inherit;}
+  .card:hover{border-color:var(--accent);}
+  .card-num{flex:0 0 40px; height:40px; border-radius:11px; background:var(--surface-3); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:16px;}
+  .card-info{flex:1; min-width:0;}
+  .card-title{font-size:15.5px; font-weight:700; font-family:var(--font-display);}
+  .card-sub{font-size:12.5px; color:var(--ink-faint); margin-top:2px;}
+  .card-badge{flex:0 0 auto; font-size:11px; font-weight:700; color:var(--ink-faint); background:var(--surface-2); padding:4px 10px; border-radius:999px;}
+  .card-arrow{flex:0 0 auto; width:16px; height:16px; color:var(--ink-faint);}
+  .card:hover .card-arrow{color:var(--accent-ink);}
+
+  .note{margin-top:28px; font-size:12.5px; line-height:1.7; color:var(--ink-soft); background:var(--surface-2); border-radius:12px; padding:14px 16px;}
+  .note b{color:var(--ink);}
+
+  .teacher-link{display:inline-flex; align-items:center; gap:6px; margin-top:20px; font-size:12px; color:var(--ink-faint); text-decoration:none;}
+  .teacher-link:hover{color:var(--accent-ink);}
+</style>
+</head>
+<body>
+
+
+<div class="wrap" dir="rtl">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div>
+      <h1>מסלול ה-AI</h1>
+      <span>חוברת התחנות — דפי עבודה אישיים</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h2>בחרו את המסלול שלכם</h2>
+    <p>לכל תחנה יש דף עבודה נפרד לחטיבה ולתיכון. פתחו את התחנה שאתם עובדים עליה היום, מלאו אותה ישירות במסך, ובסיום — שמרו כ-PDF.</p>
+  </div>
+
+  <div class="track-toggle" id="trackToggle">
+    <button type="button" class="hativa active" data-track="hativa">חטיבה</button>
+    <button type="button" class="tichon" data-track="tichon">תיכון</button>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="note">
+    <b>איך שומרים כ-PDF?</b> בתוך כל דף עבודה יש כפתור "שמירה כ-PDF" בפינה — הוא פותח את חלון ההדפסה של הדפדפן; שם בוחרים יעד "Save as PDF" במקום מדפסת.
+    כל מה שממלאים נשמר גם אוטומטית בדפדפן של המכשיר, כך שאפשר לחזור לדף מאוחר יותר ולהמשיך.
+  </div>
+
+  <a class="teacher-link" href="teacher.html" target="_blank" rel="noopener">
+    לוח ניהול למורה (עם טיימר והערות הדרכה) ←
+  </a>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var STATIONS = [
+    { num:1, title:"פיצוח מוח ה-AI", sub:"מודלים, הטיות וציד הזיות",
+      urls:{ hativa:"u1-hativa.html", tichon:"u1-tichon.html" } },
+    { num:2, title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי",
+      urls:{ hativa:"u2-hativa.html", tichon:"u2-tichon.html" } },
+    { num:3, title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
+      urls:{ hativa:"u3-hativa.html", tichon:"u3-tichon.html" } },
+    { num:4, title:"שותף חשיבה ואנליזה", sub:"דיבייט וחקירה סוקרטית",
+      urls:{ hativa:"u4-hativa.html", tichon:"u4-tichon.html" } },
+    { num:5, title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · 3 מפגשים", badge:"פרויקט חותם",
+      urls:{ hativa:"u5-hativa.html", tichon:"u5-tichon.html" } },
+  ];
+
+  var ARROW = '<svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+  var track = "hativa";
+  try{ track = localStorage.getItem("aiTrail.indexTrack") || "hativa"; }catch(e){}
+
+  function render(){
+    document.querySelectorAll(".track-toggle button").forEach(function(b){
+      b.classList.toggle("active", b.dataset.track === track);
+    });
+    document.getElementById("cards").innerHTML = STATIONS.map(function(s){
+      return '<a class="card" href="'+s.urls[track]+'" target="_blank" rel="noopener">'
+        + '<span class="card-num">'+s.num+'</span>'
+        + '<span class="card-info"><span class="card-title">'+s.title+'</span><span class="card-sub">'+s.sub+'</span></span>'
+        + (s.badge ? '<span class="card-badge">'+s.badge+'</span>' : '')
+        + ARROW
+        + '</a>';
+    }).join("");
+  }
+
+  document.getElementById("trackToggle").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-track]");
+    if(!btn) return;
+    track = btn.dataset.track;
+    try{ localStorage.setItem("aiTrail.indexTrack", track); }catch(err){}
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

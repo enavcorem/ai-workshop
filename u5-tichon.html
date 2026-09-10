@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%9D%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>אתגר אמיתי — תיכון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#EAEEF4; --surface-3:#E1E7EF; --border:#D7DEE8;
+    --ink:#1C2430; --ink-soft:#5A6373; --ink-faint:#8B93A3;
+    --accent:#DD8A2E; --accent-ink:#8A5613; --accent-soft:#FBE9D2;
+    --hativa:#D9584B; --hativa-soft:#FBE3DF; --tichon:#2A8A8A; --tichon-soft:#DFF1F1;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px -12px rgba(28,36,48,.18);
+    --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+      --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+      --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+      --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+    --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+    --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+    --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); direction:rtl;}
+  h1,h2,h3,.disp{font-family:var(--font-display); text-wrap:balance;}
+  .page{max-width:760px; margin:0 auto; padding:34px 26px 90px;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px;}
+  .brandline{display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink-faint); font-weight:600;}
+  .brandline .mark{width:20px; height:20px; border-radius:6px; background:linear-gradient(155deg, var(--accent), var(--hativa)); flex:0 0 auto;}
+  .track-tag{display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-weight:700; font-size:13px;}
+  .track-tag.hativa{background:var(--hativa-soft); color:var(--hativa);}
+  .track-tag.tichon{background:var(--tichon-soft); color:var(--tichon);}
+
+  .head{border-bottom:1px solid var(--border); padding-bottom:18px; margin-bottom:20px;}
+  .eyebrow{font-family:'Rubik',monospace; font-size:12px; color:var(--ink-faint); margin-bottom:8px;}
+  h1.title{font-size:25px; font-weight:800; margin:0 0 6px;}
+  .subtitle{font-size:14px; color:var(--ink-soft); margin-bottom:10px;}
+  .goal{font-size:13px; line-height:1.6; color:var(--ink-soft); max-width:62ch;}
+  .equip{margin-top:10px; font-size:12px; color:var(--ink-faint);}
+
+  .student-bar{display:flex; flex-wrap:wrap; gap:14px; margin:18px 0 26px; padding:14px 16px; background:var(--surface-2); border-radius:12px;}
+  .student-field{flex:1; min-width:150px; display:flex; flex-direction:column; gap:4px;}
+  .student-field label{font-size:11px; font-weight:700; color:var(--ink-faint);}
+  .student-field input{border:none; border-bottom:1.5px solid var(--border); background:transparent; padding:4px 2px; font-size:14px; color:var(--ink); font-family:inherit;}
+  .student-field input:focus{outline:none; border-color:var(--accent);}
+
+  .session-section{margin-top:8px;}
+  .session-head{display:flex; align-items:center; gap:10px; margin:30px 0 14px; padding-top:20px; border-top:2px dashed var(--border);}
+  .session-section:first-of-type .session-head{border-top:none; padding-top:0; margin-top:8px;}
+  .session-num{width:30px; height:30px; border-radius:9px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:14px; flex:0 0 auto;}
+  .session-title{font-size:17px; font-weight:700; font-family:var(--font-display);}
+  .session-tip{font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:8px; padding:8px 12px; margin-bottom:14px;}
+
+  .bg-note{margin-bottom:14px; font-size:13px; line-height:1.6; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px;}
+
+  .steps{display:flex; flex-direction:column; gap:16px;}
+  .step{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); break-inside:avoid;}
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .step-num{width:22px; height:22px; border-radius:7px; background:var(--surface-3); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; flex:0 0 auto;}
+  .step-title{flex:1; font-size:15px; font-weight:700; font-family:var(--font-display);}
+  .step-dur{font-family:monospace; font-size:11px; color:var(--ink-faint); background:var(--surface-2); padding:3px 9px; border-radius:999px;}
+  .step-body{display:flex; flex-direction:column; gap:12px;}
+  .step-intro{font-size:13.5px; line-height:1.65; color:var(--ink-soft);}
+
+  .prompt-card{background:var(--surface-2); border:1px solid var(--border); border-radius:11px; overflow:hidden; break-inside:avoid;}
+  .prompt-card-head{display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--border); background:var(--surface-3);}
+  .prompt-card-label{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--ink-faint);}
+  .prompt-card-label svg{width:12px; height:12px; color:var(--accent);}
+  .copy-btn{display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:5px 10px; cursor:pointer; font-family:inherit;}
+  .copy-btn:hover{border-color:var(--accent); color:var(--accent-ink);}
+  .copy-btn svg{width:12px; height:12px;}
+  .copy-btn.copied{background:#DFF3E7; color:#2F8F5B; border-color:transparent;}
+  .prompt-text{padding:13px 14px; font-size:13px; line-height:1.75; white-space:pre-wrap;}
+  .prompt-text mark{background:var(--accent-soft); color:var(--accent-ink); border-radius:4px; padding:0 3px; font-weight:600;}
+
+  .fillgroup{display:flex; flex-direction:column; gap:10px;}
+  .fillrow{display:flex; flex-direction:column; gap:5px;}
+  .fill-label{display:flex; gap:6px; font-size:13px; line-height:1.5; color:var(--ink); font-weight:600;}
+  .fill-label::before{content:"✎"; color:var(--accent); flex:0 0 auto;}
+  .fillbox{min-height:44px; border:1.5px solid var(--border); border-radius:9px; padding:9px 12px; font-size:13.5px; line-height:1.6; background:var(--surface); color:var(--ink);}
+  .fillbox:focus{outline:none; border-color:var(--accent);}
+  .fillbox:empty:before{content:attr(data-placeholder); color:var(--ink-faint);}
+
+  .closing{margin-top:24px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); break-inside:avoid;}
+  .closing h3{font-size:14.5px; margin:0 0 10px; font-family:var(--font-display);}
+
+  .toolbar-float{position:fixed; bottom:20px; left:20px; z-index:30; display:flex; flex-direction:column; align-items:flex-start; gap:6px;}
+  .save-btn{display:flex; align-items:center; gap:8px; background:var(--accent); color:#fff; border:none; border-radius:999px; padding:12px 20px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); cursor:pointer; font-family:inherit;}
+  .save-btn svg{width:16px; height:16px;}
+  .save-hint{font-size:10.5px; color:var(--ink-faint); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:5px 9px; max-width:220px; line-height:1.5;}
+
+  .no-print{}
+  @media print{
+    .no-print, .toolbar-float{display:none !important;}
+    body{background:#fff;}
+    .page{max-width:none; padding:0;}
+    .step, .prompt-card, .closing{box-shadow:none;}
+    .fillbox{border-color:#999;}
+    @page{margin:14mm;}
+  }
+</style>
+</head>
+<body>
+
+
+<div class="page" dir="rtl">
+  <div class="topbar">
+    <div class="brandline"><span class="mark"></span><span>מסלול ה-AI · תחנה 5 · 3 מפגשים</span></div>
+    <span class="track-tag tichon">תיכון</span>
+  </div>
+
+  <div class="head">
+    <div class="eyebrow">דף עבודה אישי</div>
+    <h1 class="title">אתגר אמיתי</h1>
+    <div class="subtitle">פותרים בעיה עם AI · פרויקט חותם</div>
+    <div class="goal">מעבר משימוש נקודתי ב-AI (תרגילים, הדגמות) לשימוש בו ככלי עבודה מלא לאורך תהליך שלם — מהגדרת בעיה אמיתית ועד הצגת פתרון. משלב את 4 הכישורים מהתחנות הקודמות: בדיקת עובדות (1), פרומפט עם חוקים וגבולות (2), חשיבה ויזואלית (3), וחשיבה ביקורתית מול AI (4).</div>
+    <div class="equip">מחשב/טאבלט לכל תלמיד, גישה ל-Gemini. שמרו את כתב האתגר ממפגש 1 (למשל ב-Google Doc או Keep) כדי להעתיק ממנו במפגשים הבאים.</div>
+  </div>
+
+  <div class="student-bar">
+    <div class="student-field"><label>שם</label><input type="text" data-persist="name"></div>
+    <div class="student-field"><label>תאריך</label><input type="text" data-persist="date"></div>
+    <div class="student-field"><label>עבדתי בזוג עם (אם היה)</label><input type="text" data-persist="partner"></div>
+  </div>
+
+  <div class="session-section">
+          <div class="session-head"><span class="session-num">1</span><span class="session-title">מפגש 1 · מגדירים את האתגר</span></div>
+          
+          <div class="track-subtitle-note" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">בוחרים אתגר עם משמעות אמיתית</div>
+          <div class="steps"><div class="step">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <span class="step-title">בחירת אתגר</span>
+      <span class="step-dur">5 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">בחרו אתגר אמיתי מהיומיום, מבית הספר או מהקהילה שלכם — משהו שבאמת מפריע לכם או למישהו קרוב.</div></div></div><div class="step">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <span class="step-title">ראיון עם Gemini</span>
+      <span class="step-dur">20 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">הדביקו את הפרומפט הבא (אל תבקשו פתרון עדיין!):</div><div class="prompt-card">
+    <div class="prompt-card-head">
+      <span class="prompt-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> להעתיק ל-Gemini</span>
+      <button type="button" class="copy-btn no-print" data-copy="%D7%A4%D7%A2%D7%9C%20%D7%9B%D7%9E%D7%90%D7%9E%D7%9F%20%D7%A1%D7%95%D7%A7%D7%A8%D7%98%D7%99%20%D7%A9%D7%A2%D7%95%D7%96%D7%A8%20%D7%9C%D7%99%20%D7%9C%D7%97%D7%93%D7%93%20%D7%91%D7%A2%D7%99%D7%94%20%D7%90%D7%9E%D7%99%D7%AA%D7%99%D7%AA%20%D7%9C%D7%A4%D7%A0%D7%99%20%D7%A9%D7%90%D7%A0%D7%99%20%D7%A4%D7%95%D7%AA%D7%A8%20%D7%90%D7%95%D7%AA%D7%94.%20%D7%94%D7%91%D7%A2%D7%99%D7%94%20%D7%94%D7%A8%D7%90%D7%A9%D7%95%D7%A0%D7%99%D7%AA%20%D7%A9%D7%94%D7%A2%D7%9C%D7%99%D7%AA%D7%99%3A%20%5B%D7%AA%D7%90%D7%A8%D7%95%20%D7%90%D7%AA%20%D7%94%D7%91%D7%A2%D7%99%D7%94%5D.%20%D7%90%D7%9C%20%D7%AA%D7%A6%D7%99%D7%A2%20%D7%A4%D7%AA%D7%A8%D7%95%D7%A0%D7%95%D7%AA%20%D7%A2%D7%93%D7%99%D7%99%D7%9F!%20%D7%A9%D7%90%D7%9C%20%D7%90%D7%95%D7%AA%D7%99%20%D7%A9%D7%90%D7%9C%D7%95%D7%AA%20%D7%9E%D7%91%D7%94%D7%99%D7%A8%D7%95%D7%AA%20%D7%90%D7%97%D7%AA%20%D7%90%D7%97%D7%A8%D7%99%20%D7%94%D7%A9%D7%A0%D7%99%D7%99%D7%94%3A%20%D7%9E%D7%99%20%D7%91%D7%93%D7%99%D7%95%D7%A7%20%D7%A0%D7%A4%D7%92%D7%A2%20%D7%9E%D7%94%D7%91%D7%A2%D7%99%D7%94%20%D7%94%D7%96%D7%95%2C%20%D7%91%D7%90%D7%99%D7%9C%D7%95%20%D7%9E%D7%A6%D7%91%D7%99%D7%9D%20%D7%94%D7%99%D7%90%20%D7%A7%D7%95%D7%A8%D7%99%D7%AA%2C%20%D7%95%D7%9E%D7%94%20%D7%9B%D7%91%D7%A8%20%D7%A0%D7%99%D7%A1%D7%95%20%D7%9C%D7%A2%D7%A9%D7%95%D7%AA%20%D7%9B%D7%93%D7%99%20%D7%9C%D7%A4%D7%AA%D7%95%D7%A8%20%D7%90%D7%95%D7%AA%D7%94.%20%D7%94%D7%AA%D7%97%D7%9C%20%D7%91%D7%A9%D7%90%D7%9C%D7%94%20%D7%94%D7%A8%D7%90%D7%A9%D7%95%D7%A0%D7%94."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>העתקה</span></button>
+    </div>
+    <div class="prompt-text">פעל כמאמן סוקרטי שעוזר לי לחדד בעיה אמיתית לפני שאני פותר אותה. הבעיה הראשונית שהעליתי: <mark>[תארו את הבעיה]</mark>. אל תציע פתרונות עדיין! שאל אותי שאלות מבהירות אחת אחרי השנייה: מי בדיוק נפגע מהבעיה הזו, באילו מצבים היא קורית, ומה כבר ניסו לעשות כדי לפתור אותה. התחל בשאלה הראשונה.</div>
+  </div><div class="fillgroup"><div class="fillrow">
+    <label class="fill-label" for="u5-tichon-s1-f34">האם עלה במהלך הראיון היבט של הבעיה שלא חשבתם עליו קודם?</label>
+    <div class="fillbox" id="u5-tichon-s1-f34" contenteditable="true" data-placeholder="כתבו כאן..."></div>
+  </div></div></div></div><div class="step">
+    <div class="step-head">
+      <span class="step-num">3</span>
+      <span class="step-title">כתב אתגר + בדיקת עובדות</span>
+      <span class="step-dur">10 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">נסחו כתב אתגר קצר (מי / מה / למה חשוב), ואז בדקו אותו:</div><div class="prompt-card">
+    <div class="prompt-card-head">
+      <span class="prompt-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> להעתיק ל-Gemini</span>
+      <button type="button" class="copy-btn no-print" data-copy="%D7%91%D7%93%D7%95%D7%A7%20%D7%90%D7%AA%20%D7%9B%D7%AA%D7%91%20%D7%94%D7%90%D7%AA%D7%92%D7%A8%20%D7%94%D7%91%D7%90%20%D7%9B%D7%9E%D7%95%20%D7%91%D7%A7%D7%A8%20%D7%A2%D7%95%D7%91%D7%93%D7%95%D7%AA%20%D7%A1%D7%A4%D7%A7%D7%9F%3A%20%5B%D7%94%D7%93%D7%91%D7%99%D7%A7%D7%95%20%D7%90%D7%AA%20%D7%9B%D7%AA%D7%91%20%D7%94%D7%90%D7%AA%D7%92%D7%A8%5D.%20%D7%94%D7%90%D7%9D%20%D7%99%D7%A9%20%D7%91%D7%95%20%D7%94%D7%A0%D7%97%D7%94%20%D7%A9%D7%90%D7%99%D7%A0%D7%94%20%D7%9E%D7%91%D7%95%D7%A1%D7%A1%D7%AA%20%D7%A2%D7%9C%20%D7%A2%D7%95%D7%91%D7%93%D7%95%D7%AA%3F%20%D7%A6%D7%99%D7%99%D7%9F%20%D7%90%D7%95%D7%AA%D7%94%20%D7%91%D7%9E%D7%A4%D7%95%D7%A8%D7%A9."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>העתקה</span></button>
+    </div>
+    <div class="prompt-text">בדוק את כתב האתגר הבא כמו בקר עובדות ספקן: <mark>[הדביקו את כתב האתגר]</mark>. האם יש בו הנחה שאינה מבוססת על עובדות? ציין אותה במפורש.</div>
+  </div></div></div></div>
+        </div><div class="session-section">
+          <div class="session-head"><span class="session-num">2</span><span class="session-title">מפגש 2 · בונים פתרון עם AI</span></div>
+          <div class="session-tip">מה שכתבתם למעלה בעמוד הזה עדיין כאן — גללו למעלה כדי להעתיק ממנו במידת הצורך.</div>
+          <div class="track-subtitle-note" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">בונים תוכנית פתרון מלאה</div>
+          <div class="steps"><div class="step">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <span class="step-title">בניית תוכנית הפתרון</span>
+      <span class="step-dur">25 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">הדביקו את כתב האתגר, ואז:</div><div class="prompt-card">
+    <div class="prompt-card-head">
+      <span class="prompt-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> להעתיק ל-Gemini</span>
+      <button type="button" class="copy-btn no-print" data-copy="%D7%A4%D7%A2%D7%9C%20%D7%9B%D7%99%D7%95%D7%A2%D7%A5%20%D7%A9%D7%9E%D7%A1%D7%99%D7%99%D7%A2%20%D7%9C%D7%99%20%D7%9C%D7%91%D7%A0%D7%95%D7%AA%20%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%9E%D7%A2%D7%A9%D7%99%20%D7%9C%D7%91%D7%A2%D7%99%D7%94%20%D7%94%D7%91%D7%90%D7%94%3A%20%5B%D7%94%D7%93%D7%91%D7%99%D7%A7%D7%95%20%D7%90%D7%AA%20%D7%9B%D7%AA%D7%91%20%D7%94%D7%90%D7%AA%D7%92%D7%A8%5D.%0A%D7%91%D7%A0%D7%94%20%D7%90%D7%99%D7%AA%D7%99%20%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA%20%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%94%D7%9B%D7%95%D7%9C%D7%9C%D7%AA%3A%0A-%203%20%D7%A9%D7%9C%D7%91%D7%99%20%D7%99%D7%99%D7%A9%D7%95%D7%9D%20%D7%91%D7%A8%D7%95%D7%A8%D7%99%D7%9D.%0A-%20%D7%94%D7%9E%D7%9B%D7%A9%D7%95%D7%9C%D7%99%D7%9D%20%D7%94%D7%A6%D7%A4%D7%95%D7%99%D7%99%D7%9D%20%D7%95%D7%90%D7%99%D7%9A%20%D7%9C%D7%94%D7%AA%D7%92%D7%91%D7%A8%20%D7%A2%D7%9C%D7%99%D7%94%D7%9D.%0A-%20%D7%93%D7%A8%D7%9A%20%D7%90%D7%97%D7%AA%20%D7%9C%D7%9E%D7%93%D7%95%D7%93%20%D7%90%D7%9D%20%D7%94%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%A2%D7%95%D7%91%D7%93.%0A%D7%90%D7%9C%20%D7%AA%D7%99%D7%AA%D7%9F%20%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%92%D7%A0%D7%A8%D7%99%20%E2%80%94%20%D7%94%D7%AA%D7%90%D7%9D%20%D7%90%D7%95%D7%AA%D7%95%20%D7%91%D7%93%D7%99%D7%95%D7%A7%20%D7%9C%D7%9E%D7%A6%D7%91%20%D7%A9%D7%AA%D7%99%D7%90%D7%A8%D7%AA%D7%99%2C%20%D7%95%D7%A9%D7%90%D7%9C%20%D7%90%D7%95%D7%AA%D7%99%20%D7%A9%D7%90%D7%9C%D7%94%20%D7%90%D7%9D%20%D7%9E%D7%A9%D7%94%D7%95%20%D7%9C%D7%90%20%D7%91%D7%A8%D7%95%D7%A8."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>העתקה</span></button>
+    </div>
+    <div class="prompt-text">פעל כיועץ שמסייע לי לבנות פתרון מעשי לבעיה הבאה: <mark>[הדביקו את כתב האתגר]</mark>.
+בנה איתי תוכנית פתרון הכוללת:
+- 3 שלבי יישום ברורים.
+- המכשולים הצפויים ואיך להתגבר עליהם.
+- דרך אחת למדוד אם הפתרון עובד.
+אל תיתן פתרון גנרי — התאם אותו בדיוק למצב שתיארתי, ושאל אותי שאלה אם משהו לא ברור.</div>
+  </div></div></div><div class="step">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <span class="step-title">שכבה ויזואלית להצגה</span>
+      <span class="step-dur">10 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">בקשו מ-Gemini ליצור ישירות בשיחה ויזואל שיעזור להציג את הפתרון (תרשים זרימה / מוקאפ / סקיצה):</div><div class="prompt-card">
+    <div class="prompt-card-head">
+      <span class="prompt-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> להעתיק ל-Gemini</span>
+      <button type="button" class="copy-btn no-print" data-copy="%D7%A6%D7%95%D7%A8%20%D7%9C%D7%99%20%D7%A2%D7%9B%D7%A9%D7%99%D7%95%20%D7%AA%D7%A8%D7%A9%D7%99%D7%9D%20%D7%90%D7%95%20%D7%94%D7%93%D7%9E%D7%99%D7%94%20%D7%A4%D7%A9%D7%95%D7%98%D7%94%20%D7%95%D7%91%D7%A8%D7%95%D7%A8%D7%94%20%D7%A9%D7%9E%D7%A6%D7%99%D7%92%D7%94%20%D7%90%D7%AA%20%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA%20%D7%94%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%91%D7%A9%D7%9C%D7%95%D7%A9%D7%AA%20%D7%94%D7%A9%D7%9C%D7%91%D7%99%D7%9D%2C%20%D7%91%D7%A1%D7%92%D7%A0%D7%95%D7%9F%20%D7%A0%D7%A7%D7%99%20%D7%95%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%99."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>העתקה</span></button>
+    </div>
+    <div class="prompt-text">צור לי עכשיו תרשים או הדמיה פשוטה וברורה שמציגה את תוכנית הפתרון בשלושת השלבים, בסגנון נקי ומקצועי.</div>
+  </div></div></div></div>
+        </div><div class="session-section">
+          <div class="session-head"><span class="session-num">3</span><span class="session-title">מפגש 3 · בודקים, משכתבים, מציגים</span></div>
+          <div class="session-tip">מה שכתבתם למעלה בעמוד הזה עדיין כאן — גללו למעלה כדי להעתיק ממנו במידת הצורך.</div>
+          <div class="track-subtitle-note" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">לוחצים על הפתרון לפני שמציגים</div>
+          <div class="steps"><div class="step">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <span class="step-title">עורך דין השטן</span>
+      <span class="step-dur">15 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">בקשו מ-Gemini לעצור מלהיות עוזר נחמד:</div><div class="prompt-card">
+    <div class="prompt-card-head">
+      <span class="prompt-card-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg> להעתיק ל-Gemini</span>
+      <button type="button" class="copy-btn no-print" data-copy="%D7%A2%D7%A6%D7%95%D7%A8%20%D7%9E%D7%9C%D7%94%D7%99%D7%95%D7%AA%20%D7%A2%D7%95%D7%96%D7%A8%20%D7%A0%D7%97%D7%9E%D7%93%20%D7%9C%D7%A8%D7%92%D7%A2.%20%D7%A4%D7%A2%D7%9C%20%D7%9B%D7%9E%D7%91%D7%A7%D7%A8%20%D7%A7%D7%A9%D7%95%D7%97%20%D7%A9%D7%AA%D7%A4%D7%A7%D7%99%D7%93%D7%95%20%D7%9C%D7%9E%D7%A6%D7%95%D7%90%20%D7%90%D7%AA%20%D7%9B%D7%9C%20%D7%94%D7%97%D7%95%D7%9C%D7%A9%D7%95%D7%AA%20%D7%91%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%94%D7%91%D7%90%3A%20%5B%D7%94%D7%93%D7%91%D7%99%D7%A7%D7%95%20%D7%90%D7%AA%20%D7%94%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%5D.%20%D7%AA%D7%9F%20%D7%9C%D7%99%20%D7%9C%D7%A4%D7%97%D7%95%D7%AA%203%20%D7%A1%D7%99%D7%91%D7%95%D7%AA%20%D7%90%D7%9E%D7%99%D7%AA%D7%99%D7%95%D7%AA%20%D7%A9%D7%94%D7%A4%D7%AA%D7%A8%D7%95%D7%9F%20%D7%94%D7%96%D7%94%20%D7%A2%D7%9C%D7%95%D7%9C%20%D7%9C%D7%94%D7%99%D7%9B%D7%A9%D7%9C%2C%20%D7%95%D7%A9%D7%90%D7%9C%D7%94%20%D7%90%D7%97%D7%AA%20%D7%A7%D7%A9%D7%94%20%D7%A9%D7%90%D7%A6%D7%98%D7%A8%D7%9A%20%D7%9C%D7%A2%D7%A0%D7%95%D7%AA%20%D7%A2%D7%9C%D7%99%D7%94%20%D7%9C%D7%A4%D7%A0%D7%99%20%D7%A9%D7%90%D7%A6%D7%99%D7%92%20%D7%90%D7%AA%20%D7%96%D7%94."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>העתקה</span></button>
+    </div>
+    <div class="prompt-text">עצור מלהיות עוזר נחמד לרגע. פעל כמבקר קשוח שתפקידו למצוא את כל החולשות בפתרון הבא: <mark>[הדביקו את הפתרון]</mark>. תן לי לפחות 3 סיבות אמיתיות שהפתרון הזה עלול להיכשל, ושאלה אחת קשה שאצטרך לענות עליה לפני שאציג את זה.</div>
+  </div></div></div><div class="step">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <span class="step-title">שכתוב</span>
+      <span class="step-dur">15 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">כתבו גרסה מחוזקת של הפתרון שעונה על הביקורת. אפשר לבקש מ-Gemini עזרה בניסוח.</div></div></div><div class="step">
+    <div class="step-head">
+      <span class="step-num">3</span>
+      <span class="step-title">פיץ' של 60 שניות</span>
+      <span class="step-dur">10 דקות</span>
+    </div>
+    <div class="step-body"><div class="step-intro">הציגו בפני הקבוצה: הבעיה, הפתרון, למה הוא יעבוד, ומה בדקתם והפריך את עצמכם עליו. השתמשו בוויזואל.</div></div></div></div>
+        </div>
+
+  <div class="closing">
+    <h3>מה למדתי בתחנה הזו? (רשות)</h3>
+    <div class="fillrow">
+    <label class="fill-label" for="u5-tichon-f35">רפלקציה חופשית</label>
+    <div class="fillbox" id="u5-tichon-f35" contenteditable="true" data-placeholder="כתבו כאן..."></div>
+  </div>
+  </div>
+</div>
+
+<div class="toolbar-float no-print">
+  <div class="save-hint">בסיום המילוי: לחצו "שמירה כ-PDF", ובחלון ההדפסה בחרו ביעד "Save as PDF" במקום מדפסת.</div>
+  <button type="button" class="save-btn" id="saveBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg><span>שמירה כ-PDF</span></button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var PAGE_KEY = "aiWorksheet." + "u5-tichon";
+
+  function loadDraft(){
+    try{ return JSON.parse(localStorage.getItem(PAGE_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveDraft(d){
+    try{ localStorage.setItem(PAGE_KEY, JSON.stringify(d)); }catch(e){}
+  }
+  var draft = loadDraft();
+
+  document.querySelectorAll(".fillbox").forEach(function(el){
+    if(draft[el.id]) el.innerText = draft[el.id];
+    el.addEventListener("input", function(){
+      draft[el.id] = el.innerText;
+      saveDraft(draft);
+    });
+  });
+  document.querySelectorAll(".student-field input").forEach(function(el){
+    var key = "field:" + el.dataset.persist;
+    if(draft[key]) el.value = draft[key];
+    el.addEventListener("input", function(){
+      draft[key] = el.value;
+      saveDraft(draft);
+    });
+  });
+
+  document.querySelectorAll(".copy-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var text = decodeURIComponent(btn.dataset.copy);
+      var done = function(){
+        btn.classList.add("copied");
+        var label = btn.querySelector("span");
+        var prev = label.textContent;
+        label.textContent = "הועתק!";
+        setTimeout(function(){ btn.classList.remove("copied"); label.textContent = prev; }, 1600);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){
+          var ta = document.createElement("textarea");
+          ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+          document.body.appendChild(ta); ta.select();
+          try{ document.execCommand("copy"); }catch(e){}
+          document.body.removeChild(ta);
+          done();
+        });
+      }
+    });
+  });
+
+  document.getElementById("saveBtn").addEventListener("click", function(){
+    window.print();
+  });
+})();
+</script>
+
+</body>
+</html>

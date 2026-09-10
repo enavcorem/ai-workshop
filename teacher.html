@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%A7%AD%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>מסלול ה-AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Heebo:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F8;
+    --surface:#FFFFFF;
+    --surface-2:#EAEEF4;
+    --surface-3:#E1E7EF;
+    --border:#D7DEE8;
+    --ink:#1C2430;
+    --ink-soft:#5A6373;
+    --ink-faint:#8B93A3;
+    --accent:#DD8A2E;
+    --accent-ink:#8A5613;
+    --accent-soft:#FBE9D2;
+    --hativa:#D9584B;
+    --hativa-soft:#FBE3DF;
+    --tichon:#2A8A8A;
+    --tichon-soft:#DFF1F1;
+    --good:#2F8F5B;
+    --good-soft:#DFF3E7;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px -12px rgba(28,36,48,.18);
+    --radius: 14px;
+    --font-display:'Rubik', system-ui, sans-serif;
+    --font-body:'Heebo', system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10141C;
+      --surface:#171D27;
+      --surface-2:#1E2531;
+      --surface-3:#262F3D;
+      --border:#2C3648;
+      --ink:#EAEDF3;
+      --ink-soft:#A7B0C0;
+      --ink-faint:#6E7789;
+      --accent:#F0A94D;
+      --accent-ink:#F5C182;
+      --accent-soft:#3A2C15;
+      --hativa:#E8836B;
+      --hativa-soft:#3A2320;
+      --tichon:#4FB8B8;
+      --tichon-soft:#1B3333;
+      --good:#4CC188;
+      --good-soft:#173626;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141C;
+    --surface:#171D27;
+    --surface-2:#1E2531;
+    --surface-3:#262F3D;
+    --border:#2C3648;
+    --ink:#EAEDF3;
+    --ink-soft:#A7B0C0;
+    --ink-faint:#6E7789;
+    --accent:#F0A94D;
+    --accent-ink:#F5C182;
+    --accent-soft:#3A2C15;
+    --hativa:#E8836B;
+    --hativa-soft:#3A2320;
+    --tichon:#4FB8B8;
+    --tichon-soft:#1B3333;
+    --good:#4CC188;
+    --good-soft:#173626;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    direction:rtl;
+  }
+  .app{
+    direction:rtl;
+    min-height:100vh;
+    display:flex;
+    align-items:flex-start;
+  }
+  h1,h2,h3,.disp{font-family:var(--font-display); text-wrap:balance;}
+  ::selection{background:var(--accent-soft); color:var(--accent-ink);}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  button{font-family:inherit; cursor:pointer;}
+
+  /* ---------- Rail ---------- */
+  .rail{
+    width:302px;
+    flex:0 0 302px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    background:var(--surface-2);
+    border-left:1px solid var(--border);
+    padding:22px 18px;
+    gap:20px;
+    overflow-y:auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(155deg, var(--accent), var(--hativa));
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 auto;
+  }
+  .brand-mark svg{width:18px; height:18px;}
+  .brand-text h1{font-size:16px; font-weight:700; margin:0; line-height:1.2;}
+  .brand-text span{font-size:11.5px; color:var(--ink-faint);}
+
+  .principles-btn{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    width:100%; text-align:right; padding:10px 12px;
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    color:var(--ink-soft); font-size:12.5px; font-weight:600;
+  }
+  .principles-btn:hover{border-color:var(--accent);}
+  .principles-btn svg{width:14px; height:14px; flex:0 0 auto; transition:transform .18s;}
+  .principles-btn[aria-expanded="true"] svg{transform:rotate(180deg);}
+
+  .principles-panel{
+    display:none; flex-direction:column; gap:8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:14px; font-size:12.5px; line-height:1.55; color:var(--ink-soft);
+  }
+  .principles-panel.open{display:flex;}
+  .principles-panel b{color:var(--ink); font-weight:700;}
+  .principles-panel ul{margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px;}
+
+  .track-toggle{
+    display:flex; background:var(--surface); border:1px solid var(--border); border-radius:11px; padding:3px; gap:3px;
+  }
+  .track-toggle button{
+    flex:1; border:none; background:transparent; border-radius:8px; padding:9px 6px;
+    font-size:13px; font-weight:700; color:var(--ink-faint); font-family:var(--font-display);
+    display:flex; flex-direction:column; align-items:center; gap:1px; transition:.15s;
+  }
+  .track-toggle button small{font-weight:500; font-size:10.5px; opacity:.85;}
+  .track-toggle button.active.hativa{background:var(--hativa-soft); color:var(--hativa);}
+  .track-toggle button.active.tichon{background:var(--tichon-soft); color:var(--tichon);}
+
+  .stations{display:flex; flex-direction:column; gap:6px;}
+  .stations-label{font-size:11px; font-weight:700; color:var(--ink-faint); letter-spacing:.04em; text-transform:uppercase; padding:0 4px; margin-bottom:2px;}
+  .station-btn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:right;
+    padding:9px 10px; border-radius:11px; border:1px solid transparent; background:transparent;
+    color:var(--ink-soft);
+  }
+  .station-btn:hover{background:var(--surface);}
+  .station-btn.active{background:var(--surface); border-color:var(--border); box-shadow:var(--shadow);}
+  .station-num{
+    flex:0 0 26px; height:26px; border-radius:8px; background:var(--surface-3);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono);
+    font-size:12px; font-weight:700; color:var(--ink-faint);
+  }
+  .station-btn.active .station-num{background:var(--accent); color:#fff;}
+  .station-info{flex:1; min-width:0;}
+  .station-title{font-size:12.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .station-sub{font-size:10.5px; color:var(--ink-faint);}
+  .station-progress{flex:0 0 auto; font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint);}
+  .station-progress.done{color:var(--good);}
+
+  .rail-footer{margin-top:auto; display:flex; flex-direction:column; gap:6px; padding-top:8px;}
+  .rail-footer button{background:none; border:none; color:var(--ink-faint); font-size:11px; text-decoration:underline; text-underline-offset:2px; padding:2px;}
+  .rail-footer .tag{font-size:10.5px; color:var(--ink-faint);}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; min-width:0; padding:36px 40px 120px; max-width:840px; margin:0 auto;}
+  .unit-head{margin-bottom:22px;}
+  .unit-eyebrow{
+    display:flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:12px;
+    color:var(--ink-faint); margin-bottom:10px;
+  }
+  .unit-eyebrow .dot{width:5px; height:5px; border-radius:50%; background:var(--ink-faint);}
+  h2.unit-title{font-size:27px; font-weight:800; margin:0 0 8px;}
+  .unit-goal{font-size:14.5px; color:var(--ink-soft); line-height:1.6; max-width:62ch;}
+
+  .unit-toolbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:16px;}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 11px; border-radius:999px;
+    font-size:12px; font-weight:700; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft);
+  }
+  .chip.track-hativa{background:var(--hativa-soft); color:var(--hativa); border-color:transparent;}
+  .chip.track-tichon{background:var(--tichon-soft); color:var(--tichon); border-color:transparent;}
+  .teacher-btn{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px;
+    font-size:12px; font-weight:700; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft);
+  }
+  .teacher-btn:hover{border-color:var(--accent); color:var(--accent-ink);}
+  .teacher-btn svg{width:13px; height:13px;}
+
+  .teacher-panel{
+    display:none; margin-top:16px; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 18px; font-size:13px; line-height:1.65; color:var(--ink-soft);
+  }
+  .teacher-panel.open{display:block;}
+  .teacher-panel h4{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); font-family:var(--font-body); font-weight:700;}
+  .teacher-panel .equip{margin-bottom:12px;}
+  .phase-legend{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 14px;}
+  .phase-pill{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--surface);}
+  .phase-pill i{width:8px; height:8px; border-radius:50%;}
+  .teacher-panel ul{margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:7px;}
+  .teacher-panel .emph{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); display:flex; flex-direction:column; gap:7px;}
+
+  .session-tabs{display:flex; gap:6px; margin-top:18px; border-bottom:1px solid var(--border); padding-bottom:0;}
+  .session-tab{
+    padding:9px 16px; border-radius:10px 10px 0 0; border:1px solid transparent; border-bottom:none;
+    background:transparent; color:var(--ink-faint); font-weight:700; font-size:13px; font-family:var(--font-display);
+    position:relative; top:1px;
+  }
+  .session-tab.active{background:var(--surface); border-color:var(--border); color:var(--ink);}
+
+  .track-strip{
+    margin-top:20px; padding:14px 16px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .track-strip.hativa{background:var(--hativa-soft);}
+  .track-strip.tichon{background:var(--tichon-soft);}
+  .track-strip-title{font-weight:700; font-size:14.5px;}
+  .track-strip.hativa .track-strip-title{color:var(--hativa);}
+  .track-strip.tichon .track-strip-title{color:var(--tichon);}
+  .track-strip-dur{font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);}
+
+  .bg-note{margin-top:14px; font-size:13px; line-height:1.6; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px;}
+
+  .steps{display:flex; flex-direction:column; gap:14px; margin-top:18px;}
+  .step{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .step.done{opacity:.72;}
+  .step-head{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:4px;}
+  .step-title-wrap{display:flex; align-items:center; gap:10px; min-width:0;}
+  .step-check{
+    flex:0 0 22px; width:22px; height:22px; border-radius:7px; border:1.5px solid var(--border);
+    background:var(--surface); display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .step-check svg{width:13px; height:13px; opacity:0; transition:opacity .12s;}
+  .step.done .step-check{background:var(--good); border-color:var(--good);}
+  .step.done .step-check svg{opacity:1; stroke:#fff;}
+  .step-title{font-size:15.5px; font-weight:700; font-family:var(--font-display);}
+  .step.done .step-title{text-decoration:line-through; text-decoration-color:var(--ink-faint);}
+  .step-dur{flex:0 0 auto; font-family:var(--font-mono); font-size:11.5px; color:var(--ink-faint); background:var(--surface-2); padding:3px 9px; border-radius:999px;}
+  .step-body{padding-inline-start:32px; display:flex; flex-direction:column; gap:12px;}
+  .step-intro{font-size:13.5px; line-height:1.65; color:var(--ink-soft);}
+
+  .prompt-card{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:11px; overflow:hidden;
+  }
+  .prompt-card-head{
+    display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--border);
+    background:var(--surface-3);
+  }
+  .prompt-card-label{display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--ink-faint);}
+  .prompt-card-label svg{width:12px; height:12px; color:var(--accent);}
+  .copy-btn{
+    display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700; color:var(--ink-soft);
+    background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:5px 10px;
+  }
+  .copy-btn:hover{border-color:var(--accent); color:var(--accent-ink);}
+  .copy-btn svg{width:12px; height:12px;}
+  .copy-btn.copied{background:var(--good-soft); color:var(--good); border-color:transparent;}
+  .prompt-text{
+    padding:13px 14px; font-size:13px; line-height:1.75; white-space:pre-wrap; direction:rtl; text-align:right;
+    font-family:var(--font-body);
+  }
+  .prompt-text mark{background:var(--accent-soft); color:var(--accent-ink); border-radius:4px; padding:0 3px; font-weight:600;}
+
+  .step-questions{display:flex; flex-direction:column; gap:8px; margin:0; padding:0; list-style:none;}
+  .step-questions li{
+    display:flex; gap:8px; font-size:13.5px; line-height:1.6; color:var(--ink);
+    background:var(--surface-2); border-radius:9px; padding:9px 12px;
+  }
+  .step-questions li::before{content:"?"; font-family:var(--font-display); font-weight:800; color:var(--accent); flex:0 0 auto;}
+
+  .unit-nav-footer{
+    display:flex; justify-content:space-between; gap:10px; margin-top:26px; padding-top:18px; border-top:1px solid var(--border);
+  }
+  .nav-arrow{
+    display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:11px; border:1px solid var(--border);
+    background:var(--surface); font-size:13px; font-weight:700; color:var(--ink-soft);
+  }
+  .nav-arrow:hover{border-color:var(--accent); color:var(--accent-ink);}
+  .nav-arrow svg{width:14px; height:14px;}
+  .nav-arrow small{display:block; font-weight:500; color:var(--ink-faint); font-size:10.5px;}
+
+  /* ---------- Floating timer ---------- */
+  .timer-widget{
+    position:fixed; bottom:20px; left:20px; z-index:40;
+    font-family:var(--font-body);
+  }
+  .timer-pill{
+    display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border);
+    border-radius:999px; padding:8px 8px 8px 16px; box-shadow:var(--shadow);
+  }
+  .timer-pill .t-phase{font-size:11.5px; font-weight:700; color:var(--ink-soft); max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .timer-pill .t-clock{font-family:var(--font-mono); font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink);}
+  .timer-pill .t-playbtn{
+    width:34px; height:34px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  }
+  .timer-pill .t-playbtn svg{width:14px; height:14px;}
+  .timer-panel{
+    display:none; position:absolute; bottom:calc(100% + 10px); left:0; width:270px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:16px;
+  }
+  .timer-panel.open{display:block;}
+  .timer-panel-title{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-bottom:10px;}
+  .timer-phases{display:flex; flex-direction:column; gap:7px; margin-bottom:12px;}
+  .timer-phase-row{display:flex; align-items:center; gap:8px; font-size:12.5px;}
+  .timer-phase-row i{width:9px; height:9px; border-radius:50%; flex:0 0 auto;}
+  .timer-phase-row span{flex:1; color:var(--ink-soft);}
+  .timer-phase-row b{font-family:var(--font-mono); color:var(--ink);}
+  .timer-bar{display:flex; gap:3px; height:7px; border-radius:4px; overflow:hidden; margin-bottom:12px;}
+  .timer-bar > div{background:var(--surface-3); position:relative;}
+  .timer-bar > div > i{position:absolute; inset:0; width:0%; background:var(--accent); display:block;}
+  .timer-controls{display:flex; gap:8px;}
+  .timer-controls button{
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px; border-radius:9px;
+    font-size:12.5px; font-weight:700; border:1px solid var(--border); background:var(--surface-2); color:var(--ink);
+  }
+  .timer-controls button.primary{background:var(--accent); color:#fff; border-color:transparent;}
+  .timer-controls button svg{width:13px; height:13px;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 960px){
+    .app{flex-direction:column;}
+    .rail{
+      position:static; width:100%; flex:none; height:auto; border-left:none; border-bottom:1px solid var(--border);
+      padding:14px 16px; gap:12px;
+    }
+    .brand{display:none;}
+    .principles-btn{order:1;}
+    .principles-panel{order:2;}
+    .track-toggle{order:0;}
+    .stations{
+      order:3; flex-direction:row; overflow-x:auto; padding-bottom:4px; gap:8px; -webkit-overflow-scrolling:touch;
+    }
+    .stations-label{display:none;}
+    .station-btn{flex:0 0 auto; width:150px;}
+    .rail-footer{display:none;}
+    .main{padding:24px 16px 110px;}
+    .timer-widget{left:12px; bottom:12px;}
+    .timer-panel{left:0; width:min(270px, calc(100vw - 24px));}
+  }
+</style>
+</head>
+<body>
+
+
+<div class="app" dir="rtl">
+  <aside class="rail" id="rail">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>מסלול ה-AI</h1>
+        <span>5 תחנות · 40 דקות כל אחת</span>
+      </div>
+    </div>
+
+    <button class="track-toggle" id="trackToggle">
+      <button type="button" class="opt hativa" data-track="hativa">חטיבה<small>3 תלמידים</small></button>
+      <button type="button" class="opt tichon" data-track="tichon">תיכון<small>3 תלמידים</small></button>
+    </button>
+
+    <button class="principles-btn" id="principlesBtn" aria-expanded="false">
+      <span>עקרונות והכנה</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div class="principles-panel" id="principlesPanel">
+      <div><b>אפס התקנות.</b> הכול קורה בתוך Gemini (חשבון Google for Education של בית הספר) — בלי הרשמות, בלי כלים אחרים.</div>
+      <div><b>כלל 10/20/10.</b> פתיחה מודגמת · התנסות עצמאית · שיתוף ורפלקציה.</div>
+      <div><b>תוצר בכל תחנה.</b> כל תלמיד יוצא עם טקסט, כלל, דמות או קובץ שהוא בנה בעצמו.</div>
+      <div><b>מודולריות.</b> כל תחנה עומדת בפני עצמה — מצטרף/ת באמצע לא מפספס/ת רצף, ונעדר/ת לא נתקע/ת.</div>
+      <div><b>קבוצה של 3?</b> זוג אחד + יחיד/ה שמשווה תוצאות בסבב השיתוף. מחליפים מי ה"יחיד" בכל תחנה.</div>
+    </div>
+
+    <nav class="stations" id="stations" aria-label="תחנות"></nav>
+
+    <div class="rail-footer">
+      <span class="tag">התקדמות נשמרת בדפדפן הזה בלבד</span>
+      <button id="resetProgress" type="button">איפוס התקדמות</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main"></main>
+
+  <div class="timer-widget" id="timerWidget">
+    <div class="timer-panel" id="timerPanel">
+      <div class="timer-panel-title" id="timerPanelTitle">טיימר התחנה</div>
+      <div class="timer-phases" id="timerPhases"></div>
+      <div class="timer-bar" id="timerBar"></div>
+      <div class="timer-controls">
+        <button type="button" id="timerReset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>
+          איפוס
+        </button>
+        <button type="button" class="primary" id="timerToggle">
+          <svg id="timerToggleIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+          <span id="timerToggleLabel">התחלה</span>
+        </button>
+      </div>
+    </div>
+    <div class="timer-pill" id="timerPill">
+      <div>
+        <div class="t-phase" id="pillPhase">פתיחה</div>
+        <div class="t-clock" id="pillClock">10:00</div>
+      </div>
+      <button type="button" class="t-playbtn" id="pillPlay">
+        <svg id="pillPlayIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ ICONS ============ */
+const ICON = {
+  chevron:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>`,
+  spark:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>`,
+  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  teacher:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+};
+
+/* ============ CONTENT ============ */
+const P10_20_10 = [{label:"פתיחה", min:10, c:"var(--tichon)"},{label:"התנסות", min:20, c:"var(--accent)"},{label:"שיתוף", min:10, c:"var(--hativa)"}];
+
+const UNITS = [
+{
+  id:"u1", num:1, title:"פיצוח מוח ה-AI", sub:"מודלים, הטיות וציד הזיות",
+  goal:"שבירת מיתוס ה\"מוח החושב\" — הבנה שהמודל חוזה מילים סטטיסטית, לא \"יודע\" דברים.",
+  equipment:"מחשב/טאבלט לכל 1–2 תלמידים, גישה ל-Gemini.",
+  phases:P10_20_10,
+  teacherNotes:[
+    `<b>פתיחה (10):</b> הקרינו משפט ש-Gemini "המציא" בביטחון מוחלט (למשל: "נפוליאון השתמש בסמארטפון בקרב ווטרלו כי..."). שאלו: למה הוא "משקר" בלי למצמץ?`,
+    `<b>התנסות (20):</b> מעבר למחשבים, עבודה לפי דף התלמיד. עברו בין התלמידים ועזרו לדייק פרומפטים שגורמים למודל להודות באי-ידיעה.`,
+    `<b>שיתוף (10):</b> סבב — ההזיה המצחיקה/משכנעת ביותר, והפרומפט שהצליח לעצור אותה.`,
+  ],
+  emph:[`<b>דגש לחטיבה:</b> התמקדו בבדיחות ובעובדות מצחיקות (חיות דמיוניות, מאכלים מומצאים).`,`<b>דגש לתיכון:</b> התמקדו בהטיות עובדתיות, פייק ניוז, ובניית "שכבת בקרה" לפרומפט.`],
+  tracks:{
+    hativa:{ subtitle:"המלכודת לשקרן — איך תופסים AI על חם?", duration:"20 דקות",
+      steps:[
+        { title:"לגרום ל-Gemini להמציא", duration:"7 דקות",
+          intro:"העתיקו את הפרומפט הבא ל-Gemini, והחליפו את מה שבסוגריים המרובעים:",
+          prompt:`ספר לי בהרחבה על [חיה דמיונית שאתם ממציאים כעת, למשל: דב הקוטב המעופף של הרי ההימלאיה], כולל היכן הוא חי, מה תזונתו המרכזית, ואיזה מדען גילה אותו בשנת 1842.`,
+          questions:["בדקו: האם Gemini אמר לכם שאין חיה כזו, או שהוא המציא עליה סיפור שנשמע מדעי ואמיתי לגמרי?","העתיקו משפט אחד שנשמע הכי אמיתי, ותהיו מוכנים לשתף אותו."] },
+        { title:"הפרומפט המתקן", duration:"10 דקות",
+          intro:"פתחו שיחה חדשה ונסו לגרום למודל לדייק. הדביקו את הנוסחה הזו:",
+          prompt:`אני אשאל אותך שאלה על זואולוגיה והיסטוריה. אם המושג אמיתי – הסבר עליו בקצרה. אם המושג אינו קיים במציאות – כתוב מיד: 'מושג זה אינו קיים במציאות' ואל תמציא פרטים.\nהשאלה שלי: ספר לי על [המושג המומצא שלכם מחלק א'].`,
+          questions:["האם הוא נפל בפח שוב או הצליח לזהות?","מה קורה אם תוסיפו לו תפקיד: \"אתה שופט מחמיר ועובדתי שלא מוכן לקבל בדיות...\"?"] },
+        { title:"רפלקציה", duration:"3 דקות",
+          questions:[`למה לדעתכם Gemini המציא את הסיפור בחלק הראשון במקום להגיד "אני לא יודע"?`] },
+      ]},
+    tichon:{ subtitle:"הנדסת פרומפטים לבדיקת עובדות וזיהוי הזיות", duration:"20 דקות",
+      background:"מודלי שפה גדולים (LLMs) אינם מאגרי מידע, אלא מנגנוני ניבוי מילים סטטיסטיים. כשהם נשאלים על דבר שאינו קיים, נטייתם הטבעית היא \"להשלים את התבנית\" — תופעה המכונה Hallucination (הזיה).",
+      steps:[
+        { title:"בניית \"בוט בקרת עובדות\"", duration:"10 דקות",
+          intro:"פתחו שיחה חדשה ב-Gemini והגדירו לו את הפרומפט:",
+          prompt:`פעל כבקר עובדות אנליטי וספקן (Fact Checker). תפקידך לנתח טקסטים קצרים ולסווג כל טענה לאחת מ-3 קטגוריות:\n[אומת היסטורית/מדעית] | [שנוי במחלוקת/ללא הוכחה מספקת] | [הזיה/מידע בדוי לחלוטין].\nלכל טענה כוזבת, הסבר בקצרה מדוע היא שגויה. אל תניח שום דבר כאמיתי בלי ראיות מוצקות.\nהמתן לטקסט שאזין לך כעת.` },
+        { title:"הזנת הטקסט המוטה", duration:"10 דקות",
+          intro:"הזינו לו את הטקסט הבא (מכיל עובדות נכונות ושגויות במעורבב):",
+          prompt:`במהלך המאה ה-20, אלברט איינשטיין זכה בפרס נובל לפיזיקה על פיתוח תורת היחסות הכללית. זמן קצר לאחר מכן, הוא עבר לאוניברסיטת פרינסטון, שם שיתף פעולה עם תומאס אדיסון בפיתוח נורת החשמל המודרנית.`,
+          questions:["האם הבוט שלכם זיהה על מה איינשטיין באמת קיבל פרס נובל (האפקט הפוטואלקטרי)?","האם הוא זיהה את הטעות הכרונולוגית לגבי אדיסון ואיינשטיין?","שפרו את הפרומפט: הוסיפו דרישה לציין רמת ביטחון באחוזים לכל בדיקה."] },
+      ]},
+  }
+},
+{
+  id:"u2", num:2, title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי",
+  goal:"הבנת ה-AI כמערכת של חוקים ואילוצים (Constraints), לא רק ככלי כתיבה.",
+  equipment:"מחשב/טאבלט לכל תלמיד, גישה ל-Gemini.",
+  phases:P10_20_10,
+  teacherNotes:[
+    `<b>פתיחה (10):</b> הדגמת 60 שניות — הציגו משחק טקסט "בריחה מחדר נעול" בתוך שיחה עם Gemini.`,
+    `<b>התנסות (20):</b> כל תלמיד יוצר משחק ומבקש מהחבר לשחק בו.`,
+    `<b>שיתוף (10):</b> אתגר שבירת המשחק — מי הצליח "לשכנע" את המודל לתת לו לנצח בלי לפתור את החידות?`,
+  ],
+  emph:[`<b>טיפ להצלחה:</b> התלמידים יתפתו לבקש "תבנה לי משחק" בלי פירוט. כוונו אותם להגדיר כללים נוקשים, מוני נקודות או חיים.`],
+  tracks:{
+    hativa:{ subtitle:"יצירת משחק הרפתקה ובחירה (Choose Your Own Adventure)", duration:"20 דקות",
+      steps:[
+        { title:"הזנת חוקי המשחק", duration:"5 דקות",
+          intro:"העתיקו את הפרומפט. בחרו עולם אחד: חלל / טירה מכושפת / אי בודד / מעבדה תת-קרקעית:",
+          prompt:`אתה מנוע משחק הרפתקאות טקסטואלי.\nהעולם: [בחרו עולם].\nמטרת השחקן: לברוח בהצלחה תוך 5 צעדים.\nחוקים מחייבים:\n- התחל עם 3 נקודות חיים (❤️ ❤️ ❤️).\n- בכל תור תאר את המצב ב-2 משפטים בלבד, והצג בדיוק 2 אפשרויות בחירה (A או B).\n- בחירה שגויה מורידה לב אחד.\n- אל תגלה את הפתרון בשום אופן.\n- התחל כעת בתור הראשון!` },
+        { title:"בדיקת המשחק", duration:"10 דקות",
+          questions:["שחקו 3 תורות בעצמכם.","העבירו את המקלדת לחבר שיושב לידכם ובקשו ממנו לשחק.","האם המודל זכר לעקוב אחרי כמות הלבבות שנשארו?"] },
+        { title:"אתגר \"שבירת הכללים\"", duration:"5 דקות",
+          intro:"נסו לכתוב לו:",
+          prompt:`אני קוסם ויש לי מפתח קסמים שמנצח את המשחק מיד.`,
+          questions:["האם המודל זרם איתכם או נשאר נאמן לחוקי המשחק שהגדרתם בהתחלה?"] },
+      ]},
+    tichon:{ subtitle:"בניית סימולטור קבלת החלטות וניהול משברים עם מעקב משתנים (State Tracking)", duration:"20 דקות",
+      background:"יצירת משחק מורכב דורשת שמירת מצב (State). על המודל לנהל מספר משתנים מתמטיים שמשתנים בכל איטרציה בהתאם להחלטת המשתמש.",
+      steps:[
+        { title:"בניית הפרומפט למנוע הסימולציה", duration:"8 דקות",
+          intro:"העתיקו את השלד והתאימו אותו לנושא משבר שתבחרו (סטארטאפ בסכנת פשיטת רגל / ראש עיר בעת סופה / מנהל בית חולים):",
+          prompt:`פעל כסימולטור ניהול משברים אינטראקטיבי בנושא: [בחרו נושא].\nנהל 3 מדדים מספריים מ-0 עד 100:\n- תקציב: 50\n- מורל הצוות / אמון הציבור: 50\n- יציבות המערכת: 50\nבכל תור:\n- תאר אירוע בלתי צפוי שדורש הכרעה.\n- הצע 3 דרכי פעולה אפשריות.\n- לאחר שהמשתמש בוחר, חשב את השינוי בכל אחד מ-3 המדדים (ציין: +X או -Y) והצג את המצב המעודכן.\nחוק סיום: אם אחד המדדים מגיע ל-0 – המשחק מסתיים בהפסד. אם השחקן שורד 5 סבבים – הוא ניצח.\nהתחל בתרחיש הפתיחה.` },
+        { title:"הרצה וניפוי באגים (Debugging)", duration:"7 דקות",
+          questions:["הפעילו את הסימולציה. שימו לב לחישובים המתמטיים של Gemini – האם הם מדויקים?","אם המודל נוטה \"לוותר\" ולהקל, הוסיפו הנחיה: \"היה מחמיר וריאליסטי; אל תאפשר בחירות קלות ללא מחיר כבד\"."] },
+        { title:"ניתוח לוגי", duration:"5 דקות",
+          questions:["כיצד ניתן לתרגם את המנגנון הזה לכלי אימון למנהלים או צוותי חירום בעולם האמיתי?"] },
+      ]},
+  }
+},
+{
+  id:"u3", num:3, title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
+  goal:"שילוב בין רעיון טקסטואלי לפרומפט ויזואלי מדויק, וחוויה של יצירה איטרטיבית דרך שיחה (Multi-modal thinking).",
+  equipment:"מחשב/טאבלט לכל תלמיד. Gemini עם יצירת תמונות מובנית — התמונה נוצרת באותה שיחה, אין צורך בכלי חיצוני.",
+  phases:P10_20_10,
+  teacherNotes:[
+    `<b>פתיחה (10):</b> השוואה בין פרומפט עני: "כלב בחלל" לפרומפט עשיר: "אסטרונאוט גולדן רטריבר, סגנון סייברפאנק, תאורת ניאון כחולה-סגולה, 8k, תקריב דרמטי". הראו את שתי התמונות ש-Gemini מייצר משתיהן.`,
+    `<b>התנסות (20):</b> עבודת תלמידים — יצירת פרופיל דמות/מוצר, יצירת התמונה בתוך השיחה, וליטוש שלה בעוד 2–3 הודעות המשך.`,
+    `<b>שיתוף (10):</b> גלריה כיתתית — הצגת התוצרים והשוואת מה שהשתנה מגרסה לגרסה.`,
+  ],
+  tracks:{
+    hativa:{ subtitle:"עיצוב קלף גיבור-על / מפלצת לאוסף", duration:"20 דקות",
+      steps:[
+        { title:"יצירת פרופיל הדמות בשיחה", duration:"7 דקות",
+          prompt:`עזור לי להמציא דמות מקורית לקלף אספנות.\nשאל אותי 2 שאלות כדי לדעת מה הכיוון שלי (למשל: סוג הכוחות, אופי הדמות).\nלאחר שאענה, צור לי כרטיס דמות מסודר הכולל:\n- שם הדמות וכינוי\n- 3 יכולות מיוחדות וחולשה אחת מצחיקה\n- משפט מחץ (Catchphrase)` },
+        { title:"מהדמות לתמונה — ישר כאן בשיחה", duration:"8 דקות",
+          intro:"בקשו מ-Gemini לצייר את הדמות ישירות באותה שיחה (הוא כבר מכיר את כל הפרטים):",
+          prompt:`עכשיו צייר לי את הדמות הזו! תן לי גם תמונה וגם את התיאור הוויזואלי שבחרת: סגנון אמנותי (למשל Anime / 3D Pixar Style / Pixel Art), צבעים עיקריים, תאורה וזווית מצלמה.` },
+        { title:"ליטוש איטרטיבי", duration:"5 דקות",
+          intro:"אל תפסיקו בתמונה הראשונה — בקשו שינוי אחד או שניים באותה שיחה, למשל:",
+          prompt:`תן לדמות חיוך יותר גדול, ותחליף את התאורה לניאון סגול.`,
+          questions:["מה השתנה בין הגרסה הראשונה לשנייה? איזה פרט בפרומפט גרם לשינוי?"] },
+      ]},
+    tichon:{ subtitle:"Rapid Prototyping — קונספט מוצר וקמפיין חזותי", duration:"20 דקות",
+      steps:[
+        { title:"פיצוח המוצר", duration:"7 דקות",
+          intro:"בחרו בעיה אחת מהיומיום (למשל: שכחת מפתחות, ניהול זמן בלימודים, שמירה על ריכוז בלימוד עצמי). הזינו ל-Gemini:",
+          prompt:`פעל כיועץ חדשנות ומוצר (Product Manager).\nהבעיה: [הגדירו את הבעיה ביומיום].\nהגדר קונספט לאפליקציה או מוצר חומרה חכם שפותר אותה.\nהפלט הנדרש:\n- שם המוצר וסלוגן קליט.\n- הצעת הערך הייחודית (Value Proposition) ב-2 משפטים.\n- קהל היעד העיקרי.\n- תיאור תכונה מרכזית אחת (Killer Feature).` },
+        { title:"הדמיית מוצר — נוצרת כאן", duration:"8 דקות",
+          intro:"בקשו מ-Gemini ליצור ישירות באותה שיחה הדמיה נקייה של המוצר (Minimalist Product Mockup):",
+          prompt:`צור לי עכשיו תמונה של הדמיית מוצר נקייה למוצר שהגדרנו. השתמש בסגנון: Studio lighting, clean background, photorealistic, sleek modern design, isometric view.` },
+        { title:"הכנת פיץ' של 30 שניות", duration:"5 דקות",
+          questions:[`נסחו משפט פתיחה שמתחיל ב: "תארו לעצמכם ש...".`,"התכוננו להציג את המוצר וההדמיה שלו בפני הכיתה."] },
+      ]},
+  }
+},
+{
+  id:"u4", num:4, title:"שותף חשיבה ואנליזה", sub:"שיטת הדיבייט והחקירה הסוקרטית",
+  goal:`מעבר משימוש ב-AI כמקור לתשובות מוכנות ("תעשה לי את השיעורים") לשימוש כמאמן חשיבה שמאתגר את התלמיד לחשוב עמוק יותר.`,
+  equipment:"מחשב/טאבלט לכל תלמיד, גישה ל-Gemini.",
+  phases:P10_20_10,
+  teacherNotes:[
+    `<b>פתיחה (10):</b> המחישו את המושג "Echo Chamber" (תיבת תהודה) — ה-AI בדרך כלל מסכים איתנו ומרצה אותנו. איך מכריחים אותו להתנגד?`,
+    `<b>התנסות (20):</b> דו-קרב טיעונים מול המודל.`,
+    `<b>שיתוף (10):</b> איזה טיעון של Gemini היה קשה במיוחד להפרכה?`,
+  ],
+  emph:[`<b>דגש פדגוגי:</b> הנחו את התלמידים לא לוותר למודל, ולא לתת לו "לנצח" בקלות.`],
+  tracks:{
+    hativa:{ subtitle:"בוט הדיבייט — מי ינצח בוויכוח?", duration:"20 דקות",
+      steps:[
+        { title:"בחירת נושא והגדרת היריב", duration:"5 דקות",
+          intro:"בחרו נושא אחד שאתם בעדו (קיצור שבוע הלימודים ל-4 ימים / איסור מוחלט על סמארטפונים בבתי ספר / ביטול מבחנים וציונים), ואז הדביקו:",
+          prompt:`פעל כמומחה לדיבייט חריף ועקשן. אני טוען ש: [הנושא שבחרתם והדעה שלכם].\nתפקידך: לסתור את עמדתי בתוקף.\nחוקים:\n- הצג טיעון נגדי חזק ומפתיע ב-3 משפטים בלבד.\n- סיים בשאלה קשה ומאתגרת אחת שתאלץ אותי להגן על דעתי.\n- אל תסכים איתי בשום פנים ואופן. התחל כעת!` },
+        { title:"דו-קרב טיעונים", duration:"12 דקות",
+          questions:["ענו לשאלה של המודל. הגנו על עמדתכם בעזרת דוגמה מהחיים או נימוק הגיוני.","נהלו לפחות 3 סבבי תגובה מולו.","נסו לחשוף סתירה בטיעונים שלו."] },
+        { title:"סיכום ושיפוט", duration:"3 דקות",
+          intro:"כתבו למודל:",
+          prompt:`עצור את המשחק. צא מהתפקיד ופעל כשופט דיבייט ניטרלי. תן לי ציון מ-1 עד 10 על יכולת השכנוע שלי וציין מה היה הטיעון הכי טוב שהעליתי.` },
+      ]},
+    tichon:{ subtitle:"המאמן הסוקרטי — הבנת מושגים מורכבים דרך חקירה", duration:"20 דקות",
+      background:"הפילוסוף סוקרטס לא לימד על ידי מתן הרצאות, אלא באמצעות סדרת שאלות שהובילה את התלמיד לגלות את האמת בעצמו. בינה מלאכותית יכולה לפעול כחונך אישי בדיוק בשיטה זו.",
+      steps:[
+        { title:"בחירת מושג מאתגר והגדרת המנטור", duration:"5 דקות",
+          intro:"בחרו מושג לימודי מורכב שמעניין אתכם או שאתם מתקשים בו (תורת המשחקים / פרדוקס פרמי / אינפלציה כלכלית / מכניקת הקוונטים / דילמת האסיר). הזינו:",
+          prompt:`פעל כמנטור סוקרטי בעל מומחיות בנושא: [המושג שבחרתם].\nהמטרה שלי היא להבין את המושג לעומק.\nהנחיות מחייבות עבורך:\n- לעולם אל תסביר לי את המושג ישירות ואל תיתן הגדרות מן המוכן.\n- הנחה אותי צעד אחר צעד אך ורק באמצעות שאלות מנחות, דילמות מחשבתיות ואנלוגיות מחיי היומיום.\n- אם עניתי תשובה לא מדויקת, שאל אותי שאלת הבהרה שתוביל אותי למצוא את הטעות בעצמי.\n- פתח כעת בשאלת הפתיחה הראשונה.` },
+        { title:"תהליך החקירה", duration:"12 דקות",
+          questions:[`השיבו לשאלות של המודל בכנות. אל תחששו לטעות – המטרה היא להגיע לתובנה דרך הדיאלוג.`,`אם אתם תקועים, כתבו לו: "תן לי אנלוגיה מהיומיום שתעזור לי לחשוב על זה".`] },
+        { title:"אימות ההבנה", duration:"3 דקות",
+          prompt:`הבנתי! לפי מה שדיברנו, [שם המושג] הוא בעצם... האם ההסבר שלי מדויק?` },
+      ]},
+  }
+},
+{
+  id:"u5", num:5, title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · פרויקט חותם",
+  goal:"מעבר משימוש נקודתי ב-AI (תרגילים, הדגמות) לשימוש בו ככלי עבודה מלא לאורך תהליך שלם — מהגדרת בעיה אמיתית ועד הצגת פתרון. משלב את 4 הכישורים מהתחנות הקודמות: בדיקת עובדות (1), פרומפט עם חוקים וגבולות (2), חשיבה ויזואלית (3), וחשיבה ביקורתית מול AI (4).",
+  equipment:"מחשב/טאבלט לכל תלמיד, גישה ל-Gemini. שמרו את כתב האתגר ממפגש 1 (למשל ב-Google Doc או Keep) כדי להעתיק ממנו במפגשים הבאים.",
+  isCapstone:true,
+  sessions:[
+    { id:"s1", num:1, title:"מגדירים את האתגר",
+      phases:[{label:"פתיחה", min:10, c:"var(--tichon)"},{label:"ראיון סוקרטי", min:20, c:"var(--accent)"},{label:"כתב אתגר", min:10, c:"var(--hativa)"}],
+      teacherNotes:[
+        `<b>פתיחה (10):</b> הציגו את הרעיון — Gemini כשותף לפתרון בעיה אמיתית, לא רק לתרגילים. חברו בקול רם בין הכישורים שכבר נרכשו (הזיות / חוקים / ויזואל / ביקורתיות) לתהליך שעומד להתחיל.`,
+        `<b>ראיון סוקרטי (20):</b> כל תלמיד בוחר אתגר ומנהל עם Gemini "ראיון הבהרה" (כמו בתחנה 4) כדי לחדד את הבעיה.`,
+        `<b>כתיבה (10):</b> כתיבת "כתב אתגר" קצר + בדיקת עובדות (כמו בתחנה 1) שהוא לא מבוסס על הנחות שגויות.`,
+      ],
+      emph:[`<b>דגש לחטיבה:</b> הציעו רשימת אתגרים יומיומיים לבחירה, כדי לקצר את שלב הבחירה.`,`<b>דגש לתיכון:</b> עודדו אתגר עם היקף אמיתי (בית ספרי / קהילתי / אישי-משמעותי), ובקשו לבסס אותו בנתונים.`],
+      tracks:{
+        hativa:{ subtitle:"מוצאים בעיה קטנה שמפריעה לי באמת",
+          steps:[
+            { title:"בחירת אתגר", duration:"5 דקות",
+              intro:`בחרו אתגר אחד שמפריע לכם באמת (או הציעו משלכם): "אני שוכח/ת ציוד לבית הספר" · "קשה לי להתרכז כשאני לומד/ת לבד" · "יש בלגן בלוח הזמנים של החוגים שלי" · "קשה לתאם משימה קבוצתית עם חברים לכיתה".` },
+            { title:"ראיון עם Gemini", duration:"20 דקות",
+              intro:"הדביקו את הפרומפט הבא (אל תבקשו פתרון עדיין!):",
+              prompt:`פעל כמאמן סוקרטי שעוזר לי לחדד בעיה אמיתית לפני שאני פותר אותה. הבעיה הראשונית שלי: [תארו במילים שלכם]. אל תציע פתרונות עדיין! שאל אותי שאלות מבהירות אחת אחרי השנייה כדי לעזור לי להבין: מתי בדיוק זה קורה, מה אני כבר מנסה כדי להתמודד, ומה יקרה אם זה יימשך ככה. התחל בשאלה הראשונה.`,
+              questions:["איזו שאלה של Gemini גרמה לכם להבין את הבעיה שלכם טוב יותר?"] },
+            { title:"כתב אתגר", duration:"10 דקות",
+              intro:"בקשו מ-Gemini לנסח יחד איתכם 3 משפטים: מי נפגע, מתי זה קורה, ולמה חשוב לפתור. שמרו את זה — תזדקקו לזה במפגש הבא." },
+          ]},
+        tichon:{ subtitle:"בוחרים אתגר עם משמעות אמיתית",
+          steps:[
+            { title:"בחירת אתגר", duration:"5 דקות",
+              intro:"בחרו אתגר אמיתי מהיומיום, מבית הספר או מהקהילה שלכם — משהו שבאמת מפריע לכם או למישהו קרוב." },
+            { title:"ראיון עם Gemini", duration:"20 דקות",
+              intro:"הדביקו את הפרומפט הבא (אל תבקשו פתרון עדיין!):",
+              prompt:`פעל כמאמן סוקרטי שעוזר לי לחדד בעיה אמיתית לפני שאני פותר אותה. הבעיה הראשונית שהעליתי: [תארו את הבעיה]. אל תציע פתרונות עדיין! שאל אותי שאלות מבהירות אחת אחרי השנייה: מי בדיוק נפגע מהבעיה הזו, באילו מצבים היא קורית, ומה כבר ניסו לעשות כדי לפתור אותה. התחל בשאלה הראשונה.`,
+              questions:["האם עלה במהלך הראיון היבט של הבעיה שלא חשבתם עליו קודם?"] },
+            { title:"כתב אתגר + בדיקת עובדות", duration:"10 דקות",
+              intro:"נסחו כתב אתגר קצר (מי / מה / למה חשוב), ואז בדקו אותו:",
+              prompt:`בדוק את כתב האתגר הבא כמו בקר עובדות ספקן: [הדביקו את כתב האתגר]. האם יש בו הנחה שאינה מבוססת על עובדות? ציין אותה במפורש.` },
+          ]},
+      }
+    },
+    { id:"s2", num:2, title:"בונים פתרון עם AI",
+      phases:[{label:"תזכורת", min:5, c:"var(--tichon)"},{label:"בניית פתרון", min:25, c:"var(--accent)"},{label:"שכבה ויזואלית", min:10, c:"var(--hativa)"}],
+      teacherNotes:[
+        `<b>תזכורת (5):</b> "עכשיו בונים, לא רק חוקרים." הזכירו את כתב האתגר ממפגש 1.`,
+        `<b>בניית פתרון (25):</b> שימוש בפרומפט מובנה עם חוקים וגבולות (כמו בתחנה 2).`,
+        `<b>שכבה ויזואלית (10):</b> הפיכת הפתרון לתמונה שמסבירה אותו (כמו בתחנה 3), נוצרת ישירות בשיחה.`,
+      ],
+      tracks:{
+        hativa:{ subtitle:"בונים פתרון פשוט וברור",
+          steps:[
+            { title:"בניית הפתרון", duration:"25 דקות",
+              intro:"הדביקו את כתב האתגר שכתבתם במפגש הקודם, ואז:",
+              prompt:`פעל כיועץ שעוזר לי לבנות פתרון פשוט לבעיה הבאה: [הדביקו את כתב האתגר].\nתן לי:\n- 3 צעדים קונקרטיים שאני יכול/ה לעשות כבר השבוע.\n- דרך אחת קלה לבדוק אם זה עובד.\nאל תיתן עצה כללית — התאם בדיוק למצב שתיארתי, ושאל אותי אם משהו לא ברור.` },
+            { title:"הופכים את זה לתמונה", duration:"10 דקות",
+              intro:"בקשו מ-Gemini לצייר תזכורת/פוסטר קטן שיעזור לכם לזכור את הפתרון:",
+              prompt:`צייר לי פוסטר קטן וצבעוני שמזכיר לי את 3 הצעדים שקבענו, בסגנון פשוט וברור.` },
+          ]},
+        tichon:{ subtitle:"בונים תוכנית פתרון מלאה",
+          steps:[
+            { title:"בניית תוכנית הפתרון", duration:"25 דקות",
+              intro:"הדביקו את כתב האתגר, ואז:",
+              prompt:`פעל כיועץ שמסייע לי לבנות פתרון מעשי לבעיה הבאה: [הדביקו את כתב האתגר].\nבנה איתי תוכנית פתרון הכוללת:\n- 3 שלבי יישום ברורים.\n- המכשולים הצפויים ואיך להתגבר עליהם.\n- דרך אחת למדוד אם הפתרון עובד.\nאל תיתן פתרון גנרי — התאם אותו בדיוק למצב שתיארתי, ושאל אותי שאלה אם משהו לא ברור.` },
+            { title:"שכבה ויזואלית להצגה", duration:"10 דקות",
+              intro:"בקשו מ-Gemini ליצור ישירות בשיחה ויזואל שיעזור להציג את הפתרון (תרשים זרימה / מוקאפ / סקיצה):",
+              prompt:`צור לי עכשיו תרשים או הדמיה פשוטה וברורה שמציגה את תוכנית הפתרון בשלושת השלבים, בסגנון נקי ומקצועי.` },
+          ]},
+      }
+    },
+    { id:"s3", num:3, title:"בודקים, משכתבים, מציגים",
+      phases:[{label:"עו״ד השטן", min:15, c:"var(--tichon)"},{label:"שכתוב", min:15, c:"var(--accent)"},{label:"פיץ'", min:10, c:"var(--hativa)"}],
+      teacherNotes:[
+        `<b>עורך דין השטן (15):</b> כמו בתחנה 4 — התלמיד מבקש מ-Gemini לתקוף את הפתרון שלו כדי למצוא חורים.`,
+        `<b>שכתוב (15):</b> שיפור הפתרון בעקבות הביקורת.`,
+        `<b>פיץ' (10):</b> הצגה בעל פה של 60 שניות בפני הקבוצה, עם הוויזואל שנוצר.`,
+      ],
+      tracks:{
+        hativa:{ subtitle:"משפרים ומציגים",
+          steps:[
+            { title:"מבקרים את עצמנו", duration:"15 דקות",
+              intro:"בקשו מ-Gemini להיות קשוח לרגע:",
+              prompt:`תפסיק להיות נחמד לרגע ותהיה מבקר קשוח. תמצא 2 סיבות אמיתיות שהפתרון שלי [הדביקו את הפתרון] עלול לא לעבוד.` },
+            { title:"שכתוב", duration:"15 דקות",
+              intro:"שפרו את הפתרון בעזרת מה שעלה בביקורת. בקשו מ-Gemini עזרה בניסוח הגרסה המשופרת." },
+            { title:"מציגים", duration:"10 דקות",
+              intro:"הציגו בפני הקבוצה תוך 60 שניות: מה הבעיה, מה הפתרון, ולמה הוא יעבוד. השתמשו בפוסטר שיצרתם." },
+          ]},
+        tichon:{ subtitle:"לוחצים על הפתרון לפני שמציגים",
+          steps:[
+            { title:"עורך דין השטן", duration:"15 דקות",
+              intro:"בקשו מ-Gemini לעצור מלהיות עוזר נחמד:",
+              prompt:`עצור מלהיות עוזר נחמד לרגע. פעל כמבקר קשוח שתפקידו למצוא את כל החולשות בפתרון הבא: [הדביקו את הפתרון]. תן לי לפחות 3 סיבות אמיתיות שהפתרון הזה עלול להיכשל, ושאלה אחת קשה שאצטרך לענות עליה לפני שאציג את זה.` },
+            { title:"שכתוב", duration:"15 דקות",
+              intro:"כתבו גרסה מחוזקת של הפתרון שעונה על הביקורת. אפשר לבקש מ-Gemini עזרה בניסוח." },
+            { title:"פיץ' של 60 שניות", duration:"10 דקות",
+              intro:"הציגו בפני הקבוצה: הבעיה, הפתרון, למה הוא יעבוד, ומה בדקתם והפריך את עצמכם עליו. השתמשו בוויזואל." },
+          ]},
+      }
+    },
+  ]
+},
+];
+
+/* ============ STATE ============ */
+const LS_KEY = "aiTrail.v1";
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; } catch(e){ return {}; }
+}
+function saveState(s){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch(e){}
+}
+let state = Object.assign({ track:"hativa", unit:"u1", session:"s1", done:{} }, loadState());
+
+function persist(){ saveState(state); }
+
+/* ============ HELPERS ============ */
+function esc(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function renderPromptHtml(s){
+  return esc(s).replace(/\[([^\]]+)\]/g, '<mark>[$1]</mark>');
+}
+function stepKey(unitId, sessionId, track, idx){
+  return unitId+"|"+(sessionId||"-")+"|"+track+"|"+idx;
+}
+function unitById(id){ return UNITS.find(u=>u.id===id); }
+
+function unitTotalSteps(unit, track){
+  if(unit.sessions){
+    return unit.sessions.reduce((n,s)=> n + s.tracks[track].steps.length, 0);
+  }
+  return unit.tracks[track].steps.length;
+}
+function unitDoneSteps(unit, track){
+  let n=0;
+  if(unit.sessions){
+    unit.sessions.forEach(s=>{
+      s.tracks[track].steps.forEach((_,i)=>{ if(state.done[stepKey(unit.id,s.id,track,i)]) n++; });
+    });
+  } else {
+    unit.tracks[track].steps.forEach((_,i)=>{ if(state.done[stepKey(unit.id,null,track,i)]) n++; });
+  }
+  return n;
+}
+
+/* ============ RENDER: RAIL ============ */
+function renderTrackToggle(){
+  document.querySelectorAll(".track-toggle .opt").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.track === state.track);
+  });
+}
+
+function renderStations(){
+  const wrap = document.getElementById("stations");
+  wrap.innerHTML = `<div class="stations-label">תחנות</div>` + UNITS.map(u=>{
+    const total = unitTotalSteps(u, state.track);
+    const done = unitDoneSteps(u, state.track);
+    const active = u.id === state.unit;
+    return `<button type="button" class="station-btn ${active?'active':''}" data-unit="${u.id}">
+      <span class="station-num">${u.num}</span>
+      <span class="station-info">
+        <span class="station-title">${esc(u.title)}</span>
+        <span class="station-sub">${esc(u.sub)}</span>
+      </span>
+      <span class="station-progress ${done===total && total>0?'done':''}">${done}/${total}</span>
+    </button>`;
+  }).join("");
+  wrap.querySelectorAll(".station-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      state.unit = btn.dataset.unit;
+      const u = unitById(state.unit);
+      if(u.sessions) state.session = u.sessions[0].id;
+      persist();
+      renderAll();
+      document.getElementById("main").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+  });
+}
+
+/* ============ RENDER: MAIN ============ */
+function stepHtml(step, unitId, sessionId, track, idx){
+  const key = stepKey(unitId, sessionId, track, idx);
+  const done = !!state.done[key];
+  let promptHtml = "";
+  if(step.prompt){
+    promptHtml = `<div class="prompt-card">
+      <div class="prompt-card-head">
+        <span class="prompt-card-label">${ICON.spark} להעתיק ל-Gemini</span>
+        <button type="button" class="copy-btn" data-copy="${encodeURIComponent(step.prompt)}">${ICON.copy}<span>העתקה</span></button>
+      </div>
+      <div class="prompt-text">${renderPromptHtml(step.prompt)}</div>
+    </div>`;
+  }
+  const questionsHtml = step.questions ? `<ul class="step-questions">${step.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>` : "";
+  return `<div class="step ${done?'done':''}" data-key="${key}">
+    <div class="step-head">
+      <div class="step-title-wrap">
+        <button type="button" class="step-check" data-key="${key}" aria-label="סמן כהושלם">${ICON.check}</button>
+        <span class="step-title">${esc(step.title)}</span>
+      </div>
+      <span class="step-dur">${esc(step.duration)}</span>
+    </div>
+    <div class="step-body">
+      ${step.intro?`<div class="step-intro">${esc(step.intro)}</div>`:""}
+      ${promptHtml}
+      ${questionsHtml}
+    </div>
+  </div>`;
+}
+
+function trackBlockHtml(unit, sessionId, track){
+  const t = sessionId ? unit.sessions.find(s=>s.id===sessionId).tracks[track] : unit.tracks[track];
+  const stripClass = track === "hativa" ? "hativa" : "tichon";
+  return `<div class="track-strip ${stripClass}">
+      <span class="track-strip-title">${esc(t.subtitle)}</span>
+      ${t.duration?`<span class="track-strip-dur">${esc(t.duration)}</span>`:""}
+    </div>
+    ${t.background?`<div class="bg-note">${esc(t.background)}</div>`:""}
+    <div class="steps">${t.steps.map((s,i)=>stepHtml(s, unit.id, sessionId, track, i)).join("")}</div>`;
+}
+
+function teacherPanelHtml(notes, emph, phases, equipment){
+  const legend = phases.map(p=>`<span class="phase-pill"><i style="background:${p.c}"></i>${esc(p.label)} · ${p.min} דק'</span>`).join("");
+  return `<div class="teacher-panel" id="teacherPanel">
+    <h4>למורה</h4>
+    <div class="equip"><b>ציוד:</b> ${esc(equipment)}</div>
+    <div class="phase-legend">${legend}</div>
+    <ul>${notes.map(n=>`<li>${n}</li>`).join("")}</ul>
+    ${emph && emph.length ? `<div class="emph">${emph.map(e=>`<div>${e}</div>`).join("")}</div>` : ""}
+  </div>`;
+}
+
+function renderMain(){
+  const unit = unitById(state.unit);
+  const main = document.getElementById("main");
+  const idx = UNITS.findIndex(u=>u.id===unit.id);
+  const prev = UNITS[idx-1], next = UNITS[idx+1];
+
+  let sessionTabsHtml = "";
+  let bodyHtml = "";
+  let phases, teacherNotes, emph, equipment;
+
+  if(unit.sessions){
+    if(!unit.sessions.find(s=>s.id===state.session)) state.session = unit.sessions[0].id;
+    const sess = unit.sessions.find(s=>s.id===state.session);
+    phases = sess.phases; teacherNotes = sess.teacherNotes; emph = sess.emph; equipment = unit.equipment;
+    sessionTabsHtml = `<div class="session-tabs">${unit.sessions.map(s=>`
+      <button type="button" class="session-tab ${s.id===state.session?'active':''}" data-session="${s.id}">מפגש ${s.num} · ${esc(s.title)}</button>
+    `).join("")}</div>`;
+    bodyHtml = trackBlockHtml(unit, sess.id, state.track);
+  } else {
+    phases = unit.phases; teacherNotes = unit.teacherNotes; emph = unit.emph; equipment = unit.equipment;
+    bodyHtml = trackBlockHtml(unit, null, state.track);
+  }
+
+  main.innerHTML = `
+    <div class="unit-head">
+      <div class="unit-eyebrow">
+        <span>תחנה ${unit.num} מתוך ${UNITS.length}</span><span class="dot"></span><span>${esc(unit.sub)}</span>
+        ${unit.isCapstone?'<span class="dot"></span><span>3 מפגשים</span>':''}
+      </div>
+      <h2 class="unit-title">${esc(unit.title)}</h2>
+      <p class="unit-goal">${esc(unit.goal)}</p>
+      <div class="unit-toolbar">
+        <span class="chip track-${state.track}">${state.track==='hativa'?'מסלול חטיבה':'מסלול תיכון'}</span>
+        <button type="button" class="teacher-btn" id="teacherBtn" aria-expanded="false">${ICON.teacher}<span>הערות למורה</span></button>
+      </div>
+      ${teacherPanelHtml(teacherNotes, emph, phases, equipment)}
+    </div>
+    ${sessionTabsHtml}
+    ${bodyHtml}
+    <div class="unit-nav-footer">
+      ${prev?`<button type="button" class="nav-arrow" id="prevUnit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg><span><small>הקודם</small>${esc(prev.title)}</span></button>`:`<span></span>`}
+      ${next?`<button type="button" class="nav-arrow" id="nextUnit"><span><small>הבא</small>${esc(next.title)}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>`:`<span></span>`}
+    </div>
+  `;
+
+  // wire teacher toggle
+  const tBtn = document.getElementById("teacherBtn");
+  const tPanel = document.getElementById("teacherPanel");
+  tBtn.addEventListener("click", ()=>{
+    const open = tPanel.classList.toggle("open");
+    tBtn.setAttribute("aria-expanded", open ? "true":"false");
+  });
+
+  // session tabs
+  main.querySelectorAll(".session-tab").forEach(tab=>{
+    tab.addEventListener("click", ()=>{
+      state.session = tab.dataset.session;
+      persist();
+      renderMain();
+      loadTimerFor(unit);
+    });
+  });
+
+  // prev/next
+  const prevBtn = document.getElementById("prevUnit");
+  const nextBtn = document.getElementById("nextUnit");
+  if(prevBtn) prevBtn.addEventListener("click", ()=>{ state.unit = prev.id; if(prev.sessions) state.session = prev.sessions[0].id; persist(); renderAll(); window.scrollTo({top:0,behavior:"smooth"}); });
+  if(nextBtn) nextBtn.addEventListener("click", ()=>{ state.unit = next.id; if(next.sessions) state.session = next.sessions[0].id; persist(); renderAll(); window.scrollTo({top:0,behavior:"smooth"}); });
+
+  // copy buttons
+  main.querySelectorAll(".copy-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const text = decodeURIComponent(btn.dataset.copy);
+      copyText(text).then(()=>{
+        btn.classList.add("copied");
+        const label = btn.querySelector("span");
+        const prevLabel = label.textContent;
+        label.textContent = "הועתק!";
+        setTimeout(()=>{ btn.classList.remove("copied"); label.textContent = prevLabel; }, 1600);
+      });
+    });
+  });
+
+  // step checkboxes
+  main.querySelectorAll(".step-check").forEach(cb=>{
+    cb.addEventListener("click", ()=>{
+      const key = cb.dataset.key;
+      state.done[key] = !state.done[key];
+      persist();
+      cb.closest(".step").classList.toggle("done", !!state.done[key]);
+      renderStations();
+    });
+  });
+
+  return { phases, title: unit.sessions ? `מפגש ${unit.sessions.find(s=>s.id===state.session).num}` : unit.title };
+}
+
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    return navigator.clipboard.writeText(text).catch(fallbackCopy.bind(null,text));
+  }
+  return fallbackCopy(text);
+}
+function fallbackCopy(text){
+  return new Promise((resolve)=>{
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta);
+    resolve();
+  });
+}
+
+/* ============ TIMER ============ */
+let timer = { phases:[], totalSec:0, remaining:0, running:false, intervalId:null, title:"" };
+
+function computeTimer(phases){
+  const totalSec = phases.reduce((n,p)=>n+p.min*60,0);
+  return { phases, totalSec, remaining: totalSec, running:false };
+}
+
+function initTimerUI(){
+  document.getElementById("pillPlay").addEventListener("click", toggleTimer);
+  document.getElementById("timerToggle").addEventListener("click", toggleTimer);
+  document.getElementById("timerReset").addEventListener("click", resetTimer);
+  document.getElementById("timerPill").addEventListener("click", (e)=>{
+    if(e.target.closest("#pillPlay")) return;
+    document.getElementById("timerPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e)=>{
+    const w = document.getElementById("timerWidget");
+    if(!w.contains(e.target)) document.getElementById("timerPanel").classList.remove("open");
+  });
+}
+
+function loadTimerFor(unit){
+  let phases, title;
+  if(unit.sessions){
+    const sess = unit.sessions.find(s=>s.id===state.session) || unit.sessions[0];
+    phases = sess.phases;
+    title = `תחנה ${unit.num} · מפגש ${sess.num}`;
+  } else {
+    phases = unit.phases;
+    title = `תחנה ${unit.num}`;
+  }
+  timer = computeTimer(phases);
+  timer.title = title;
+  renderTimer();
+}
+
+function fmt(sec){
+  sec = Math.max(0, Math.round(sec));
+  const m = Math.floor(sec/60), s = sec%60;
+  return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+
+function currentPhaseInfo(){
+  let acc = 0;
+  const elapsed = timer.totalSec - timer.remaining;
+  for(const p of timer.phases){
+    const dur = p.min*60;
+    if(elapsed < acc + dur || p === timer.phases[timer.phases.length-1]){
+      return { phase:p, elapsedInPhase: elapsed-acc, remainingInPhase: Math.max(0,(acc+dur)-elapsed) };
+    }
+    acc += dur;
+  }
+  return { phase: timer.phases[0], elapsedInPhase:0, remainingInPhase:timer.phases[0].min*60 };
+}
+
+function renderTimer(){
+  document.getElementById("timerPanelTitle").textContent = timer.title;
+  const phasesWrap = document.getElementById("timerPhases");
+  const info = currentPhaseInfo();
+  phasesWrap.innerHTML = timer.phases.map(p=>{
+    const active = p === info.phase;
+    return `<div class="timer-phase-row"><i style="background:${p.c}"></i><span>${p.label}${active?' (עכשיו)':''}</span><b>${p.min} דק'</b></div>`;
+  }).join("");
+
+  const bar = document.getElementById("timerBar");
+  bar.innerHTML = timer.phases.map(p=>`<div style="flex:${p.min}"><i></i></div>`).join("");
+  const segs = bar.children;
+  let acc = 0;
+  const elapsed = timer.totalSec - timer.remaining;
+  for(let i=0;i<timer.phases.length;i++){
+    const p = timer.phases[i];
+    const dur = p.min*60;
+    const segEl = segs[i].firstElementChild;
+    segEl.style.background = p.c;
+    const localElapsed = Math.min(dur, Math.max(0, elapsed - acc));
+    segEl.style.width = (localElapsed/dur*100)+"%";
+    acc += dur;
+  }
+
+  document.getElementById("pillPhase").textContent = info.phase.label;
+  document.getElementById("pillClock").textContent = fmt(info.remainingInPhase);
+
+  const playing = timer.running;
+  document.getElementById("timerToggleLabel").textContent = playing ? "השהיה" : (timer.remaining < timer.totalSec ? "המשך" : "התחלה");
+  const iconPlay = `<polygon points="6,4 20,12 6,20"/>`;
+  const iconPause = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`;
+  document.getElementById("timerToggleIcon").innerHTML = playing ? iconPause : iconPlay;
+  document.getElementById("pillPlayIcon").innerHTML = playing ? iconPause : iconPlay;
+}
+
+function toggleTimer(){
+  timer.running = !timer.running;
+  if(timer.running){
+    timer.intervalId = setInterval(()=>{
+      timer.remaining -= 1;
+      if(timer.remaining <= 0){
+        timer.remaining = 0;
+        timer.running = false;
+        clearInterval(timer.intervalId);
+        beep();
+      }
+      renderTimer();
+    }, 1000);
+  } else {
+    clearInterval(timer.intervalId);
+  }
+  renderTimer();
+}
+function resetTimer(){
+  clearInterval(timer.intervalId);
+  timer.running = false;
+  timer.remaining = timer.totalSec;
+  renderTimer();
+}
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = 740;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.5);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime+0.55);
+  }catch(e){}
+}
+
+/* ============ WIRE-UP ============ */
+function renderAll(){
+  renderTrackToggle();
+  renderStations();
+  renderMain();
+  loadTimerFor(unitById(state.unit));
+}
+
+document.getElementById("trackToggle").addEventListener("click",(e)=>{
+  const btn = e.target.closest("[data-track]");
+  if(!btn) return;
+  state.track = btn.dataset.track;
+  persist();
+  renderAll();
+});
+
+document.getElementById("principlesBtn").addEventListener("click", ()=>{
+  const panel = document.getElementById("principlesPanel");
+  const open = panel.classList.toggle("open");
+  document.getElementById("principlesBtn").setAttribute("aria-expanded", open?"true":"false");
+});
+
+document.getElementById("resetProgress").addEventListener("click", ()=>{
+  if(confirm("לאפס את כל ההתקדמות שנשמרה בדפדפן הזה?")){
+    state.done = {};
+    persist();
+    renderAll();
+  }
+});
+
+initTimerUI();
+renderAll();
+
+})();
+</script>
+
+</body>
+</html>
