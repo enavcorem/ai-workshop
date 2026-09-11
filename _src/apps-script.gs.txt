@@ -1,0 +1,39 @@
+/**
+ * מסלול ה-AI — קליטת "שליחה למורה" לגיליון Google Sheets.
+ *
+ * איך מתקינים (חד פעמי):
+ * 1. sheets.google.com -> גיליון חדש וריק. תני לו שם כמו "מסלול AI - תשובות תלמידים".
+ * 2. בתפריט: Extensions (תוספים) -> Apps Script.
+ * 3. תמחקי את כל הקוד שכבר שם (myFunction הריק), ותדביקי את כל הקובץ הזה במקומו.
+ * 4. Deploy (פריסה) -> New deployment (פריסה חדשה) -> לחצי על גלגל השיניים ליד "Select type" ובחרי "Web app".
+ * 5. Execute as: Me (את). Who has access: Anyone.
+ *    (הערה: "Anyone" אומר שכל מי שיש לו את הקישור יכול לשלוח נתונים - זה בסדר לכלי כיתתי,
+ *    אבל אם תרצי הגבלה נוספת בעתיד אפשר לדבר על זה)
+ * 6. Deploy -> תאשרי הרשאות (זה הגיליון שלך, זה בטוח) -> תעתיקי את ה-Web app URL שמופיע בסוף.
+ * 7. תשלחי לי את ה-URL הזה ואני אחבר אותו לדפים.
+ */
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("תשובות") || ss.insertSheet("תשובות");
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["זמן שליחה", "שם תלמיד/ה", "מסלול", "תחנה", "שאלה", "תשובה", "תאריך (מהתלמיד)", "עבד/ה בזוג עם", "מזהה שליחה"]);
+    sheet.setFrozenRows(1);
+  }
+
+  var data = JSON.parse(e.postData.contents);
+  var trackLabel = data.track === "tichon" ? "תיכון" : "חטיבה";
+
+  (data.answers || []).forEach(function (a) {
+    sheet.appendRow([
+      data.timestamp, data.name, trackLabel, data.pageTitle,
+      a.question, a.answer,
+      data.date, data.partner, data.submissionId
+    ]);
+  });
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}

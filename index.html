@@ -54,12 +54,19 @@
   .card{display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); text-decoration:none; color:inherit;}
   .card:hover{border-color:var(--accent);}
   .card-num{flex:0 0 40px; height:40px; border-radius:11px; background:var(--surface-3); color:var(--ink-soft); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:800; font-size:16px;}
+  .card-num.sent{background:#2F8F5B; color:#fff;}
   .card-info{flex:1; min-width:0;}
   .card-title{font-size:15.5px; font-weight:700; font-family:var(--font-display);}
   .card-sub{font-size:12.5px; color:var(--ink-faint); margin-top:2px;}
   .card-badge{flex:0 0 auto; font-size:11px; font-weight:700; color:var(--ink-faint); background:var(--surface-2); padding:4px 10px; border-radius:999px;}
+  .card-badge.sent{color:#2F8F5B; background:rgba(47,143,91,.12);}
   .card-arrow{flex:0 0 auto; width:16px; height:16px; color:var(--ink-faint);}
   .card:hover .card-arrow{color:var(--accent-ink);}
+
+  .who-bar{display:flex; align-items:center; gap:12px; margin-bottom:22px; padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:12px;}
+  .who-bar label{font-size:11px; font-weight:700; color:var(--ink-faint); flex:0 0 auto;}
+  .who-bar input{flex:1; min-width:0; border:none; background:transparent; font-size:14px; color:var(--ink); font-family:inherit; padding:4px 2px; border-bottom:1.5px solid var(--border);}
+  .who-bar input:focus{outline:none; border-color:var(--accent);}
 
   .note{margin-top:28px; font-size:12.5px; line-height:1.7; color:var(--ink-soft); background:var(--surface-2); border-radius:12px; padding:14px 16px;}
   .note b{color:var(--ink);}
@@ -82,7 +89,12 @@
 
   <div class="hero">
     <h2>בחרו את המסלול שלכם</h2>
-    <p>לכל תחנה יש דף עבודה נפרד לחטיבה ולתיכון. פתחו את התחנה שאתם עובדים עליה היום, מלאו אותה ישירות במסך, ובסיום — שמרו כ-PDF.</p>
+    <p>לכל תחנה יש דף עבודה נפרד לחטיבה ולתיכון. פתחו את התחנה שאתם עובדים עליה היום, מלאו אותה ישירות במסך, ובסיום — "שלח למורה" (או שמירה כ-PDF לגיבוי אישי).</p>
+  </div>
+
+  <div class="who-bar">
+    <label for="whoName">שם</label>
+    <input type="text" id="whoName" placeholder="הקלידו את השם שלכם — יישמר בכל התחנות">
   </div>
 
   <div class="track-toggle" id="trackToggle">
@@ -93,8 +105,8 @@
   <div class="cards" id="cards"></div>
 
   <div class="note">
-    <b>איך שומרים כ-PDF?</b> בתוך כל דף עבודה יש כפתור "שמירה כ-PDF" בפינה — הוא פותח את חלון ההדפסה של הדפדפן; שם בוחרים יעד "Save as PDF" במקום מדפסת.
-    כל מה שממלאים נשמר גם אוטומטית בדפדפן של המכשיר, כך שאפשר לחזור לדף מאוחר יותר ולהמשיך.
+    <b>איך זה עובד?</b> בתוך כל דף עבודה יש כפתור ירוק "שלח למורה" (שולח ישירות) וכפתור "PDF" לגיבוי אישי (בחלון ההדפסה בוחרים "Save as PDF").
+    כל מה שממלאים נשמר גם אוטומטית בדפדפן של המכשיר, כך שאפשר לחזור לדף מאוחר יותר ולהמשיך. תחנה שנשלחה למורה מסומנת כאן ב-✓ ירוק.
   </div>
 
   <a class="teacher-link" href="teacher.html" target="_blank" rel="noopener">
@@ -106,32 +118,55 @@
 (function(){
   "use strict";
   var STATIONS = [
-    { num:1, title:"פיצוח מוח ה-AI", sub:"מודלים, הטיות וציד הזיות",
+    { num:1, id:"u1", title:"פיצוח מוח ה-AI", sub:"עין ביקורתית וכיול אמון",
       urls:{ hativa:"u1-hativa.html", tichon:"u1-tichon.html" } },
-    { num:2, title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי",
+    { num:2, id:"u2", title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי",
       urls:{ hativa:"u2-hativa.html", tichon:"u2-tichon.html" } },
-    { num:3, title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
+    { num:3, id:"u3", title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
       urls:{ hativa:"u3-hativa.html", tichon:"u3-tichon.html" } },
-    { num:4, title:"שותף חשיבה ואנליזה", sub:"דיבייט וחקירה סוקרטית",
+    { num:4, id:"u4", title:"שותף חשיבה ואנליזה", sub:"דיבייט וחקירה סוקרטית",
       urls:{ hativa:"u4-hativa.html", tichon:"u4-tichon.html" } },
-    { num:5, title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · 3 מפגשים", badge:"פרויקט חותם",
+    { num:5, id:"u5", title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · 3 מפגשים", badge:"פרויקט חותם",
       urls:{ hativa:"u5-hativa.html", tichon:"u5-tichon.html" } },
   ];
 
   var ARROW = '<svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M20 6L9 17l-5-5"/></svg>';
 
   var track = "hativa";
   try{ track = localStorage.getItem("aiTrail.indexTrack") || "hativa"; }catch(e){}
+
+  var IDENTITY_KEY = "aiTrail.identity";
+  function loadIdentity(){
+    try{ return JSON.parse(localStorage.getItem(IDENTITY_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveIdentity(id){
+    try{ localStorage.setItem(IDENTITY_KEY, JSON.stringify(id)); }catch(e){}
+  }
+  var identity = loadIdentity();
+  var whoName = document.getElementById("whoName");
+  if(identity.name) whoName.value = identity.name;
+  whoName.addEventListener("input", function(){
+    identity.name = whoName.value;
+    saveIdentity(identity);
+  });
+
+  function loadSubmitted(){
+    try{ return JSON.parse(localStorage.getItem("aiTrail.submitted")) || {}; }catch(e){ return {}; }
+  }
 
   function render(){
     document.querySelectorAll(".track-toggle button").forEach(function(b){
       b.classList.toggle("active", b.dataset.track === track);
     });
+    var submitted = loadSubmitted();
     document.getElementById("cards").innerHTML = STATIONS.map(function(s){
+      var pageId = s.id + "-" + track;
+      var sent = !!submitted[pageId];
       return '<a class="card" href="'+s.urls[track]+'" target="_blank" rel="noopener">'
-        + '<span class="card-num">'+s.num+'</span>'
+        + '<span class="card-num'+(sent?' sent':'')+'">'+(sent?CHECK:s.num)+'</span>'
         + '<span class="card-info"><span class="card-title">'+s.title+'</span><span class="card-sub">'+s.sub+'</span></span>'
-        + (s.badge ? '<span class="card-badge">'+s.badge+'</span>' : '')
+        + (sent ? '<span class="card-badge sent">נשלח</span>' : (s.badge ? '<span class="card-badge">'+s.badge+'</span>' : ''))
         + ARROW
         + '</a>';
     }).join("");

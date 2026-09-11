@@ -11,6 +11,10 @@ const { P10_20_10, UNITS } = require("./content.js");
 const SITE_DIR = path.join(__dirname, "..");
 const TRACK_LABEL = { hativa: "חטיבה", tichon: "תיכון" };
 
+// After deploying site/_src/apps-script.gs.txt as a Google Apps Script Web App,
+// paste the resulting URL here and rerun `node site/_src/build.js`.
+const TEACHER_ENDPOINT = "";
+
 function esc(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
@@ -49,6 +53,7 @@ const ICON = {
   copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>`,
   spark:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>`,
   print:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+  send:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>`,
 };
 
 let fillCounter = 0;
@@ -120,6 +125,7 @@ ${favicon}
     --ink:#1C2430; --ink-soft:#5A6373; --ink-faint:#8B93A3;
     --accent:#DD8A2E; --accent-ink:#8A5613; --accent-soft:#FBE9D2;
     --hativa:#D9584B; --hativa-soft:#FBE3DF; --tichon:#2A8A8A; --tichon-soft:#DFF1F1;
+    --good:#2F8F5B;
     --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px -12px rgba(28,36,48,.18);
     --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif;
   }
@@ -129,6 +135,7 @@ ${favicon}
       --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
       --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
       --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+      --good:#4CC188;
       --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
     }
   }
@@ -137,6 +144,7 @@ ${favicon}
     --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
     --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
     --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+    --good:#4CC188;
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
   }
   *{box-sizing:border-box;}
@@ -204,10 +212,18 @@ ${favicon}
   .closing{margin-top:24px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); break-inside:avoid;}
   .closing h3{font-size:14.5px; margin:0 0 10px; font-family:var(--font-display);}
 
-  .toolbar-float{position:fixed; bottom:20px; left:20px; z-index:30; display:flex; flex-direction:column; align-items:flex-start; gap:6px;}
-  .save-btn{display:flex; align-items:center; gap:8px; background:var(--accent); color:#fff; border:none; border-radius:999px; padding:12px 20px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); cursor:pointer; font-family:inherit;}
-  .save-btn svg{width:16px; height:16px;}
-  .save-hint{font-size:10.5px; color:var(--ink-faint); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:5px 9px; max-width:220px; line-height:1.5;}
+  .toolbar-float{position:fixed; bottom:20px; left:20px; z-index:30; display:flex; flex-direction:column; align-items:flex-start; gap:6px; max-width:240px;}
+  .toolbar-buttons{display:flex; gap:8px;}
+  .save-btn, .send-btn{display:flex; align-items:center; gap:8px; border:none; border-radius:999px; padding:12px 18px; font-size:13.5px; font-weight:700; box-shadow:var(--shadow); cursor:pointer; font-family:inherit;}
+  .save-btn{background:var(--accent); color:#fff;}
+  .send-btn{background:var(--good); color:#fff;}
+  .send-btn:disabled{opacity:.6; cursor:default;}
+  .save-btn svg, .send-btn svg{width:16px; height:16px;}
+  .save-hint{font-size:10.5px; color:var(--ink-faint); background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:5px 9px; line-height:1.5;}
+  .send-status{font-size:11px; font-weight:700; padding:0 2px; min-height:14px;}
+  .send-status.ok{color:var(--good);}
+  .send-status.warn{color:var(--accent-ink);}
+  .send-status.err{color:var(--hativa);}
 
   .no-print{}
   @media print{
@@ -252,8 +268,12 @@ ${favicon}
 </div>
 
 <div class="toolbar-float no-print">
-  <div class="save-hint">בסיום המילוי: לחצו "שמירה כ-PDF", ובחלון ההדפסה בחרו ביעד "Save as PDF" במקום מדפסת.</div>
-  <button type="button" class="save-btn" id="saveBtn">${ICON.print}<span>שמירה כ-PDF</span></button>
+  <div class="send-status" id="sendStatus"></div>
+  <div class="save-hint">"שלח למורה" שולח ישירות; "שמירה כ-PDF" היא גיבוי אישי (בחלון ההדפסה בחרו "Save as PDF").</div>
+  <div class="toolbar-buttons">
+    <button type="button" class="send-btn" id="sendBtn">${ICON.send}<span>שלח למורה</span></button>
+    <button type="button" class="save-btn" id="saveBtn">${ICON.print}<span>PDF</span></button>
+  </div>
 </div>
 
 <script>
@@ -285,6 +305,25 @@ ${favicon}
     });
   });
 
+  // Cross-page identity: the student's name persists across every station on this device
+  // (separate from the per-page draft above, which only remembers this one page).
+  var IDENTITY_KEY = "aiTrail.identity";
+  function loadIdentity(){
+    try{ return JSON.parse(localStorage.getItem(IDENTITY_KEY)) || {}; }catch(e){ return {}; }
+  }
+  function saveIdentity(id){
+    try{ localStorage.setItem(IDENTITY_KEY, JSON.stringify(id)); }catch(e){}
+  }
+  var identity = loadIdentity();
+  var nameInput = document.querySelector('.student-field input[data-persist="name"]');
+  if(nameInput){
+    if(identity.name) nameInput.value = identity.name;
+    nameInput.addEventListener("input", function(){
+      identity.name = nameInput.value;
+      saveIdentity(identity);
+    });
+  }
+
   document.querySelectorAll(".copy-btn").forEach(function(btn){
     btn.addEventListener("click", function(){
       var text = decodeURIComponent(btn.dataset.copy);
@@ -310,6 +349,73 @@ ${favicon}
 
   document.getElementById("saveBtn").addEventListener("click", function(){
     window.print();
+  });
+
+  var TEACHER_ENDPOINT = ${JSON.stringify(TEACHER_ENDPOINT)};
+  var SUBMITTED_KEY = "aiTrail.submitted";
+  function markSubmitted(){
+    try{
+      var s = JSON.parse(localStorage.getItem(SUBMITTED_KEY)) || {};
+      s[${JSON.stringify(fileId)}] = true;
+      localStorage.setItem(SUBMITTED_KEY, JSON.stringify(s));
+    }catch(e){}
+  }
+  function collectAnswers(){
+    var answers = [];
+    document.querySelectorAll(".fillrow").forEach(function(row){
+      var label = row.querySelector(".fill-label");
+      var box = row.querySelector(".fillbox");
+      if(label && box){
+        answers.push({ question: label.textContent.trim(), answer: box.innerText.trim() });
+      }
+    });
+    return answers;
+  }
+
+  var sendBtn = document.getElementById("sendBtn");
+  var sendStatus = document.getElementById("sendStatus");
+  sendBtn.addEventListener("click", function(){
+    if(!TEACHER_ENDPOINT){
+      sendStatus.textContent = "עדיין לא הוגדר יעד שליחה — בינתיים אפשר להשתמש ב\\"שמירה כ-PDF\\".";
+      sendStatus.className = "send-status warn";
+      return;
+    }
+    var nameVal = nameInput ? nameInput.value.trim() : "";
+    if(!nameVal){
+      sendStatus.textContent = "מלאו קודם את השם למעלה.";
+      sendStatus.className = "send-status warn";
+      if(nameInput) nameInput.focus();
+      return;
+    }
+    var payload = {
+      submissionId: Date.now() + "-" + Math.random().toString(36).slice(2,8),
+      timestamp: new Date().toISOString(),
+      name: nameVal,
+      date: (document.querySelector('.student-field input[data-persist="date"]') || {}).value || "",
+      partner: (document.querySelector('.student-field input[data-persist="partner"]') || {}).value || "",
+      track: ${JSON.stringify(trackKey)},
+      pageId: ${JSON.stringify(fileId)},
+      pageTitle: ${JSON.stringify(title)},
+      answers: collectAnswers()
+    };
+    sendBtn.disabled = true;
+    sendStatus.textContent = "שולח...";
+    sendStatus.className = "send-status";
+    fetch(TEACHER_ENDPOINT, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).then(function(){
+      markSubmitted();
+      sendStatus.textContent = "נשלח למורה!";
+      sendStatus.className = "send-status ok";
+      sendBtn.disabled = false;
+    }).catch(function(){
+      sendStatus.textContent = "השליחה נכשלה — בדקו אינטרנט, או השתמשו ב-PDF.";
+      sendStatus.className = "send-status err";
+      sendBtn.disabled = false;
+    });
   });
 })();
 </script>
