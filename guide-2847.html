@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%98%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>מדריך למורה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=Heebo:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#EAEEF4; --surface-3:#E1E7EF; --border:#D7DEE8;
+    --ink:#1C2430; --ink-soft:#5A6373; --ink-faint:#8B93A3;
+    --accent:#DD8A2E; --accent-ink:#8A5613; --accent-soft:#FBE9D2;
+    --hativa:#D9584B; --hativa-soft:#FBE3DF; --tichon:#2A8A8A; --tichon-soft:#DFF1F1;
+    --good:#2F8F5B; --good-soft:#DFF3E7;
+    --shadow: 0 1px 2px rgba(28,36,48,.06), 0 8px 24px -12px rgba(28,36,48,.18);
+    --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif; --font-mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+      --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+      --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+      --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+      --good:#4CC188; --good-soft:#173626;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10141C; --surface:#171D27; --surface-2:#1E2531; --surface-3:#262F3D; --border:#2C3648;
+    --ink:#EAEDF3; --ink-soft:#A7B0C0; --ink-faint:#6E7789;
+    --accent:#F0A94D; --accent-ink:#F5C182; --accent-soft:#3A2C15;
+    --hativa:#E8836B; --hativa-soft:#3A2320; --tichon:#4FB8B8; --tichon-soft:#1B3333;
+    --good:#4CC188; --good-soft:#173626;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--ink); font-family:var(--font-body); direction:rtl;}
+  h1,h2,h3,.disp{font-family:var(--font-display); text-wrap:balance;}
+  .wrap{max-width:760px; margin:0 auto; padding:40px 26px 90px;}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+  .brand-mark{width:30px; height:30px; border-radius:9px; background:linear-gradient(155deg, var(--accent), var(--hativa)); flex:0 0 auto;}
+  .brand span{font-size:11.5px; color:var(--ink-faint); display:block;}
+  h1.page-title{font-size:26px; font-weight:800; margin:2px 0 6px;}
+  .lede{font-size:14px; color:var(--ink-soft); line-height:1.65; max-width:62ch; margin:0 0 28px;}
+
+  nav.toc{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:34px;}
+  nav.toc a{font-size:12px; font-weight:700; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 13px; text-decoration:none;}
+  nav.toc a:hover{border-color:var(--accent); color:var(--accent-ink);}
+
+  section{margin-bottom:38px;}
+  h2.sec{font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin:0 0 14px; display:flex; align-items:center; gap:10px;}
+  h2.sec::after{content:""; flex:1; height:1px; background:var(--border);}
+  h3.sub{font-size:16px; font-weight:700; margin:22px 0 10px;}
+
+  .linklist{display:flex; flex-direction:column; gap:10px;}
+  .linkrow{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 16px; box-shadow:var(--shadow);}
+  .linkrow .ico{flex:0 0 34px; height:34px; border-radius:9px; background:var(--surface-3); display:flex; align-items:center; justify-content:center; font-size:16px;}
+  .linkrow .txt{flex:1; min-width:0;}
+  .linkrow .txt b{display:block; font-size:14px;}
+  .linkrow .txt span{font-size:12px; color:var(--ink-faint);}
+  .linkrow a.go{flex:0 0 auto; font-size:12px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); padding:6px 12px; border-radius:999px; text-decoration:none; white-space:nowrap;}
+  .linkrow code{font-family:var(--font-mono); font-size:12px; background:var(--surface-2); padding:2px 7px; border-radius:6px;}
+  .placeholder{color:var(--hativa); font-style:normal;}
+
+  .flow{display:flex; flex-direction:column; gap:10px;}
+  .flow-step{display:flex; gap:12px; align-items:flex-start;}
+  .flow-num{flex:0 0 24px; height:24px; border-radius:7px; background:var(--surface-3); color:var(--ink-soft); font-family:var(--font-mono); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px;}
+  .flow-step p{margin:0; font-size:13.5px; line-height:1.6; color:var(--ink-soft);}
+  .flow-step b{color:var(--ink);}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 20px; box-shadow:var(--shadow); margin-bottom:12px;}
+  .card h4{margin:0 0 8px; font-size:14.5px; font-family:var(--font-display);}
+  .card p, .card li{font-size:13.5px; line-height:1.65; color:var(--ink-soft); margin:0;}
+  .card ul{margin:6px 0 0; padding-inline-start:18px; display:flex; flex-direction:column; gap:5px;}
+
+  table.who{width:100%; border-collapse:collapse; font-size:13px;}
+  table.who th{text-align:right; font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em; padding:0 10px 8px; border-bottom:1px solid var(--border);}
+  table.who td{padding:12px 10px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.5;}
+  table.who tr:last-child td{border-bottom:none;}
+  .tag{display:inline-flex; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; white-space:nowrap;}
+  .tag.hativa{background:var(--hativa-soft); color:var(--hativa);}
+  .tag.tichon{background:var(--tichon-soft); color:var(--tichon);}
+  .tag.both{background:var(--surface-3); color:var(--ink-soft);}
+
+  .hook{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow); margin-bottom:12px;}
+  .hook-head{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .hook-emoji{font-size:18px;}
+  .hook h4{margin:0; font-size:14.5px; font-family:var(--font-display); flex:1;}
+  .hook .when{font-size:10.5px; font-weight:700; color:var(--ink-faint); background:var(--surface-2); padding:3px 9px; border-radius:999px; white-space:nowrap;}
+  .hook p{margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-soft);}
+
+  .principle{display:flex; gap:12px; margin-bottom:14px;}
+  .principle .dot{flex:0 0 8px; height:8px; border-radius:50%; background:var(--accent); margin-top:7px;}
+  .principle p{margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-soft);}
+  .principle b{color:var(--ink);}
+
+  .note{font-size:12.5px; line-height:1.7; color:var(--ink-soft); background:var(--surface-2); border-radius:12px; padding:14px 16px;}
+  .note b{color:var(--ink);}
+
+  .gate{position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:20px;}
+  .gate-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px 26px; max-width:320px; width:100%; box-shadow:var(--shadow); text-align:center;}
+  .gate-card h2{font-size:16px; margin:0 0 6px; font-family:var(--font-display);}
+  .gate-card p{font-size:12.5px; color:var(--ink-faint); margin:0 0 16px;}
+  .gate-card input{width:100%; padding:10px 12px; border-radius:9px; border:1.5px solid var(--border); font-size:15px; text-align:center; margin-bottom:10px; font-family:inherit; background:var(--surface-2); color:var(--ink); box-sizing:border-box;}
+  .gate-card input:focus{outline:none; border-color:var(--accent);}
+  .gate-card button{width:100%; padding:10px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit;}
+  .gate-err{color:var(--hativa); font-size:12px; margin-top:8px; min-height:14px;}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h2>מדריך למורה</h2>
+    <p>הדף הזה מיועד למורה בלבד. הזינו קוד גישה:</p>
+    <input type="password" id="gatePass" placeholder="קוד גישה" autocomplete="off">
+    <button type="button" id="gateBtn">כניסה</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var PASS = "ai2026";
+  var KEY = "aiTrail.staffUnlocked";
+  var gate = document.getElementById("gate");
+  try{
+    if(localStorage.getItem(KEY) === "1"){ gate.style.display = "none"; }
+  }catch(e){}
+  function tryUnlock(){
+    var val = document.getElementById("gatePass").value;
+    if(val === PASS){
+      try{ localStorage.setItem(KEY, "1"); }catch(e){}
+      gate.style.display = "none";
+    } else {
+      document.getElementById("gateErr").textContent = "קוד שגוי, נסו שוב.";
+    }
+  }
+  document.getElementById("gateBtn").addEventListener("click", tryUnlock);
+  document.getElementById("gatePass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryUnlock(); });
+})();
+</script>
+
+<div class="wrap" dir="rtl">
+  <div class="brand"><div class="brand-mark"></div><span>מסלול ה-AI · פנימי</span></div>
+  <h1 class="page-title">מדריך למורה</h1>
+  <p class="lede">כל מה שצריך לפני שיעור: קישורים, איך המערכת עובדת, למי מתאימה כל תחנה, וכמה רעיונות לפתיחה של 10 דקות שתופסת.</p>
+
+  <nav class="toc">
+    <a href="#links">קישורים</a>
+    <a href="#howitworks">איך זה עובד</a>
+    <a href="#principles">עקרונות הפעלה</a>
+    <a href="#who">תחנה למי</a>
+    <a href="#hooks">פתיחות של 10 דקות</a>
+    <a href="#maintain">עדכון תוכן</a>
+  </nav>
+
+  <section id="links">
+    <h2 class="sec">קישורים</h2>
+    <div class="linklist">
+      <div class="linkrow">
+        <div class="ico">🗂️</div>
+        <div class="txt"><b>עמוד הבית לתלמידים</b><span>בחירת מסלול + 5 דפי עבודה</span></div>
+        <a class="go" href="https://enavcorem.github.io/ai-workshop/" target="_blank" rel="noopener">פתחי ←</a>
+      </div>
+      <div class="linkrow">
+        <div class="ico">🧭</div>
+        <div class="txt"><b>לוח ניהול (טיימר + הערות)</b><span>קוד גישה: <code>ai2026</code></span></div>
+        <a class="go" href="https://enavcorem.github.io/ai-workshop/staff-2847.html" target="_blank" rel="noopener">פתחי ←</a>
+      </div>
+      <div class="linkrow">
+        <div class="ico">📊</div>
+        <div class="txt"><b>גיליון התשובות שנשלחות "למורה"</b><span class="placeholder">הוסיפי כאן את הקישור לגיליון ה-Google Sheets שיצרת</span></div>
+      </div>
+      <div class="linkrow">
+        <div class="ico">💻</div>
+        <div class="txt"><b>הקבצים והקוד (GitHub)</b><span>לגיבוי, היסטוריה, ועריכות עתידיות</span></div>
+        <a class="go" href="https://github.com/enavcorem/ai-workshop" target="_blank" rel="noopener">פתחי ←</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="howitworks">
+    <h2 class="sec">איך זה עובד</h2>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><p>תלמיד/ה נכנס/ת לעמוד הבית, מקליד/ה שם (נשמר אוטומטית בכל התחנות באותו מכשיר) ובוחר/ת מסלול — חטיבה או תיכון.</p></div>
+      <div class="flow-step"><div class="flow-num">2</div><p>פותח/ת דף עבודה של תחנה אחת, עובד/ת עם Gemini לפי ההוראות, וממלא/ה את התשובות ישירות בדף.</p></div>
+      <div class="flow-step"><div class="flow-num">3</div><p>בסיום: <b>"שלח למורה"</b> (שולח את התשובות לגיליון שלך) — או <b>"PDF"</b> כגיבוי אישי. שתי האפשרויות זמינות תמיד.</p></div>
+      <div class="flow-step"><div class="flow-num">4</div><p>את פותחת את <b>לוח הניהול</b> בזמן השיעור לצפייה בטיימר ובהערות ההדרכה, ואת <b>הגיליון</b> אחרי השיעור כדי לראות מי הגיע ומה כתבו.</p></div>
+    </div>
+  </section>
+
+  <section id="principles">
+    <h2 class="sec">עקרונות הפעלה</h2>
+    <div class="principle"><div class="dot"></div><p><b>מודולריות מלאה.</b> כל תחנה עומדת בפני עצמה — אין חובה להריץ לפי סדר. תלמיד שמצטרף באמצע לא מפספס כלום.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>קבוצה אי-זוגית (3 תלמידים)?</b> זוג אחד + יחיד/ה שמשווה תוצאות בסבב השיתוף. מחליפים מי ה"יחיד" בכל תחנה.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>חכות, לא דגים.</b> המטרה היא שיֵדעו לחקור בעצמם — לא לתת תשובה מוכנה. כשמתלבטים בין להסביר לתלמיד לבין לשאול אותו "מה קורה אם תנסה...", עדיף השאלה.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>מודלים משתפרים כל הזמן.</b> אם פרומפט מסוים "כבר לא עובד" — זו לא תקלה, זו תוצאה לימודית. שתפי את הכיתה בזה במקום להסתיר.</p></div>
+  </section>
+
+  <section id="who">
+    <h2 class="sec">איזו תחנה למי</h2>
+    <table class="who">
+      <tr><th>מצב התלמיד/ה</th><th>תחנה מומלצת</th><th>למה</th></tr>
+      <tr><td>מסויג/ת, לא סומך/ת על AI, ניסה/תה וזה אכזב</td><td><span class="tag both">1</span> פיצוח מוח ה-AI</td><td>בדיוק בנויה בשביל זה — מזמינה את החשדנות להיות הכלי המרכזי, לא מנסה "לשכנע".</td></tr>
+      <tr><td>חטיבה, מתעניין/ת במשחקים</td><td><span class="tag hativa">2</span> מנוע משחקים</td><td>בונים משחק הרפתקה משלהם תוך 20 דקות.</td></tr>
+      <tr><td>תיכון, מתעניין/ת בהכנסה/יזמות</td><td><span class="tag tichon">3</span> ו-<span class="tag tichon">5</span> סדנת יוצרים / אתגר אמיתי</td><td>קונספט מוצר + סלוגן + הדמיה (3), ופרויקט מלא מבעיה עד פתרון (5).</td></tr>
+      <tr><td>רוצה חשיבה ביקורתית עמוקה, אוהב/ת ויכוחים</td><td><span class="tag both">4</span> שותף חשיבה</td><td>דיבייט/חקירה סוקרטית מול Gemini.</td></tr>
+      <tr><td>כבר עשה/תה כמה תחנות, רוצה לחבר הכול</td><td><span class="tag both">5</span> אתגר אמיתי</td><td>פרויקט חותם ל-3 מפגשים שמשלב את כל הכישורים.</td></tr>
+    </table>
+  </section>
+
+  <section id="hooks">
+    <h2 class="sec">פתיחות של 10 דקות</h2>
+
+    <h3 class="sub">פורמטים כלליים — מתאימים לכל תחנה</h3>
+    <div class="hook">
+      <div class="hook-head"><span class="hook-emoji">⏱️</span><h4>60 שניות, תוכיחו לי</h4><span class="when">כללי</span></div>
+      <p>לפני שמסבירים מה עושים היום — זורקים לכיתה אתגר בזק: "מי חושב שיוכל לגרום ל-Gemini לעשות X תוך דקה?" ומריצים את זה בעצמכם על המסך, בלי הכנה. הדחיפות והספונטניות תופסות תשומת לב חזק יותר מהצגה מסודרת.</p>
+    </div>
+    <div class="hook">
+      <div class="hook-head"><span class="hook-emoji">🥊</span><h4>קרב שניים</h4><span class="when">כללי</span></div>
+      <p>שני מתנדבים, כל אחד מנסה לגרום ל-Gemini לעשות משהו הפוך מהשני (למשל: אחד משכנע שמשהו נכון, השני שהוא לא נכון). מריצים בקול, הכיתה שופטת מי "ניצח". הופך הדגמה פסיבית לתחרות.</p>
+    </div>
+    <div class="hook">
+      <div class="hook-head"><span class="hook-emoji">🔮</span><h4>נחשו לפני שנראה</h4><span class="when">כללי</span></div>
+      <p>לפני שמריצים את הפרומפט המודגם, מבקשים מהכיתה להצביע: מה Gemini יענה? רק אחר כך מריצים בפועל. ההימור האישי הופך את הכיתה למעורבת בתוצאה במקום צופה מהצד.</p>
+    </div>
+    <div class="hook">
+      <div class="hook-head"><span class="hook-emoji">🎭</span><h4>מי מאמין למי</h4><span class="when">כללי</span></div>
+      <p>מקריאים שתי תשובות אפשריות (אחת אמיתית מ-Gemini, אחת שהמצאתם) בלי לגלות מי זו מי. הכיתה מצביעה איזו אמיתית. מתחבר ישירות לנושא הביקורתיות ומייצר עניין לפני שהתחילו בכלל.</p>
+    </div>
+    <div class="hook">
+      <div class="hook-head"><span class="hook-emoji">🎯</span><h4>התפקיד האישי</h4><span class="when">לתלמיד ספציפי</span></div>
+      <p>לתלמיד/ה מסויג/ת או שקט/ה — לפני השיעור, בשיחה אישית קצרה: "תרצה/י להיות זה/את שמנסה לשבור את ה-AI היום?" תפקיד ייעודי הופך היסוס לבעלות על המשימה.</p>
+    </div>
+
+    <h3 class="sub">ספציפי לכל תחנה (כבר בנוי בהערות המורה בלוח הניהול — כאן לנוחות)</h3>
+    <div class="card">
+      <h4>1 · פיצוח מוח ה-AI</h4>
+      <p>מדגימים "מבחן הסכמה" חי: שואלים את הכיתה טענה שנויה במחלוקת, פותחים שתי שיחות עם עמדות הפוכות מול העיניים שלהם, ושואלים: איך נדע אם Gemini "חושב" שזה נכון, או סתם מנומס?</p>
+    </div>
+    <div class="card">
+      <h4>2 · מנוע משחקים ולוגיקה</h4>
+      <p>הדגמת 60 שניות: "בריחה מחדר נעול" רץ בצ'אט מול הכיתה, בלי הכנה מראש.</p>
+    </div>
+    <div class="card">
+      <h4>3 · סדנת יוצרים</h4>
+      <p>משווים פרומפט עני ("כלב בחלל") מול עשיר ("אסטרונאוט גולדן רטריבר, סייברפאנק, ניאון...") ומראים את שתי התמונות שיוצאות — ההבדל מדבר בעד עצמו.</p>
+    </div>
+    <div class="card">
+      <h4>4 · שותף חשיבה ואנליזה</h4>
+      <p>ממחישים "Echo Chamber" — Gemini בדרך כלל מסכים ומרצה אותנו. שואלים את הכיתה: איך מכריחים אותו להתנגד?</p>
+    </div>
+    <div class="card">
+      <h4>5 · אתגר אמיתי</h4>
+      <p>מחברים בקול רם בין הכישורים שכבר נרכשו (הזיות / חוקים / ויזואל / ביקורתיות) לתהליך החדש שעומד להתחיל — "היום אתם משתמשים בהכול ביחד."</p>
+    </div>
+  </section>
+
+  <section id="maintain">
+    <h2 class="sec">עדכון תוכן עתידי</h2>
+    <div class="note">
+      כל התוכן (יחידות, פרומפטים, שאלות) חי במקום אחד: <code>site/_src/content.js</code>. כדי לשנות משהו — פשוט תבקשי ממני, אני אערוך שם ואריץ <code>node site/_src/build.js</code>, וזה מתעדכן אוטומטית בכל 11 הדפים (לוח הניהול + 10 דפי העבודה). לא צריך לגעת בכל דף בנפרד.
+    </div>
+  </section>
+</div>
+
+</body>
+</html>
