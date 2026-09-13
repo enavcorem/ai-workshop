@@ -354,9 +354,50 @@
     .timer-widget{left:12px; bottom:12px;}
     .timer-panel{left:0; width:min(270px, calc(100vw - 24px));}
   }
+
+  .gate{position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:20px;}
+  .gate-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px 26px; max-width:320px; width:100%; box-shadow:var(--shadow); text-align:center;}
+  .gate-card h2{font-size:16px; margin:0 0 6px; font-family:var(--font-display);}
+  .gate-card p{font-size:12.5px; color:var(--ink-faint); margin:0 0 16px;}
+  .gate-card input{width:100%; padding:10px 12px; border-radius:9px; border:1.5px solid var(--border); font-size:15px; text-align:center; margin-bottom:10px; font-family:inherit; background:var(--surface-2); color:var(--ink); box-sizing:border-box;}
+  .gate-card input:focus{outline:none; border-color:var(--accent);}
+  .gate-card button{width:100%; padding:10px; border-radius:9px; border:none; background:var(--accent); color:#fff; font-weight:700; font-size:14px; cursor:pointer; font-family:inherit;}
+  .gate-err{color:var(--hativa); font-size:12px; margin-top:8px; min-height:14px;}
 </style>
 </head>
 <body>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h2>לוח למורה</h2>
+    <p>הדף הזה מיועד למורה בלבד. הזינו קוד גישה:</p>
+    <input type="password" id="gatePass" placeholder="קוד גישה" autocomplete="off">
+    <button type="button" id="gateBtn">כניסה</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var PASS = "ai2026";
+  var KEY = "aiTrail.staffUnlocked";
+  var gate = document.getElementById("gate");
+  try{
+    if(localStorage.getItem(KEY) === "1"){ gate.style.display = "none"; }
+  }catch(e){}
+  function tryUnlock(){
+    var val = document.getElementById("gatePass").value;
+    if(val === PASS){
+      try{ localStorage.setItem(KEY, "1"); }catch(e){}
+      gate.style.display = "none";
+    } else {
+      document.getElementById("gateErr").textContent = "קוד שגוי, נסו שוב.";
+    }
+  }
+  document.getElementById("gateBtn").addEventListener("click", tryUnlock);
+  document.getElementById("gatePass").addEventListener("keydown", function(e){ if(e.key === "Enter") tryUnlock(); });
+})();
+</script>
 
 
 <div class="app" dir="rtl">

@@ -1,7 +1,8 @@
 // Single source of truth build script.
 // Edit content.js, then run: node site/_src/build.js
-// Regenerates: ../teacher.html (content block only) + ../u#-track.html (10 files, fully).
-// Does NOT touch ../index.html (it has no dependency on unit content).
+// Regenerates: ../staff-2847.html (content block only, formerly teacher.html - renamed
+// deliberately to an unguessable name so students don't stumble on it) + ../u#-track.html
+// (10 files, fully). Does NOT touch ../index.html (it has no dependency on unit content).
 
 const fs = require("fs");
 const path = require("path");
@@ -29,7 +30,7 @@ function renderPromptHtml(s){
    PART 1 — splice fresh content into teacher.html
    ============================================================ */
 function updateTeacherApp(){
-  const filePath = path.join(SITE_DIR, "teacher.html");
+  const filePath = path.join(SITE_DIR, "staff-2847.html");
   const html = fs.readFileSync(filePath, "utf8");
 
   const START_MARK = "/* ============ CONTENT ============ */";
@@ -43,7 +44,7 @@ function updateTeacherApp(){
   const dataBlock = `${START_MARK}\nconst { P10_20_10, UNITS } = ${JSON.stringify({ P10_20_10, UNITS })};\n\n`;
   const updated = html.slice(0, startIdx) + dataBlock + html.slice(endIdx);
   fs.writeFileSync(filePath, updated, "utf8");
-  console.log("updated teacher.html (content block)");
+  console.log("updated staff-2847.html (content block)");
 }
 
 /* ============================================================
