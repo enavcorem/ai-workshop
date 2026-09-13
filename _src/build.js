@@ -13,7 +13,7 @@ const TRACK_LABEL = { hativa: "חטיבה", tichon: "תיכון" };
 
 // After deploying site/_src/apps-script.gs.txt as a Google Apps Script Web App,
 // paste the resulting URL here and rerun `node site/_src/build.js`.
-const TEACHER_ENDPOINT = "";
+const TEACHER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwlWbYMZP-5_5fVHxMXsBQtVGSTBZrOYpV7o1wATx1ZTZftYiPTl0oN3JdOnKoQ9KHu/exec";
 
 function esc(s){
   return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
