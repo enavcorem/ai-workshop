@@ -58,9 +58,9 @@ const ICON = {
 };
 
 let fillCounter = 0;
-function fillbox(pageId, labelText){
-  fillCounter++;
-  const fid = pageId + "-f" + fillCounter;
+// fixedKey: מזהה קבוע שלא נשען על המונה, כדי ששדה חדש לא יזיז את המזהים של שדות קיימים (תשובות שמורות בדפדפן)
+function fillbox(pageId, labelText, fixedKey){
+  const fid = fixedKey ? pageId + "-" + fixedKey : pageId + "-f" + (++fillCounter);
   return `<div class="fillrow">
     <label class="fill-label" for="${fid}">${esc(labelText)}</label>
     <div class="fillbox" id="${fid}" contenteditable="true" data-placeholder="כתבו כאן..."></div>
@@ -98,6 +98,28 @@ function stepHtml(pageId, step, i){
   return html;
 }
 
+const STUDIO_LABEL = { skills: "מיומנויות AI", games: "סטודיו משחקים" };
+
+// "מיומנויות AI · מפגש 2" — מספר המפגש בסטודיו, לא מספר היחידה
+function brandText(unit){
+  const studio = STUDIO_LABEL[unit.studio] || "מסלול ה-AI";
+  const meetings = unit.sessions ? unit.sessions.map(s => s.meeting).filter(Boolean) : (unit.meeting ? [unit.meeting] : []);
+  if(!meetings.length) return `${studio} · העשרה`;
+  if(meetings.length === 1) return `${studio} · מפגש ${meetings[0]}`;
+  const consecutive = meetings.every((m,i) => i===0 || m === meetings[i-1]+1);
+  return `${studio} · מפגשים ${consecutive ? `${meetings[0]}–${meetings[meetings.length-1]}` : meetings.join(", ")}`;
+}
+
+function hackathonBoxHtml(pageId){
+  return `<div class="hack-box">
+    <div class="hack-title">🚀 בקרוב: האקתון אלברט איינשטיין · יום חמישי 26.11</div>
+    <div class="hack-text">יום שלם (9:00–17:00, מקוון) שבו צוותים של תלמידים בונים פתרון לאתגר אמיתי בעזרת AI, עם מנטורים ושופטים. <b>לא צריך ידע טכני מראש</b>, רק סקרנות ורצון להשפיע.</div>
+    <div class="hack-text">ארבעה מסלולים: חדשנות פתוחה · חינוך פיננסי · קיימות וסביבה · Agency (לעצב את העתיד שלי)</div>
+    <a class="hack-link" href="https://www.hackathonalberteinstein.com" target="_blank" rel="noopener">לאתר ההאקתון ←</a>
+    ${fillbox(pageId, "רוצים להשתתף? (כן / אולי / עדיין לא) ועל מה הייתם רוצים לעבוד?", "hackathon")}
+  </div>`;
+}
+
 function trackContentHtml(pageId, t){
   let html = "";
   if(t.background) html += `<div class="bg-note">${esc(t.background)}</div>`;
@@ -106,7 +128,7 @@ function trackContentHtml(pageId, t){
 }
 
 function page(opts){
-  const { fileId, trackKey, title, num, totalNote, subtitle, goal, equipment, bodyHtml } = opts;
+  const { fileId, trackKey, title, brand, hackathonHtml, subtitle, goal, equipment, bodyHtml } = opts;
   const trackLabel = TRACK_LABEL[trackKey];
   const trackClass = trackKey;
   const favicon = `<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>`)}">`;
@@ -179,6 +201,10 @@ ${favicon}
   .session-title{font-size:17px; font-weight:700; font-family:var(--font-display);}
   .session-tip{font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:8px; padding:8px 12px; margin-bottom:14px;}
 
+  .hack-box{margin-bottom:18px; background:var(--accent-soft); border:1px solid var(--accent); border-radius:14px; padding:14px 16px;}
+  .hack-title{font-family:var(--font-display); font-weight:700; font-size:15.5px; margin-bottom:6px;}
+  .hack-text{font-size:13.5px; line-height:1.6; color:var(--ink); margin-bottom:4px;}
+  .hack-link{display:inline-block; margin:4px 0 10px; font-weight:700; color:var(--accent-ink);}
   .bg-note{margin-bottom:14px; font-size:13px; line-height:1.6; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px;}
 
   .steps{display:flex; flex-direction:column; gap:16px;}
@@ -242,7 +268,7 @@ ${favicon}
 
 <div class="page" dir="rtl">
   <div class="topbar">
-    <div class="brandline"><span class="mark"></span><span>מסלול ה-AI · תחנה ${num}${totalNote?` · ${totalNote}`:""}</span></div>
+    <div class="brandline"><span class="mark"></span><span>${esc(brand)}</span></div>
     <span class="track-tag ${trackClass}">${trackLabel}</span>
   </div>
 
@@ -260,11 +286,14 @@ ${favicon}
     <div class="student-field"><label>עבדתי בזוג עם (אם היה)</label><input type="text" data-persist="partner"></div>
   </div>
 
+  ${hackathonHtml || ""}
+
   ${bodyHtml}
 
   <div class="closing">
-    <h3>מה למדתי בתחנה הזו? (רשות)</h3>
+    <h3>מה למדתי במפגש הזה? (רשות)</h3>
     ${fillbox(fileId, "רפלקציה חופשית")}
+    ${fillbox(fileId, "💡 רעיון להאקתון שעלה לי היום (רשות)", "idea")}
   </div>
 </div>
 
@@ -436,7 +465,7 @@ function generateWorksheets(){
           const t = sess.tracks[trackKey];
           const tip = si > 0 ? `<div class="session-tip">מה שכתבתם למעלה בעמוד הזה עדיין כאן — גללו למעלה כדי להעתיק ממנו במידת הצורך.</div>` : "";
           return `<div class="session-section">
-          <div class="session-head"><span class="session-num">${sess.num}</span><span class="session-title">מפגש ${sess.num} · ${esc(sess.title)}</span></div>
+          <div class="session-head"><span class="session-num">${sess.meeting || "+"}</span><span class="session-title">${sess.meeting ? `מפגש ${sess.meeting}` : "בהמשך"} · ${esc(sess.title)}</span></div>
           ${tip}
           <div class="track-subtitle-note" style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">${esc(t.subtitle)}</div>
           ${trackContentHtml(fileId + "-s" + sess.num, t)}
@@ -451,8 +480,8 @@ function generateWorksheets(){
         fileId,
         trackKey,
         title: unit.title,
-        num: unit.num,
-        totalNote: unit.isCapstone ? "3 מפגשים" : null,
+        brand: brandText(unit),
+        hackathonHtml: unit.hackathon ? hackathonBoxHtml(fileId) : "",
         subtitle: unit.sub,
         goal: unit.goal,
         equipment: unit.equipment,

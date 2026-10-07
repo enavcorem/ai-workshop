@@ -67,6 +67,10 @@
   .session-title{font-size:17px; font-weight:700; font-family:var(--font-display);}
   .session-tip{font-size:12px; color:var(--ink-faint); background:var(--surface-2); border-radius:8px; padding:8px 12px; margin-bottom:14px;}
 
+  .hack-box{margin-bottom:18px; background:var(--accent-soft); border:1px solid var(--accent); border-radius:14px; padding:14px 16px;}
+  .hack-title{font-family:var(--font-display); font-weight:700; font-size:15.5px; margin-bottom:6px;}
+  .hack-text{font-size:13.5px; line-height:1.6; color:var(--ink); margin-bottom:4px;}
+  .hack-link{display:inline-block; margin:4px 0 10px; font-weight:700; color:var(--accent-ink);}
   .bg-note{margin-bottom:14px; font-size:13px; line-height:1.6; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px;}
 
   .steps{display:flex; flex-direction:column; gap:16px;}
@@ -130,7 +134,7 @@
 
 <div class="page" dir="rtl">
   <div class="topbar">
-    <div class="brandline"><span class="mark"></span><span>מסלול ה-AI · תחנה 4</span></div>
+    <div class="brandline"><span class="mark"></span><span>מיומנויות AI · מפגש 4</span></div>
     <span class="track-tag hativa">חטיבה</span>
   </div>
 
@@ -147,6 +151,8 @@
     <div class="student-field"><label>תאריך</label><input type="text" data-persist="date"></div>
     <div class="student-field"><label>עבדתי בזוג עם (אם היה)</label><input type="text" data-persist="partner"></div>
   </div>
+
+  
 
   <div class="track-subtitle-note" style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;">בוט הדיבייט — מי ינצח בוויכוח? · 20 דקות</div><div class="steps"><div class="step">
     <div class="step-head">
@@ -195,10 +201,14 @@
   </div></div></div></div>
 
   <div class="closing">
-    <h3>מה למדתי בתחנה הזו? (רשות)</h3>
+    <h3>מה למדתי במפגש הזה? (רשות)</h3>
     <div class="fillrow">
     <label class="fill-label" for="u4-hativa-f31">רפלקציה חופשית</label>
     <div class="fillbox" id="u4-hativa-f31" contenteditable="true" data-placeholder="כתבו כאן..."></div>
+  </div>
+    <div class="fillrow">
+    <label class="fill-label" for="u4-hativa-idea">💡 רעיון להאקתון שעלה לי היום (רשות)</label>
+    <div class="fillbox" id="u4-hativa-idea" contenteditable="true" data-placeholder="כתבו כאן..."></div>
   </div>
   </div>
 </div>

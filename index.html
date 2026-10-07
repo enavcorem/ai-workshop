@@ -59,6 +59,10 @@
   .card-title{font-size:15.5px; font-weight:700; font-family:var(--font-display);}
   .card-sub{font-size:12.5px; color:var(--ink-faint); margin-top:2px;}
   .card-badge{flex:0 0 auto; font-size:11px; font-weight:700; color:var(--ink-faint); background:var(--surface-2); padding:4px 10px; border-radius:999px;}
+  .group-title{font-size:15px; font-weight:800; color:var(--ink-soft); margin:18px 2px 0;}
+  .group-title:first-child{margin-top:0;}
+  .hack{display:block; margin:0 0 16px; padding:14px 16px; border-radius:14px; background:var(--accent-soft); color:var(--accent-ink); text-decoration:none; line-height:1.5;}
+  .hack b{font-weight:800;}
   .card-badge.sent{color:#2F8F5B; background:rgba(47,143,91,.12);}
   .card-arrow{flex:0 0 auto; width:16px; height:16px; color:var(--ink-faint);}
   .card:hover .card-arrow{color:var(--accent-ink);}
@@ -99,6 +103,8 @@
     <button type="button" class="tichon" data-track="tichon">תיכון</button>
   </div>
 
+  <a class="hack" href="https://www.hackathonalberteinstein.com" target="_blank" rel="noopener"><b>בקרוב: האקתון אלברט איינשטיין · יום חמישי 26.11</b><br>יום שלם שבו צוותים בונים פתרון לבעיה אמיתית בעזרת AI. לפרטים ←</a>
+
   <div class="cards" id="cards"></div>
 
   <div class="note">
@@ -114,14 +120,23 @@
   var STATIONS = [
     { num:1, id:"u1", title:"פיצוח מוח ה-AI", sub:"עין ביקורתית וכיול אמון",
       urls:{ hativa:"u1-hativa.html", tichon:"u1-tichon.html" } },
-    { num:2, id:"u2", title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי",
+    { num:"+", id:"u2", title:"מנוע משחקים ולוגיקה", sub:"מודל שפה כעולם אינטראקטיבי", badge:"העשרה",
       urls:{ hativa:"u2-hativa.html", tichon:"u2-tichon.html" } },
-    { num:3, id:"u3", title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
+    { num:6, id:"u3", title:"סדנת יוצרים", sub:"רעיון, דמות וויז'ואל",
       urls:{ hativa:"u3-hativa.html", tichon:"u3-tichon.html" } },
     { num:4, id:"u4", title:"שותף חשיבה ואנליזה", sub:"דיבייט וחקירה סוקרטית",
       urls:{ hativa:"u4-hativa.html", tichon:"u4-tichon.html" } },
-    { num:5, id:"u5", title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · 3 מפגשים", badge:"פרויקט חותם",
+    { num:3, id:"u5", title:"אתגר אמיתי", sub:"פותרים בעיה עם AI · מפגשים 3 ו-5", badge:"פרויקט חותם",
       urls:{ hativa:"u5-hativa.html", tichon:"u5-tichon.html" } },
+    { num:2, id:"u6", title:"מאיפה ה-AI יודע?", sub:"מקורות, אימות ו-NotebookLM", badge:"חדש",
+      urls:{ hativa:"u6-hativa.html", tichon:"u6-tichon.html" } },
+    { num:2, id:"u7", title:"סטודיו משחקים", sub:"מעצבים משחקים עם AI · סדרת מפגשים", badge:"חדש",
+      urls:{ hativa:"u7-hativa.html", tichon:"u7-tichon.html" } },
+  ];
+  // שתי קבוצות: מפגש המיומנויות וסטודיו המשחקים. הסדר הוא סדר ההוראה, והמספר על הכרטיס הוא מספר המפגש (לא מספר היחידה)
+  var GROUPS = [
+    { title:"מיומנויות AI", ids:["u1","u6","u5","u4","u3"] },
+    { title:"סטודיו משחקים", ids:["u7","u2"] },
   ];
 
   var ARROW = '<svg class="card-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
@@ -154,7 +169,7 @@
       b.classList.toggle("active", b.dataset.track === track);
     });
     var submitted = loadSubmitted();
-    document.getElementById("cards").innerHTML = STATIONS.map(function(s){
+    function cardHtml(s){
       var pageId = s.id + "-" + track;
       var sent = !!submitted[pageId];
       return '<a class="card" href="'+s.urls[track]+'" target="_blank" rel="noopener">'
@@ -163,6 +178,10 @@
         + (sent ? '<span class="card-badge sent">נשלח</span>' : (s.badge ? '<span class="card-badge">'+s.badge+'</span>' : ''))
         + ARROW
         + '</a>';
+    }
+    document.getElementById("cards").innerHTML = GROUPS.map(function(g){
+      return '<div class="group-title">'+g.title+'</div>'
+        + g.ids.map(function(id){ return cardHtml(STATIONS.filter(function(s){ return s.id===id; })[0]); }).join("");
     }).join("");
   }
 
