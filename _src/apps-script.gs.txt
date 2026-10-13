@@ -11,6 +11,19 @@
  *    אבל אם תרצי הגבלה נוספת בעתיד אפשר לדבר על זה)
  * 6. Deploy -> תאשרי הרשאות (זה הגיליון שלך, זה בטוח) -> תעתיקי את ה-Web app URL שמופיע בסוף.
  * 7. תשלחי לי את ה-URL הזה ואני אחבר אותו לדפים.
+ *
+ * עדכון (הסטודיו, 10.2026): הסקריפט קולט גם משחקים (קובצי HTML) וגם כוחות מדף הסטודיו.
+ * איך מעדכנים בלי לשנות את הקישור:
+ * 1. Apps Script -> מוחקים את הקוד הישן ומדביקים את כל הקובץ הזה.
+ * 2. Deploy -> Manage deployments (ניהול פריסות) -> העיפרון (Edit) -> Version: New version -> Deploy.
+ *    (לא New deployment! אחרת נוצר קישור חדש והדפים לא יעבדו)
+ * 3. גוגל יבקש הרשאה חדשה לדרייב. זה כדי לשמור את קובצי המשחקים בתיקייה בדרייב שלך.
+ * המשחקים נשמרים בתיקייה "ארקייד הסטודיו - משחקים שהוגשו", והרשימה בלשונית "ארקייד" בגיליון.
+ *
+ * עדכון (שמירה בענן, 13.10.2026): לשונית "התקדמות", שורה אחת לכל כינוי, עם הקוד הסודי.
+ * מעדכנים באותה דרך (Manage deployments -> New version). אין הרשאה חדשה.
+ * תלמיד ששכח את הקוד: מסתכלים בעמודה "קוד סודי". אפשר גם לשנות אותו שם ל-4 ספרות אחרות.
+ * את עמודת "נתונים" לא עורכים ידנית. משם הסטודיו טוען את ההתקדמות.
  */
 
 function doPost(e) {
@@ -23,6 +36,11 @@ function doPost(e) {
   }
 
   var data = JSON.parse(e.postData.contents);
+  // הסטודיו: משחק או כוח. שליחה רגילה מדף תחנה ממשיכה כמו קודם
+  if (data.kind === "game") return saveGame_(ss, data);
+  if (data.kind === "power") return savePower_(ss, data);
+  if (data.kind === "cloud") return cloud_(ss, data);
+
   var trackLabel = data.track === "tichon" ? "תיכון" : "חטיבה";
 
   (data.answers || []).forEach(function (a) {
@@ -36,4 +54,138 @@ function doPost(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ ok: true }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ---------- הסטודיו ----------
+
+function ok_() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// גיליון עם שורת כותרת, נוצר בפעם הראשונה
+function sheetWithHeader_(ss, name, header) {
+  var sh = ss.getSheetByName(name) || ss.insertSheet(name);
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(header);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function clean_(v, max) {
+  return String(v || "").replace(/[\r\n\t]+/g, " ").trim().slice(0, max || 200);
+}
+
+// שומר את קובץ ה-HTML בתיקייה בדרייב, ושורה בלשונית "ארקייד". לא מתפרסם לשום מקום בלי אישור המורה
+function saveGame_(ss, data) {
+  var html = String(data.html || "");
+  if (!html || html.length > 5000000) return ok_();
+
+  var folderName = "ארקייד הסטודיו - משחקים שהוגשו";
+  var it = DriveApp.getFoldersByName(folderName);
+  var folder = it.hasNext() ? it.next() : DriveApp.createFolder(folderName);
+
+  var safeTitle = clean_(data.gameName, 40).replace(/[\\\/:*?"<>|]/g, "") || "משחק";
+  var stamp = Utilities.formatDate(new Date(), "Asia/Jerusalem", "yyyy-MM-dd HH-mm");
+  var file = folder.createFile(stamp + " - " + clean_(data.nick, 30) + " - " + safeTitle + ".html", html, MimeType.HTML);
+
+  var sh = sheetWithHeader_(ss, "ארקייד",
+    ["זמן", "שם (למורה)", "כינוי בארקייד", "שם המשחק", "ענף", "במה אני הכי גאה", "קובץ", "סטטוס"]);
+  sh.appendRow([
+    new Date(), clean_(data.realName, 60), clean_(data.nick, 30), clean_(data.gameName, 60),
+    clean_(data.genre, 40), clean_(data.proud, 300), file.getUrl(), "ממתין לאישור"
+  ]);
+  return ok_();
+}
+
+// כוח חדש שתלמיד גילה. המורה מחליטה אם הוא עולה ללוח
+function savePower_(ss, data) {
+  var sh = sheetWithHeader_(ss, "כוחות",
+    ["זמן", "שם (למורה)", "כינוי", "שם הכוח", "מתי משתמשים", "הלחש", "סטטוס"]);
+  sh.appendRow([
+    new Date(), clean_(data.realName, 60), clean_(data.nick, 30), clean_(data.powerName, 60),
+    clean_(data.when, 300), clean_(data.spell, 500), "חדש"
+  ]);
+  return ok_();
+}
+
+// ---------- שמירה בענן (הסטודיו) ----------
+// לשונית "התקדמות": שורה אחת לכל כינוי. הקוד גלוי למורה, כדי שתוכל לעזור למי ששכח
+var CLOUD_HEAD = ["כינוי", "שם (למורה)", "קוד סודי", "דמות", "נקודות", "דרגה", "אתגרים", "כוחות", "סודות", "משחקים שנשלחו", "נוצר", "שמירה אחרונה", "נתונים (לא לערוך)"];
+
+function json_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// "נינג׳ה  הפיקסלים" ו"נינג'ה הפיקסלים" הם אותו כינוי
+function nickKey_(v) {
+  return String(v || "").replace(/[׳'`’]/g, "'").replace(/[״"”]/g, '"').replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+// כינוי שמתחיל ב-= לא יהפוך לנוסחה בגיליון
+function text_(v) {
+  return /^[=+\-@]/.test(v) ? "'" + v : v;
+}
+
+// op: register (פעם ראשונה), save (שמירה אוטומטית), load (כניסה ממחשב אחר)
+function cloud_(ss, data) {
+  var nick = clean_(data.nick, 20).replace(/\s+/g, " "), code = String(data.code || "");
+  if (!nick || !/^\d{4}$/.test(code)) return json_({ cloud: 1, ok: false, err: "bad" });
+
+  // הגנה מניחוש קודים: 8 טעויות על אותו כינוי -> רבע שעה המתנה
+  var cache = CacheService.getScriptCache(), failKey = "fail:" + nickKey_(nick);
+  var fails = +(cache.get(failKey) || 0);
+  if (fails >= 8) return json_({ cloud: 1, ok: false, err: "wait" });
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    var sh = ss.getSheetByName("התקדמות");
+    if (!sh) {
+      sh = ss.insertSheet("התקדמות");
+      sh.appendRow(CLOUD_HEAD);
+      sh.setFrozenRows(1);
+      sh.getRange("C:C").setNumberFormat("@"); // שהקוד 0123 לא יהפוך ל-123
+    }
+    var last = sh.getLastRow(), row = 0, key = nickKey_(nick);
+    if (last > 1) {
+      var nicks = sh.getRange(2, 1, last - 1, 1).getDisplayValues();
+      for (var i = 0; i < nicks.length; i++) if (nickKey_(nicks[i][0]) === key) { row = i + 2; break; }
+    }
+
+    if (!row) {
+      if (data.op !== "register") return json_({ cloud: 1, ok: false, err: "nouser" });
+      row = last + 1;
+      sh.getRange(row, 3).setNumberFormat("@");
+      sh.getRange(row, 1, 1, 3).setValues([[text_(nick), text_(clean_(data.realName, 60)), code]]);
+      sh.getRange(row, 11).setValue(new Date());
+    } else {
+      var saved = String(sh.getRange(row, 3).getDisplayValue()).trim();
+      if (saved.length < 4) saved = ("0000" + saved).slice(-4);
+      if (saved !== code) {
+        cache.put(failKey, String(fails + 1), 900);
+        return json_({ cloud: 1, ok: false, err: data.op === "register" ? "taken" : "code" });
+      }
+      // כינוי קיים עם הקוד הנכון: מחזירים את מה ששמור, והדף מאחד ושומר. לא דורסים
+      if (data.op !== "save") {
+        var raw = String(sh.getRange(row, 13).getValue() || "");
+        var stored = null;
+        try { stored = raw ? JSON.parse(raw) : null; } catch (err) {}
+        return json_({ cloud: 1, ok: true, exists: 1, nick: sh.getRange(row, 1).getDisplayValue(), data: stored });
+      }
+    }
+
+    var txt = JSON.stringify(data.data || {});
+    if (txt.length > 45000) return json_({ cloud: 1, ok: false, err: "big" });
+    var s = data.summary || {};
+    if (clean_(data.realName, 60)) sh.getRange(row, 2).setValue(text_(clean_(data.realName, 60)));
+    sh.getRange(row, 4, 1, 7).setValues([[text_(clean_(s.av, 8)), +s.score || 0, text_(clean_(s.level, 40)),
+      +s.quests || 0, +s.powers || 0, +s.secrets || 0, +s.uploads || 0]]);
+    sh.getRange(row, 12, 1, 2).setValues([[new Date(), txt]]);
+    return json_({ cloud: 1, ok: true, nick: sh.getRange(row, 1).getDisplayValue() });
+  } finally {
+    lock.releaseLock();
+  }
 }

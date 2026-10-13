@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14112a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>הסטודיו — סטודיו משחקים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* הסטודיו: דף הבית של סטודיו המשחקים (חטיבה). עיצוב "ארקייד" כהה בכוונה, גם במצב בהיר של המערכת */
+  :root{
+    --bg:#14112a; --bg-2:#1b1738; --surface:#221d45; --surface-2:#2c2658; --border:#3a3370;
+    --ink:#f4f2ff; --ink-soft:#bdb7e3; --ink-faint:#8a84b8;
+    --pink:#ff5fa2; --cyan:#3fd8ff; --yellow:#ffd23f; --green:#4ee39a; --purple:#a78bfa; --orange:#ff9f43;
+    --radius:18px;
+    --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(1200px 500px at 85% -10%, rgba(255,95,162,.18), transparent 60%),
+                     radial-gradient(900px 500px at 0% 10%, rgba(63,216,255,.14), transparent 60%);
+    background-attachment:fixed;
+    color:var(--ink); font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit; color:inherit;}
+  a{color:var(--cyan);}
+  .wrap{max-width:980px; margin:0 auto; padding:0 16px 80px;}
+
+  /* סרגל עליון */
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:900; font-size:22px; letter-spacing:-.3px; text-decoration:none; color:var(--ink);}
+  .logo .mark{width:38px; height:38px; border-radius:12px; display:grid; place-items:center; font-size:22px;
+    background:linear-gradient(135deg, var(--pink), var(--purple) 55%, var(--cyan)); box-shadow:0 6px 20px -6px rgba(255,95,162,.6);}
+  .logo small{display:block; font-family:var(--font-body); font-weight:500; font-size:11.5px; color:var(--ink-faint); letter-spacing:0;}
+  .chip-btn{display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 12px 6px 6px; cursor:pointer; font-weight:700; font-size:14px; max-width:55vw;}
+  .chip-btn .av{width:30px; height:30px; border-radius:50%; background:var(--surface-2); display:grid; place-items:center; font-size:18px; flex:0 0 auto;}
+  .chip-btn .nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  /* כרטיס הדרגה */
+  .hero{position:relative; overflow:hidden; border-radius:24px; padding:22px; margin-top:6px;
+    background:linear-gradient(135deg, #2b2165, #3b1f5c 50%, #1d2f63); border:1px solid rgba(255,255,255,.08);
+    box-shadow:0 20px 50px -25px rgba(0,0,0,.8);}
+  .hero:after{content:""; position:absolute; inset:auto -60px -80px auto; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,210,63,.25), transparent 65%); pointer-events:none;}
+  .hero-top{display:flex; align-items:center; gap:16px;}
+  .hero-av{width:74px; height:74px; border-radius:22px; display:grid; place-items:center; font-size:42px; flex:0 0 auto;
+    background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.15);}
+  .hero-hi{font-size:14px; color:var(--ink-soft); font-weight:500;}
+  .hero-name{font-family:var(--font-display); font-weight:900; font-size:clamp(22px, 5vw, 30px); line-height:1.15; word-break:break-word;}
+  .lvl-badge{display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:4px 12px; border-radius:999px; font-weight:800; font-size:14px;
+    background:rgba(255,210,63,.16); color:var(--yellow); border:1px solid rgba(255,210,63,.35); font-family:var(--font-display);}
+  .lvl-msg{margin:14px 0 10px; font-size:15px; color:var(--ink);}
+  .xp{height:14px; border-radius:999px; background:rgba(0,0,0,.35); overflow:hidden; border:1px solid rgba(255,255,255,.08);}
+  .xp > i{display:block; height:100%; width:0; border-radius:999px; background:linear-gradient(90deg, var(--yellow), var(--orange), var(--pink)); transition:width .8s cubic-bezier(.2,.8,.2,1);}
+  .xp-row{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; color:var(--ink-soft); margin-top:6px; font-weight:600;}
+  .stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .stat{background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:6px 10px; font-size:13px; font-weight:600;}
+  .stat b{font-family:var(--font-display); font-size:16px; margin-inline-end:4px;}
+
+  /* באנר השיעור */
+  .today{margin-top:14px; border-radius:var(--radius); padding:14px 16px; background:var(--surface); border:1px solid var(--border); border-inline-start:5px solid var(--cyan);}
+  .today .lb{font-size:12px; font-weight:800; color:var(--cyan); letter-spacing:.3px;}
+  .today .tt{font-family:var(--font-display); font-weight:800; font-size:18px; margin:2px 0 4px;}
+  .today .tx{font-size:14.5px; color:var(--ink-soft);}
+
+  /* לשוניות */
+  .tabs{position:sticky; top:0; z-index:20; display:flex; gap:6px; padding:12px 0; margin-top:8px; overflow-x:auto; scrollbar-width:none;
+    background:linear-gradient(var(--bg) 75%, transparent);}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:0 0 auto; border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:9px 16px; font-weight:800; font-size:15px; cursor:pointer; font-family:var(--font-display); white-space:nowrap;}
+  .tab[aria-selected="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+  .tab .cnt{font-size:11.5px; font-weight:700; opacity:.7; margin-inline-start:4px;}
+  .panel{display:none;}
+  .panel.on{display:block; animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+
+  .sec-head{display:flex; align-items:baseline; gap:10px; margin:18px 0 10px; flex-wrap:wrap;}
+  .sec-head h2{margin:0; font-family:var(--font-display); font-weight:900; font-size:21px;}
+  .sec-head span{color:var(--ink-faint); font-size:13.5px;}
+  .intro{color:var(--ink-soft); font-size:14.5px; margin:0 0 10px;}
+
+  /* אתגרים */
+  .world{margin-top:16px;}
+  .world-h{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .world-h .we{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; font-size:22px; background:var(--surface-2);}
+  .world-h b{font-family:var(--font-display); font-size:17px; font-weight:800; display:block;}
+  .world-h small{color:var(--ink-faint); font-size:13px;}
+  .world-h .wp{margin-inline-start:auto; font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); padding:3px 10px; border-radius:999px; white-space:nowrap;}
+  .world.today-world .world-h .we{box-shadow:0 0 0 2px var(--cyan);}
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:10px;}
+  .q{position:relative; text-align:start; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:14px; cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease, background .12s; display:flex; flex-direction:column; gap:4px; min-height:118px;}
+  .q:hover{transform:translateY(-2px); border-color:var(--purple);}
+  .q:focus-visible, .tab:focus-visible, .btn:focus-visible, .chip-btn:focus-visible{outline:3px solid var(--yellow); outline-offset:2px;}
+  .q .qe{font-size:26px; line-height:1;}
+  .q .qn{font-family:var(--font-display); font-weight:800; font-size:16px;}
+  .q .qt{font-size:13.5px; color:var(--ink-soft); line-height:1.45;}
+  .q .hard{position:absolute; top:10px; inset-inline-end:12px; font-size:11px; font-weight:800; color:var(--yellow);}
+  .q.done{background:linear-gradient(160deg, rgba(78,227,154,.16), var(--surface) 60%); border-color:rgba(78,227,154,.55);}
+  .q.done:before{content:"✓"; position:absolute; top:10px; inset-inline-end:12px; width:24px; height:24px; border-radius:50%; background:var(--green); color:#0c2a1c; font-weight:900; display:grid; place-items:center; font-size:14px;}
+  .q.done .hard{display:none;}
+  .q .note{font-size:12.5px; color:var(--green); font-weight:600; margin-top:auto; padding-top:4px;}
+  .q.add{border-style:dashed; background:transparent; align-items:center; justify-content:center; text-align:center;}
+  .mine{margin-top:18px;}
+
+  /* כוחות */
+  .powers{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px;}
+  .pw{border-radius:18px; padding:14px; background:linear-gradient(160deg, #3a2a7a, #251d52); border:1px solid rgba(167,139,250,.45); display:flex; flex-direction:column; gap:8px; position:relative;}
+  .pw-top{display:flex; align-items:center; gap:10px;}
+  .pw-top .pe{font-size:28px;}
+  .pw-top b{font-family:var(--font-display); font-weight:900; font-size:18px; line-height:1.2;}
+  .pw .lbl{font-size:11.5px; font-weight:800; color:var(--purple); letter-spacing:.3px;}
+  .pw .when{font-size:14px; color:var(--ink-soft);}
+  .spell{background:rgba(0,0,0,.3); border-radius:12px; padding:10px 12px; font-size:14px; border:1px dashed rgba(255,255,255,.18);}
+  .pw .by{font-size:12.5px; color:var(--ink-faint);}
+  .pw .by b{color:var(--yellow);}
+  .pw-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:auto;}
+
+  /* כפתורים */
+  .btn{border:none; border-radius:999px; padding:10px 16px; font-weight:800; font-size:14.5px; cursor:pointer; font-family:var(--font-display); display:inline-flex; align-items:center; gap:6px; justify-content:center;}
+  .btn.main{background:linear-gradient(135deg, var(--pink), var(--orange)); color:#2a0e1b; box-shadow:0 8px 20px -8px rgba(255,95,162,.7);}
+  .btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--border);}
+  .btn.small{padding:7px 12px; font-size:13px;}
+  .btn.on{background:rgba(78,227,154,.18); color:var(--green); border-color:rgba(78,227,154,.5);}
+  .btn:disabled{opacity:.6; cursor:default;}
+  .btn.wide{width:100%;}
+
+  /* ארקייד */
+  .upload-cta{display:flex; align-items:center; gap:14px; border-radius:20px; padding:16px; margin-bottom:14px;
+    background:linear-gradient(135deg, rgba(255,95,162,.22), rgba(255,159,67,.18)); border:1px solid rgba(255,95,162,.45);}
+  .upload-cta .ue{font-size:40px;}
+  .upload-cta b{font-family:var(--font-display); font-size:18px; display:block;}
+  .upload-cta small{color:var(--ink-soft); font-size:13.5px;}
+  .upload-cta .btn{margin-inline-start:auto; flex:0 0 auto;}
+  .games{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px;}
+  .game{border-radius:18px; overflow:hidden; background:var(--surface); border:1px solid var(--border); display:flex; flex-direction:column;}
+  .game .cover{height:96px; display:grid; place-items:center; font-size:48px;}
+  .game .gb{padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1;}
+  .game .gt{font-family:var(--font-display); font-weight:900; font-size:17px;}
+  .game .gby{font-size:13px; color:var(--ink-faint);}
+  .tag{display:inline-block; font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; background:var(--surface-2); color:var(--cyan); border:1px solid var(--border);}
+  .proud{font-size:13.5px; color:var(--ink); background:rgba(255,210,63,.08); border-inline-start:3px solid var(--yellow); padding:6px 10px; border-radius:6px;}
+  .game .btn{margin-top:auto;}
+  .empty{text-align:center; padding:28px 16px; border:2px dashed var(--border); border-radius:20px; color:var(--ink-soft);}
+  .empty .ee{font-size:46px;}
+  .empty b{display:block; font-family:var(--font-display); font-size:18px; color:var(--ink); margin:6px 0 4px;}
+  .pending{margin-top:14px; font-size:13.5px; color:var(--ink-soft);}
+  .pending li{margin:3px 0;}
+
+  /* סודות */
+  .secrets{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px;}
+  .sc{border-radius:18px; padding:16px; background:repeating-linear-gradient(135deg, var(--surface) 0 14px, #251f4d 14px 28px); border:1px solid var(--border); display:flex; flex-direction:column; gap:6px;}
+  .sc .se{font-size:30px;}
+  .sc b{font-family:var(--font-display); font-weight:900; font-size:17px;}
+  .sc p{margin:0; font-size:13.5px; color:var(--ink-soft);}
+  .sc .row{display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; padding-top:6px;}
+  .sc.done{border-color:rgba(78,227,154,.55);}
+
+  /* חלון קופץ (גיליון תחתון בטלפון) */
+  .modal{position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(6,4,18,.7); backdrop-filter:blur(3px);}
+  .modal.on{display:flex;}
+  .sheet{width:100%; max-width:520px; max-height:88vh; overflow:auto; background:var(--bg-2); border:1px solid var(--border); border-radius:24px; padding:20px; animation:pop .2s ease;}
+  @keyframes pop{from{transform:scale(.96); opacity:0} to{transform:none; opacity:1}}
+  .sheet h3{margin:0 0 4px; font-family:var(--font-display); font-weight:900; font-size:22px;}
+  .sheet .sub{color:var(--ink-soft); font-size:14.5px; margin:0 0 12px;}
+  .sheet .big-e{font-size:44px; line-height:1;}
+  .field{display:flex; flex-direction:column; gap:5px; margin:12px 0;}
+  .field label{font-weight:700; font-size:14px;}
+  .field label small{font-weight:500; color:var(--ink-faint);}
+  .field input[type=text], .field textarea, .field select{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 12px; color:var(--ink); font:inherit; font-size:16px;}
+  .field textarea{min-height:70px; resize:vertical;}
+  .field input:focus, .field textarea:focus{outline:2px solid var(--purple); border-color:transparent;}
+  .file-drop{border:2px dashed var(--border); border-radius:14px; padding:16px; text-align:center; cursor:pointer; color:var(--ink-soft); font-size:14px;}
+  .file-drop.ok{border-color:var(--green); color:var(--green);}
+  .file-drop input{display:none;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chips button{border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:6px 11px; font-size:13.5px; font-weight:600; cursor:pointer;}
+  .chips button.sel{background:var(--cyan); color:#05222b; border-color:var(--cyan);}
+  .avatars{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px;}
+  .avatars button{font-size:26px; padding:6px 0; border-radius:12px; border:2px solid transparent; background:var(--surface); cursor:pointer;}
+  .avatars button.sel{border-color:var(--yellow); background:var(--surface-2);}
+  .slots{display:flex; flex-direction:column; gap:8px; margin-bottom:6px;}
+  .slot{display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:14px; cursor:pointer; text-align:start; font-size:15px; font-weight:700;}
+  .slot .av{font-size:24px;}
+  .slot small{margin-inline-start:auto; color:var(--ink-faint); font-weight:600; font-size:12.5px;}
+  .sheet-actions{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+  .sheet-actions .btn{flex:1;}
+  .msg{font-size:13.5px; font-weight:700; min-height:18px; margin-top:8px;}
+  .msg.err{color:var(--pink);} .msg.ok{color:var(--green);}
+  .divider{height:1px; background:var(--border); margin:16px 0;}
+  .codebox{font-family:ui-monospace, Consolas, monospace; font-size:12px; word-break:break-all; direction:ltr; text-align:left;}
+
+  /* הודעה צפה */
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(120px); z-index:60; background:var(--ink); color:var(--bg);
+    padding:12px 18px; border-radius:16px; font-weight:800; font-family:var(--font-display); font-size:15.5px; box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.3); max-width:calc(100vw - 32px); text-align:center;}
+  .toast.on{transform:translateX(-50%) translateY(0);}
+  /* עלייה בדרגה */
+  .levelup .sheet{text-align:center; background:radial-gradient(circle at 50% 0%, #4a2f8a, var(--bg-2) 70%);}
+  .levelup .big-e{font-size:72px; animation:bounce 1s ease infinite alternate;}
+  @keyframes bounce{to{transform:translateY(-8px) scale(1.05)}}
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:70;}
+  .foot{margin-top:40px; text-align:center; color:var(--ink-faint); font-size:12.5px;}
+  .foot a{color:var(--ink-soft);}
+
+  @media (max-width:560px){
+    .hero{padding:18px;}
+    .hero-av{width:60px; height:60px; font-size:34px; border-radius:18px;}
+    .grid{grid-template-columns:repeat(2, 1fr); gap:8px;}
+    .q{padding:12px; min-height:110px;}
+    .q .qt{font-size:12.5px;}
+    .upload-cta{flex-wrap:wrap;}
+    .upload-cta .btn{width:100%; margin:0;}
+    .modal{align-items:flex-end; padding:0;}
+    .sheet{border-radius:24px 24px 0 0; max-height:92vh;}
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="wrap">
+  <header class="topbar">
+    <a class="logo" href="index.html"><span class="mark">🎮</span><span>הסטודיו<small>סטודיו משחקים עם AI</small></span></a>
+    <button class="chip-btn" id="profileBtn" type="button" aria-label="החלפת שחקן ושמירה"><span class="av" id="chipAv">🙂</span><span class="nm" id="chipNm">מי משחק?</span></button>
+  </header>
+
+  <section class="hero" aria-live="polite">
+    <div class="hero-top">
+      <div class="hero-av" id="heroAv">🙂</div>
+      <div>
+        <div class="hero-hi">ברוכים הבאים לסטודיו,</div>
+        <div class="hero-name" id="heroName">שחקן חדש</div>
+        <div class="lvl-badge" id="lvlBadge">🎮 יוצר/ת משחקים</div>
+      </div>
+    </div>
+    <p class="lvl-msg" id="lvlMsg"></p>
+    <div class="xp" role="progressbar" aria-label="התקדמות לדרגה הבאה" id="xpBar"><i id="xpFill"></i></div>
+    <div class="xp-row"><span id="xpLeft"></span><span id="xpNext"></span></div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="today" id="today"></section>
+
+  <nav class="tabs" role="tablist" aria-label="אזורי הסטודיו">
+    <button class="tab" role="tab" data-tab="quests" aria-selected="true">🗺️ אתגרים</button>
+    <button class="tab" role="tab" data-tab="powers" aria-selected="false">⚡ כוחות <span class="cnt" id="cntPowers"></span></button>
+    <button class="tab" role="tab" data-tab="arcade" aria-selected="false">🕹️ ארקייד <span class="cnt" id="cntGames"></span></button>
+    <button class="tab" role="tab" data-tab="secrets" aria-selected="false">🔓 סודות</button>
+  </nav>
+
+  <!-- אתגרים -->
+  <section class="panel on" id="panel-quests" role="tabpanel">
+    <p class="intro">כל אתגר שעשיתם במשחק שלכם מקדם אתכם דרגה. אין סדר ואין חובה. בוחרים מה שמתאים למשחק שלכם, ומה שעשיתם ולא מופיע כאן? <b>גם הוא נחשב</b> ✨</p>
+    <div id="worlds"></div>
+    <div class="mine" id="mine"></div>
+  </section>
+
+  <!-- כוחות -->
+  <section class="panel" id="panel-powers" role="tabpanel">
+    <div class="sec-head"><h2>⚡ לוח הכוחות</h2><span>טריקים לעבודה עם AI, על שם מי שגילה אותם</span></div>
+    <p class="intro">השתמשתם בכוח? סמנו אותו. גיליתם טריק חדש? שלחו אותו, ואולי הוא יעלה ללוח עם השם שלכם.</p>
+    <div class="powers" id="powers"></div>
+    <div style="margin-top:14px"><button class="btn main wide" type="button" id="newPowerBtn">💡 גיליתי כוח חדש!</button></div>
+  </section>
+
+  <!-- ארקייד -->
+  <section class="panel" id="panel-arcade" role="tabpanel">
+    <div class="sec-head"><h2>🕹️ ארקייד הסטודיו</h2><span>כל משחק כאן נבנה על ידי מישהו מהסטודיו</span></div>
+    <div class="upload-cta">
+      <div class="ue">📼</div>
+      <div><b>הכניסו את המשחק שלכם לארקייד</b><small>מעלים את קובץ ה-HTML, ואחרי אישור של המורה כולם יוכלו לשחק בו.</small></div>
+      <button class="btn main" type="button" id="uploadBtn">⬆️ העלאת משחק</button>
+    </div>
+    <div class="games" id="games"></div>
+    <div class="pending" id="pending"></div>
+  </section>
+
+  <!-- סודות -->
+  <section class="panel" id="panel-secrets" role="tabpanel">
+    <div class="sec-head"><h2>🔓 סודות להשתדרגות</h2><span>למי שרוצה לדעת יותר</span></div>
+    <p class="intro">דפי למידה של הקורס שאפשר לפתוח לבד, בבית או כשסיימתם. כל סוד שניסיתם = עוד צעד לדרגה הבאה.</p>
+    <div class="secrets" id="secrets"></div>
+  </section>
+
+  <div class="foot"><span id="cloudStat">ההתקדמות נשמרת בדפדפן הזה.</span> · <a href="#" id="footSave">קוד שמירה</a> · <a href="index.html">לכל התחנות</a></div>
+</div>
+
+<!-- חלונות -->
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="studio-data.js"></script>
+<script>
+(function(){
+  var S = window.STUDIO;
+  var KEY = "studio.v1";
+  var AVATARS = ["🦊","🐉","🤖","👾","🦄","🐙","🚀","🐼","🦖","🐸","⚡","🎧"];
+  var PRAISE = ["יש! 🎉","כל הכבוד! 💪","זה בדיוק מה שמעצבי משחקים עושים 🎮","המשחק שלכם השתדרג ✨","איזה יופי! 🌟","עוד צעד קדימה 🚀"];
+
+  // ---------- שמירה (בדפדפן, לפי "שמירות" כמו במשחק) ----------
+  function load(){
+    try{ var d = JSON.parse(localStorage.getItem(KEY)); if(d && d.profiles) return d; }catch(e){}
+    return { current:null, profiles:{} };
+  }
+  var DB = load();
+  function writeLocal(){ try{ localStorage.setItem(KEY, JSON.stringify(DB)); }catch(e){} }
+  // כל שמירה בדפדפן. אם השחקן מחובר לענן, גם שמירה בענן כמה שניות אחרי השינוי האחרון
+  function save(){ writeLocal(); if(needsSync(P())) scheduleSync(); }
+  function newProfile(nick, av){ return { nick:nick, av:av, quests:{}, custom:[], powersUsed:{}, powersSent:[], secrets:{}, uploads:[] }; }
+  function P(){ return DB.current && DB.profiles[DB.current] ? DB.profiles[DB.current] : null; }
+
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  // ---------- ניקוד ודרגות ----------
+  function score(p){
+    if(!p) return 0;
+    return Object.keys(p.quests).length + p.custom.length + Object.keys(p.powersUsed).length
+         + p.powersSent.length + Object.keys(p.secrets).length + p.uploads.length;
+  }
+  function levelOf(n){
+    var lv = S.levels[0], idx = 0;
+    S.levels.forEach(function(l, i){ if(n >= l.at){ lv = l; idx = i; } });
+    return { lv:lv, idx:idx, next:S.levels[idx+1] || null };
+  }
+
+  // ---------- ציור ----------
+  function renderHero(){
+    var p = P(), n = score(p), L = levelOf(n);
+    document.getElementById("chipAv").textContent = p ? p.av : "🙂";
+    document.getElementById("chipNm").textContent = p ? p.nick + (p.cloud ? " ☁️" : "") : "מי משחק?";
+    document.getElementById("heroAv").textContent = p ? p.av : "🙂";
+    document.getElementById("heroName").textContent = p ? p.nick : "שחקן חדש";
+    document.getElementById("lvlBadge").textContent = L.lv.emoji + " דרגה " + (L.idx+1) + " · " + L.lv.name;
+    document.getElementById("lvlMsg").textContent = L.lv.msg;
+    var pct, left, nextTxt;
+    if(L.next){
+      pct = Math.round((n - L.lv.at) / (L.next.at - L.lv.at) * 100);
+      var need = L.next.at - n;
+      left = need === 1 ? "עוד אתגר אחד לדרגה הבאה!" : "עוד " + need + " אתגרים לדרגה הבאה";
+      nextTxt = "הבאה: " + L.next.emoji + " " + L.next.name;
+    } else { pct = 100; left = "הגעתם לדרגה הכי גבוהה 👑"; nextTxt = ""; }
+    document.getElementById("xpFill").style.width = Math.max(4, pct) + "%";
+    document.getElementById("xpBar").setAttribute("aria-valuenow", pct);
+    document.getElementById("xpLeft").textContent = left;
+    document.getElementById("xpNext").textContent = nextTxt;
+    var qn = p ? Object.keys(p.quests).length + p.custom.length : 0;
+    var pn = p ? Object.keys(p.powersUsed).length + p.powersSent.length : 0;
+    var gn = p ? p.uploads.length : 0;
+    document.getElementById("stats").innerHTML =
+      '<span class="stat"><b>'+qn+'</b>אתגרים</span><span class="stat"><b>'+pn+'</b>כוחות</span><span class="stat"><b>'+gn+'</b>משחקים שנשלחו</span>';
+  }
+
+  function renderToday(){
+    var t = S.today;
+    document.getElementById("today").innerHTML = '<div class="lb">📣 '+esc(t.label)+'</div><div class="tt">'+esc(t.title)+'</div><div class="tx">'+esc(t.text)+'</div>';
+  }
+
+  function renderQuests(){
+    var p = P();
+    var html = "";
+    // עולם השיעור קודם
+    var worlds = S.worlds.slice().sort(function(a,b){ return (b.id===S.today.world) - (a.id===S.today.world); });
+    worlds.forEach(function(w){
+      var done = w.quests.filter(function(q){ return p && p.quests[q.id]; }).length;
+      html += '<div class="world'+(w.id===S.today.world?' today-world':'')+'"><div class="world-h"><span class="we">'+w.emoji+'</span><span><b>'+esc(w.name)+(w.id===S.today.world?' · היום':'')+'</b><small>'+esc(w.sub)+'</small></span><span class="wp">'+done+'/'+w.quests.length+'</span></div><div class="grid">';
+      w.quests.forEach(function(q){
+        var d = p && p.quests[q.id];
+        html += '<button type="button" class="q'+(d?' done':'')+'" data-quest="'+q.id+'">'
+          + (q.hard ? '<span class="hard">★ מאתגר</span>' : '')
+          + '<span class="qe">'+q.emoji+'</span><span class="qn">'+esc(q.name)+'</span><span class="qt">'+esc(q.text)+'</span>'
+          + (d && d.note ? '<span class="note">💬 '+esc(d.note)+'</span>' : '')
+          + '</button>';
+      });
+      html += '</div></div>';
+    });
+    document.getElementById("worlds").innerHTML = html;
+
+    var mine = '<div class="world-h"><span class="we">✨</span><span><b>מה שאני המצאתי</b><small>כל אחד בונה משהו אחר. גם זה נחשב</small></span></div><div class="grid">';
+    (p ? p.custom : []).forEach(function(c){
+      mine += '<div class="q done" style="cursor:default"><span class="qe">'+esc(c.emoji||"⭐")+'</span><span class="qn">'+esc(c.name)+'</span>'+(c.note?'<span class="qt">'+esc(c.note)+'</span>':'')+'</div>';
+    });
+    mine += '<button type="button" class="q add" id="addCustom"><span class="qe">➕</span><span class="qn">עשיתי משהו אחר</span><span class="qt">משהו שלא ברשימה? ספרו מה</span></button></div>';
+    document.getElementById("mine").innerHTML = mine;
+  }
+
+  function renderPowers(){
+    var p = P();
+    document.getElementById("cntPowers").textContent = S.powers.length;
+    document.getElementById("powers").innerHTML = S.powers.map(function(pw, i){
+      var used = p && p.powersUsed[pw.name];
+      return '<div class="pw"><div class="pw-top"><span class="pe">'+pw.emoji+'</span><b>'+esc(pw.name)+'</b></div>'
+        + '<div><div class="lbl">מתי</div><div class="when">'+esc(pw.when)+'</div></div>'
+        + '<div><div class="lbl">הלחש</div><div class="spell">'+esc(pw.spell)+'</div></div>'
+        + '<div class="by">גילה/תה: <b>'+esc(pw.by)+'</b></div>'
+        + '<div class="pw-actions"><button type="button" class="btn small ghost" data-copy="'+i+'">📋 העתקת הלחש</button>'
+        + '<button type="button" class="btn small ghost'+(used?' on':'')+'" data-use="'+i+'">'+(used?'✓ השתמשתי':'⚡ השתמשתי בזה')+'</button></div></div>';
+    }).join("");
+  }
+
+  var COVERS = ["linear-gradient(135deg,#ff5fa2,#a78bfa)","linear-gradient(135deg,#3fd8ff,#4ee39a)","linear-gradient(135deg,#ffd23f,#ff9f43)","linear-gradient(135deg,#a78bfa,#3fd8ff)"];
+  function renderArcade(){
+    var p = P();
+    document.getElementById("cntGames").textContent = S.games.length || "";
+    if(!S.games.length){
+      document.getElementById("games").innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ee">🕹️</div><b>הארקייד נפתח!</b>המשחקים הראשונים יופיעו כאן אחרי שהמורה תאשר אותם. אולי שלכם יהיה הראשון?</div>';
+    } else {
+      document.getElementById("games").innerHTML = S.games.map(function(g, i){
+        return '<div class="game"><div class="cover" style="background:'+COVERS[i % COVERS.length]+'">'+esc(g.emoji||"🎮")+'</div><div class="gb">'
+          + '<div class="gt">'+esc(g.title)+'</div><div class="gby">מאת '+esc(g.by)+'</div>'
+          + (g.genre ? '<div><span class="tag">'+esc(g.genre)+'</span></div>' : '')
+          + (g.proud ? '<div class="proud">⭐ '+esc(g.proud)+'</div>' : '')
+          + '<a class="btn main" href="arcade/'+encodeURI(g.file)+'" target="_blank" rel="noopener">▶ לשחק</a></div></div>';
+      }).join("");
+    }
+    var ups = p ? p.uploads : [];
+    document.getElementById("pending").innerHTML = ups.length
+      ? '<b>המשחקים ששלחתם:</b><ul>' + ups.map(function(u){ return '<li>📼 '+esc(u.title)+' · נשלח '+esc(u.date)+' · ממתין לאישור המורה</li>'; }).join("") + '</ul>' : "";
+  }
+
+  function renderSecrets(){
+    var p = P();
+    document.getElementById("secrets").innerHTML = S.secrets.map(function(s){
+      var d = p && p.secrets[s.id];
+      return '<div class="sc'+(d?' done':'')+'"><span class="se">'+s.emoji+'</span><b>'+esc(s.name)+'</b><p>'+esc(s.text)+'</p>'
+        + '<div class="row"><a class="btn small main" href="'+encodeURI(s.url)+'" target="_blank" rel="noopener">🔓 לפתוח</a>'
+        + '<button type="button" class="btn small ghost'+(d?' on':'')+'" data-secret="'+s.id+'">'+(d?'✓ ניסיתי':'ניסיתי!')+'</button></div></div>';
+    }).join("");
+  }
+
+  function renderAll(){ renderHero(); renderToday(); renderQuests(); renderPowers(); renderArcade(); renderSecrets(); cloudStatus(); }
+
+  // ---------- חלון ----------
+  var modal = document.getElementById("modal"), sheet = document.getElementById("sheet");
+  var lastFocus = null;
+  function openModal(html, cls){
+    lastFocus = document.activeElement;
+    sheet.innerHTML = html; modal.className = "modal on " + (cls||"");
+    var f = sheet.querySelector("input[type=text], textarea, button"); if(f) setTimeout(function(){ f.focus(); }, 30);
+  }
+  function closeModal(){ modal.className = "modal"; sheet.innerHTML = ""; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+  modal.addEventListener("click", function(e){ if(e.target === modal && P()) closeModal(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && modal.classList.contains("on") && P()) closeModal(); });
+
+  var toastT;
+  function toast(t){ var el = document.getElementById("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove("on"); }, 2600); }
+  function praise(){ return PRAISE[Math.floor(Math.random()*PRAISE.length)]; }
+
+  // מבצע שינוי, ובודק אם עלו דרגה
+  function progress(fn, msg){
+    var before = levelOf(score(P())).idx;
+    fn(); save(); renderAll();
+    var L = levelOf(score(P()));
+    confetti(L.idx > before ? 220 : 70);
+    if(L.idx > before){
+      openModal('<div class="big-e">'+L.lv.emoji+'</div><h3>עליתם דרגה!</h3><p class="sub">דרגה '+(L.idx+1)+': <b>'+esc(L.lv.name)+'</b></p><p>'+esc(L.lv.msg)+'</p><div class="sheet-actions"><button class="btn main" type="button" data-close>יאללה, ממשיכים 🚀</button></div>', "levelup");
+    } else toast(msg || praise());
+  }
+
+  // ---------- שחקנים ----------
+  function profileModal(){
+    var keys = Object.keys(DB.profiles);
+    var slots = keys.map(function(k){ var p = DB.profiles[k]; var L = levelOf(score(p));
+      return '<button type="button" class="slot" data-slot="'+esc(k)+'"><span class="av">'+p.av+'</span>'+esc(p.nick)+(p.cloud ? ' ☁️' : '')+'<small>'+L.lv.emoji+' דרגה '+(L.idx+1)+'</small></button>'; }).join("");
+    openModal('<div class="big-e">🎮</div><h3>מי משחק?</h3><p class="sub">בחרו את השמירה שלכם, או התחילו חדשה. גם במחשב משותף כל אחד שומר בנפרד.</p>'
+      + (keys.length ? '<div class="slots">'+slots+'</div><div class="divider"></div>' : '')
+      + '<div class="field"><label for="nickIn">כינוי חדש <small>(יופיע בסטודיו)</small></label><input type="text" id="nickIn" maxlength="20" autocomplete="off" placeholder="למשל: נינג׳ת הפיקסלים"></div>'
+      + '<div class="field"><label>בחרו דמות</label><div class="avatars" id="avPick">'+AVATARS.map(function(a,i){ return '<button type="button" data-av="'+a+'"'+(i===0?' class="sel"':'')+'>'+a+'</button>'; }).join("")+'</div></div>'
+      + '<div class="msg err" id="pMsg"></div>'
+      + '<div class="sheet-actions"><button class="btn main" type="button" id="startBtn">🚀 מתחילים</button></div>'
+      + '<div class="divider"></div><button class="btn ghost small wide" type="button" id="cloudLoadBtn">☁️ יש לי שמירה בענן (כינוי + קוד סודי)</button>'
+      + (P() && !P().cloud ? '<button class="btn ghost small wide" type="button" id="cloudSetBtn" style="margin-top:8px">☁️ לשמור את '+esc(P().nick)+' בענן</button>' : '')
+      + (P() && P().cloud ? '<button class="btn ghost small wide" type="button" id="clOut" style="margin-top:8px">🚪 יציאה מהמחשב הזה ('+esc(P().nick)+')</button>' : '')
+      + '<button class="btn ghost small wide" type="button" id="loadCodeBtn" style="margin-top:8px">🔑 יש לי קוד שמירה ממחשב אחר</button>'
+      + (P() ? '<button class="btn ghost small wide" type="button" id="showCodeBtn" style="margin-top:8px">💾 קוד השמירה שלי</button>' : ''));
+  }
+  function exportCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(dataOf(P()))))); }catch(e){ return ""; } }
+  function codeModal(){
+    var c = exportCode();
+    openModal('<div class="big-e">💾</div><h3>קוד השמירה שלכם</h3><p class="sub">עוברים מחשב? העתיקו את הקוד (למשל להודעה לעצמכם), ובמחשב השני: "מי משחק?" ← "יש לי קוד שמירה".</p>'
+      + '<div class="field"><textarea class="codebox" id="codeOut" readonly>'+esc(c)+'</textarea></div>'
+      + '<div class="sheet-actions"><button class="btn main" type="button" id="copyCode">📋 העתקה</button><button class="btn ghost" type="button" data-close>סגירה</button></div>');
+  }
+  function loadCodeModal(){
+    openModal('<div class="big-e">🔑</div><h3>טעינת שמירה</h3><p class="sub">הדביקו את קוד השמירה מהמחשב השני.</p><div class="field"><textarea class="codebox" id="codeIn"></textarea></div><div class="msg err" id="cMsg"></div>'
+      + '<div class="sheet-actions"><button class="btn main" type="button" id="doLoad">טעינה</button><button class="btn ghost" type="button" id="backProf">חזרה</button></div>');
+  }
+
+  // ---------- אתגרים ----------
+  function findQuest(id){ var r = null; S.worlds.forEach(function(w){ w.quests.forEach(function(q){ if(q.id === id) r = q; }); }); return r; }
+  function questModal(id){
+    var q = findQuest(id), d = P().quests[id];
+    openModal('<div class="big-e">'+q.emoji+'</div><h3>'+esc(q.name)+(q.hard?' <span style="color:var(--yellow);font-size:14px">★ מאתגר</span>':'')+'</h3><p class="sub">'+esc(q.text)+'</p>'
+      + (q.prompt ? '<div class="field"><label>פרומפט להתחלה <small>(אפשר לשנות)</small></label><div class="spell" id="qPrompt">'+esc(q.prompt)+'</div><button type="button" class="btn small ghost" id="copyQ" style="align-self:flex-start;margin-top:6px">📋 העתקה</button></div>' : '')
+      + '<div class="field"><label for="qNote">מה יצא? <small>(רשות, משפט אחד)</small></label><input type="text" id="qNote" maxlength="80" value="'+esc(d && d.note || "")+'" placeholder="למשל: עכשיו יש פיצוץ כשהחללית נפגעת"></div>'
+      + '<div class="sheet-actions">'+(d ? '<button class="btn main" type="button" id="qSave">💾 שמירה</button><button class="btn ghost" type="button" id="qUndo">ביטול הסימון</button>' : '<button class="btn main" type="button" id="qDone">✓ עשיתי!</button><button class="btn ghost" type="button" data-close>אחר כך</button>')+'</div>');
+    sheet.dataset.quest = id;
+  }
+  function customModal(){
+    openModal('<div class="big-e">✨</div><h3>עשיתי משהו אחר</h3><p class="sub">כל אחד בונה משהו אחר, וזה הכי טוב. מה הוספתם או גיליתם במשחק שלכם?</p>'
+      + '<div class="field"><label for="cName">מה עשיתי?</label><input type="text" id="cName" maxlength="40" placeholder="למשל: הוספתי בוס בסוף כל שלב"></div>'
+      + '<div class="field"><label for="cNote">ואיך זה יצא? <small>(רשות)</small></label><input type="text" id="cNote" maxlength="80"></div>'
+      + '<div class="field"><label>אימוג׳י</label><div class="chips" id="cEmo">'+["⭐","🔥","🎨","🧠","🎵","👑","🌈","🛸"].map(function(e,i){ return '<button type="button"'+(i===0?' class="sel"':'')+'>'+e+'</button>'; }).join("")+'</div></div>'
+      + '<div class="msg err" id="cuMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="cAdd">✓ להוסיף</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+  }
+
+  // ---------- שליחה למורה ----------
+  function send(payload){
+    if(!S.endpoint) return Promise.reject(new Error("no endpoint"));
+    return fetch(S.endpoint, { method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+  }
+  function today(){ var d = new Date(); return d.getDate() + "." + (d.getMonth()+1); }
+
+  // ---------- שמירה בענן (כינוי + קוד סודי, דרך אותו סקריפט. לשונית "התקדמות" בגיליון) ----------
+  // p.cloud = { code, sent }. sent = הנתונים כפי שעלו לענן בפעם האחרונה, כדי לדעת אם יש שינוי שעוד לא עלה
+  var syncT = null, syncing = null, cloudState = "", cloudFor = null;
+  var CLOUD_ERR = {
+    taken:"הכינוי הזה כבר תפוס בענן. אם הוא שלכם, בדקו את הקוד. אם לא, בחרו כינוי אחר.",
+    code:"הקוד לא נכון. נסו שוב (המורה יכולה לעזור).",
+    nouser:"לא מצאנו את הכינוי הזה בענן. בדקו איך כתבתם אותו.",
+    wait:"יותר מדי ניסיונות. חכו רבע שעה, או בקשו עזרה מהמורה.",
+    big:"השמירה גדולה מדי לענן. ספרו למורה.",
+    bad:"צריך כינוי וקוד של 4 ספרות.",
+    off:"אין חיבור לאינטרנט. בדקו ונסו שוב.",
+    na:"השמירה בענן עוד לא פעילה. בינתיים הכול נשמר בדפדפן הזה."
+  };
+  var CLOUD_TXT = {
+    none:"ההתקדמות נשמרת בדפדפן הזה.",
+    local:'ההתקדמות נשמרת רק בדפדפן הזה. <a href="#" data-cloud="1">☁️ לשמור בענן</a>',
+    wait:"☁️ שומר בענן…",
+    ok:"☁️ נשמר בענן ✓",
+    off:"⚠️ אין חיבור. נשמר בינתיים בדפדפן, וננסה שוב לבד.",
+    na:"☁️ השמירה בענן לא זמינה כרגע. הכול נשמר בדפדפן הזה.",
+    err:'⚠️ השמירה בענן נכשלה. <a href="#" data-cloud="1">לחבר מחדש</a>'
+  };
+
+  // כאן לא no-cors: צריך לקרוא את התשובה. סקריפט ישן עונה בלי cloud, ואז "עוד לא פעילה"
+  function cloudCall(body){
+    if(!S.endpoint) return Promise.reject(new Error("na"));
+    body.kind = "cloud";
+    return fetch(S.endpoint, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(body) })
+      .then(function(r){ return r.json(); }, function(){ throw new Error("off"); })
+      .then(function(j){ if(!j || !j.cloud) throw new Error("na"); return j; });
+  }
+  function failKind(e){ return e && e.message === "off" ? "off" : "na"; }
+
+  function dataOf(p){ var o = {}; Object.keys(p).forEach(function(k){ if(k !== "cloud") o[k] = p[k]; }); return o; }
+  function needsSync(p){ return !!(p && p.cloud && JSON.stringify(dataOf(p)) !== p.cloud.sent); }
+  function summaryOf(p){
+    var L = levelOf(score(p));
+    return { av:p.av, score:score(p), level:(L.idx+1) + " · " + L.lv.name,
+      quests:Object.keys(p.quests).length + p.custom.length, powers:Object.keys(p.powersUsed).length + p.powersSent.length,
+      secrets:Object.keys(p.secrets).length, uploads:p.uploads.length };
+  }
+  function normalize(p){
+    ["custom","powersSent","uploads"].forEach(function(k){ if(!Array.isArray(p[k])) p[k] = []; });
+    ["quests","powersUsed","secrets"].forEach(function(k){ if(!p[k] || typeof p[k] !== "object") p[k] = {}; });
+    return p;
+  }
+  // "נינג׳ה  הפיקסלים" ו"נינג'ה הפיקסלים" הם אותו כינוי (כמו בסקריפט)
+  function nickKey(v){ return String(v || "").replace(/[׳'`’]/g, "'").replace(/[״"”]/g, '"').replace(/\s+/g, " ").trim().toLowerCase(); }
+  function localKey(nick){ var r = null; Object.keys(DB.profiles).forEach(function(k){ if(nickKey(k) === nickKey(nick)) r = k; }); return r; }
+
+  // איחוד שתי שמירות של אותו שחקן (בבית ובכיתה). התקדמות רק מתווספת
+  function merge(a, b){
+    var m = normalize(JSON.parse(JSON.stringify(b)));
+    a = normalize(a);
+    ["quests","powersUsed","secrets"].forEach(function(k){ Object.keys(a[k]).forEach(function(id){ m[k][id] = a[k][id]; }); });
+    ["custom","powersSent","uploads"].forEach(function(k){
+      var seen = {}; m[k].forEach(function(x){ seen[JSON.stringify(x)] = 1; });
+      a[k].forEach(function(x){ if(!seen[JSON.stringify(x)]) m[k].push(x); });
+    });
+    ["av","realName"].forEach(function(k){ if(a[k]) m[k] = a[k]; });
+    return m;
+  }
+
+  // שמירה מהענן נכנסת לשמירה בדפדפן. אם יש כבר שמירה בשם הזה, מאחדים
+  function adopt(nick, server, code){
+    var local = DB.profiles[nick];
+    server = normalize(server || newProfile(nick, local ? local.av : AVATARS[0]));
+    var m = local ? merge(dataOf(local), server) : server;
+    m.nick = nick;
+    m.cloud = { code:code, sent:JSON.stringify(server) };
+    DB.profiles[nick] = m; DB.current = nick; writeLocal(); renderAll();
+    if(needsSync(m)) scheduleSync();
+  }
+
+  // השורה בתחתית הדף. מצב תקלה נשאר עד שמשהו מצליח
+  function cloudStatus(st){
+    var p = P();
+    if(st === undefined && cloudFor === p && /^(off|na|err)$/.test(cloudState)) st = cloudState;
+    if(!p) st = "none"; else if(!p.cloud) st = "local"; else if(!st) st = needsSync(p) ? "wait" : "ok";
+    cloudState = st; cloudFor = p;
+    document.getElementById("cloudStat").innerHTML = CLOUD_TXT[st];
+  }
+  function scheduleSync(ms){ clearTimeout(syncT); syncT = setTimeout(syncNow, ms || 2500); cloudStatus("wait"); }
+  function syncNow(){
+    var p = P(); clearTimeout(syncT);
+    if(!needsSync(p)) return Promise.resolve(true);
+    if(syncing) return syncing;
+    var d = dataOf(p), txt = JSON.stringify(d);
+    syncing = cloudCall({ op:"save", nick:p.nick, code:p.cloud.code, realName:p.realName || "", data:d, summary:summaryOf(p) })
+      .then(function(j){
+        if(j.ok){ p.cloud.sent = txt; writeLocal(); }
+        if(P() === p) cloudStatus(j.ok ? "" : "err");
+        return j.ok;
+      }, function(e){
+        if(P() === p) cloudStatus(failKind(e));
+        if(failKind(e) === "off"){ clearTimeout(syncT); syncT = setTimeout(syncNow, 30000); }
+        return false;
+      })
+      .then(function(r){ syncing = null; if(r && needsSync(P())) scheduleSync(); return r; });
+    return syncing;
+  }
+  // בכניסה: מביאים מהענן מה שנעשה במחשב אחר
+  function pull(){
+    var p = P(); if(!p || !p.cloud) return;
+    cloudCall({ op:"load", nick:p.nick, code:p.cloud.code }).then(function(j){
+      if(P() !== p) return;
+      if(!j.ok) return cloudStatus("err");
+      adopt(p.nick, j.data, p.cloud.code);
+    }, function(e){ if(P() === p) cloudStatus(failKind(e)); });
+  }
+
+  function cloudSetupModal(welcome){
+    var p = P();
+    openModal('<div class="big-e">☁️</div><h3>'+(welcome ? 'ברוכים הבאים, '+esc(p.nick)+'! עוד דבר אחד' : 'שמירה בענן')+'</h3>'
+      + '<p class="sub">'+(welcome ? 'כבר בניתם משחק, אז אתם בדרגה 1 🎮<br>' : '')+'בוחרים קוד סודי של 4 ספרות. עם הכינוי והקוד ממשיכים מכל מחשב, גם מהבית. את הקוד לא מגלים לאף אחד (ואם שכחתם, המורה יכולה לעזור).</p>'
+      + '<div class="field"><label for="clNick">הכינוי</label><input type="text" id="clNick" maxlength="20" autocomplete="off" value="'+esc(p.nick)+'"></div>'
+      + '<div class="field"><label for="clCode">קוד סודי <small>(4 ספרות. תזכרו אותו!)</small></label><input type="text" id="clCode" inputmode="numeric" maxlength="4" autocomplete="off"></div>'
+      + '<div class="field"><label for="clReal">השם האמיתי שלכם <small>(רק המורה רואה)</small></label><input type="text" id="clReal" maxlength="40" value="'+esc(p.realName||"")+'"></div>'
+      + '<div class="msg" id="clMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="clSet">☁️ שמירה בענן</button><button class="btn ghost" type="button" data-close>'+(welcome ? 'אחר כך' : 'ביטול')+'</button></div>');
+  }
+  function cloudLoadModal(){
+    openModal('<div class="big-e">☁️</div><h3>כניסה עם שמירה בענן</h3><p class="sub">הכינוי והקוד הסודי שבחרתם. ההתקדמות שלכם מחכה.</p>'
+      + '<div class="field"><label for="clNick">הכינוי</label><input type="text" id="clNick" maxlength="20" autocomplete="off"></div>'
+      + '<div class="field"><label for="clCode">קוד סודי</label><input type="text" id="clCode" inputmode="numeric" maxlength="4" autocomplete="off"></div>'
+      + '<div class="msg" id="clMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="clLoad">כניסה</button><button class="btn ghost" type="button" id="backProf">חזרה</button></div>');
+  }
+
+  // סוגרים את הדף לפני שהשמירה עלתה: שולחים בכל זאת (בלי לחכות לתשובה. בכניסה הבאה זה יתוקן אם צריך)
+  window.addEventListener("pagehide", function(){
+    var p = P(); if(!needsSync(p) || !S.endpoint) return;
+    try{ fetch(S.endpoint, { method:"POST", mode:"no-cors", keepalive:true, headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body:JSON.stringify({ kind:"cloud", op:"save", nick:p.nick, code:p.cloud.code, realName:p.realName || "", data:dataOf(p), summary:summaryOf(p) }) }); }catch(e){}
+  });
+  window.addEventListener("online", function(){ syncNow(); });
+
+  function powerModal(){
+    openModal('<div class="big-e">💡</div><h3>גיליתי כוח חדש!</h3><p class="sub">טריק שגורם ל-AI לעבוד טוב יותר, או דרך לשבור אותו. המורה תראה אותו, ואולי הוא יעלה ללוח עם השם שלכם.</p>'
+      + '<div class="field"><label for="pwName">שם הכוח <small>(תנו לו שם מגניב)</small></label><input type="text" id="pwName" maxlength="40"></div>'
+      + '<div class="field"><label for="pwWhen">מתי משתמשים בו?</label><input type="text" id="pwWhen" maxlength="120"></div>'
+      + '<div class="field"><label for="pwSpell">הלחש: מה כותבים ל-AI?</label><textarea id="pwSpell" maxlength="400"></textarea></div>'
+      + '<div class="field"><label for="pwReal">השם האמיתי שלכם <small>(רק המורה רואה)</small></label><input type="text" id="pwReal" maxlength="40" value="'+esc(P().realName||"")+'"></div>'
+      + '<div class="msg" id="pwMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="pwSend">⚡ שליחה</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+  }
+
+  var pickedFile = null;
+  function uploadModal(){
+    pickedFile = null;
+    openModal('<div class="big-e">📼</div><h3>העלאת משחק לארקייד</h3><p class="sub">המשחק יגיע למורה, ואחרי אישור יעלה לארקייד וכולם יוכלו לשחק בו.</p>'
+      + '<div class="field"><label>קובץ המשחק <small>(קובץ ה-HTML שהורדתם מ-Canvas)</small></label><label class="file-drop" id="drop"><input type="file" id="gFile" accept=".html,.htm,text/html"><span id="dropTxt">📂 לחצו כאן לבחירת הקובץ</span></label></div>'
+      + '<div class="field"><label for="gName">שם המשחק</label><input type="text" id="gName" maxlength="40"></div>'
+      + '<div class="field"><label>מאיזה ענף?</label><div class="chips" id="gGenre">'+S.genres.map(function(g){ return '<button type="button">'+esc(g)+'</button>'; }).join("")+'</div></div>'
+      + '<div class="field"><label for="gProud">במה אתם הכי גאים במשחק? ⭐</label><input type="text" id="gProud" maxlength="100" placeholder="למשל: הבוס בסוף משנה צורה"></div>'
+      + '<div class="field"><label for="gReal">השם האמיתי שלכם <small>(רק המורה רואה. בארקייד יופיע הכינוי: '+esc(P().nick)+')</small></label><input type="text" id="gReal" maxlength="40" value="'+esc(P().realName||"")+'"></div>'
+      + '<div class="msg" id="gMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="gSend">⬆️ שליחה לארקייד</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+  }
+
+  // ---------- העתקה ----------
+  function copyText(t){
+    if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(function(){ toast("הועתק 📋"); }, fallback);
+    fallback();
+    function fallback(){ var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast("הועתק 📋"); }catch(e){} ta.remove(); }
+  }
+
+  // ---------- אירועים ----------
+  document.getElementById("profileBtn").addEventListener("click", profileModal);
+  document.getElementById("footSave").addEventListener("click", function(e){ e.preventDefault(); if(P()) codeModal(); else profileModal(); });
+  document.getElementById("newPowerBtn").addEventListener("click", function(){ if(!P()) return profileModal(); powerModal(); });
+  document.getElementById("uploadBtn").addEventListener("click", function(){ if(!P()) return profileModal(); uploadModal(); });
+
+  document.querySelector(".tabs").addEventListener("click", function(e){
+    var b = e.target.closest("[data-tab]"); if(!b) return;
+    document.querySelectorAll(".tab").forEach(function(t){ t.setAttribute("aria-selected", t === b ? "true" : "false"); });
+    document.querySelectorAll(".panel").forEach(function(p){ p.classList.toggle("on", p.id === "panel-" + b.dataset.tab); });
+    try{ localStorage.setItem("studio.tab", b.dataset.tab); }catch(err){}
+  });
+
+  document.body.addEventListener("click", function(e){
+    var t = e.target.closest("button, a"); if(!t) return;
+    if(t.hasAttribute("data-close")) return closeModal();
+
+    if(t.dataset.quest){ if(!P()) return profileModal(); return questModal(t.dataset.quest); }
+    if(t.id === "addCustom"){ if(!P()) return profileModal(); return customModal(); }
+    if(t.dataset.copy){ return copyText(S.powers[+t.dataset.copy].spell); }
+    if(t.dataset.use){
+      if(!P()) return profileModal();
+      var pw = S.powers[+t.dataset.use];
+      if(P().powersUsed[pw.name]){ delete P().powersUsed[pw.name]; save(); renderAll(); return; }
+      return progress(function(){ P().powersUsed[pw.name] = today(); }, "⚡ הכוח של " + pw.by + " עבד גם אצלכם!");
+    }
+    if(t.dataset.secret){
+      if(!P()) return profileModal();
+      var sid = t.dataset.secret;
+      if(P().secrets[sid]){ delete P().secrets[sid]; save(); renderAll(); return; }
+      return progress(function(){ P().secrets[sid] = today(); }, "🔓 סוד נפתח!");
+    }
+
+    // חלון השחקנים
+    if(t.dataset.slot){ syncNow(); DB.current = t.dataset.slot; save(); closeModal(); renderAll(); pull(); return toast("ברוכים השבים, " + P().nick + "! " + P().av); }
+    if(t.dataset.av){ sheet.querySelectorAll("[data-av]").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+    if(t.id === "startBtn"){
+      var nick = document.getElementById("nickIn").value.trim();
+      var msg = document.getElementById("pMsg");
+      if(!nick){ msg.textContent = "כתבו כינוי כדי להתחיל."; return; }
+      if(DB.profiles[nick]){ msg.textContent = "הכינוי הזה כבר שמור כאן. בחרו אותו מהרשימה למעלה, או כינוי אחר."; return; }
+      var av = (sheet.querySelector("[data-av].sel") || {}).dataset.av || AVATARS[0];
+      syncNow(); DB.profiles[nick] = newProfile(nick, av); DB.current = nick; save(); renderAll(); confetti(120);
+      return cloudSetupModal(true);
+    }
+    if(t.id === "showCodeBtn") return codeModal();
+
+    // שמירה בענן
+    if(t.dataset.cloud){ e.preventDefault(); return P() ? cloudSetupModal() : profileModal(); }
+    if(t.id === "cloudSetBtn") return cloudSetupModal();
+    if(t.id === "cloudLoadBtn") return cloudLoadModal();
+    if(t.id === "clSet" || t.id === "clLoad"){
+      var cm = document.getElementById("clMsg");
+      var cerr = function(x){ cm.className = "msg err"; cm.textContent = x; };
+      var cn = document.getElementById("clNick").value.replace(/\s+/g, " ").trim(), cc = document.getElementById("clCode").value.trim();
+      if(!cn) return cerr("כתבו כינוי.");
+      if(!/^\d{4}$/.test(cc)) return cerr("הקוד צריך להיות 4 ספרות.");
+      var onFail = function(err){ t.disabled = false; cerr(CLOUD_ERR[failKind(err)]); };
+
+      if(t.id === "clLoad"){
+        t.disabled = true; cm.className = "msg"; cm.textContent = "☁️ מחפשים את השמירה…";
+        syncNow();
+        return cloudCall({ op:"load", nick:cn, code:cc }).then(function(j){
+          if(!j.ok){ t.disabled = false; return cerr(CLOUD_ERR[j.err] || CLOUD_ERR.na); }
+          var nk = j.nick || cn, k = localKey(nk);
+          if(k && k !== nk){ DB.profiles[nk] = DB.profiles[k]; delete DB.profiles[k]; }
+          adopt(nk, j.data, cc); closeModal(); confetti(120);
+          toast("☁️ השמירה נטענה! ברוכים השבים, " + nk + " " + P().av);
+        }, onFail);
+      }
+
+      var p = P(), cr = document.getElementById("clReal").value.trim();
+      if(/^(\d)\1{3}$/.test(cc) || ["1234","4321","0123","9876","1212"].indexOf(cc) > -1) return cerr("הקוד הזה קל מדי לניחוש. בחרו קוד אחר.");
+      if(!cr) return cerr("כתבו את השם האמיתי, כדי שהמורה תדע של מי השמירה.");
+      var other = localKey(cn); if(other && DB.profiles[other] !== p) return cerr("יש כבר שמירה בשם הזה במחשב הזה. בחרו כינוי אחר.");
+      t.disabled = true; cm.className = "msg"; cm.textContent = "☁️ שומרים…";
+      p.realName = cr;
+      var d = dataOf(p); d.nick = cn;
+      return cloudCall({ op:"register", nick:cn, code:cc, realName:cr, data:d, summary:summaryOf(p) }).then(function(j){
+        if(!j.ok){ t.disabled = false; return cerr(CLOUD_ERR[j.err] || CLOUD_ERR.na); }
+        // אם הכינוי השתנה, השמירה בדפדפן עוברת לשם החדש
+        var nk = j.nick || cn;
+        delete DB.profiles[DB.current]; p.nick = nk; DB.profiles[nk] = p; DB.current = nk;
+        if(j.exists) adopt(nk, j.data, cc);
+        else { p.cloud = { code:cc, sent:JSON.stringify(d) }; writeLocal(); renderAll(); if(needsSync(p)) scheduleSync(); }
+        closeModal(); confetti(150);
+        toast(j.exists ? "☁️ מצאנו את השמירה שלכם בענן ואיחדנו!" : "☁️ נשמר בענן! כינוי + קוד = ממשיכים מכל מחשב");
+      }, onFail);
+    }
+    if(t.id === "clOut"){
+      var op = P(); t.disabled = true;
+      return syncNow().then(function(done){
+        if(!done || needsSync(op)){ t.disabled = false; return toast("עוד לא נשמר בענן. בדקו שיש אינטרנט ונסו שוב."); }
+        delete DB.profiles[DB.current]; DB.current = null; writeLocal(); renderAll(); profileModal();
+        toast("יצאתם מהמחשב הזה. ההתקדמות מחכה בענן ☁️");
+      });
+    }
+    if(t.id === "copyCode") return copyText(document.getElementById("codeOut").value);
+    if(t.id === "loadCodeBtn") return loadCodeModal();
+    if(t.id === "backProf") return profileModal();
+    if(t.id === "doLoad"){
+      try{
+        var p = JSON.parse(decodeURIComponent(escape(atob(document.getElementById("codeIn").value.trim()))));
+        if(!p || !p.nick || !p.quests) throw 0;
+        ["custom","powersSent","uploads"].forEach(function(k){ if(!Array.isArray(p[k])) p[k] = []; });
+        ["powersUsed","secrets"].forEach(function(k){ if(!p[k] || typeof p[k] !== "object") p[k] = {}; });
+        DB.profiles[p.nick] = p; DB.current = p.nick; save(); closeModal(); renderAll(); confetti(120);
+        return toast("השמירה נטענה! ברוכים השבים, " + p.nick);
+      }catch(err){ document.getElementById("cMsg").textContent = "הקוד לא תקין. בדקו שהעתקתם את כולו."; return; }
+    }
+
+    // חלון אתגר
+    if(t.id === "copyQ") return copyText(document.getElementById("qPrompt").textContent);
+    if(t.id === "qDone" || t.id === "qSave"){
+      var qid = sheet.dataset.quest, note = document.getElementById("qNote").value.trim();
+      if(t.id === "qSave"){ P().quests[qid].note = note; save(); closeModal(); renderAll(); return toast("נשמר 💾"); }
+      closeModal(); return progress(function(){ P().quests[qid] = { note:note, date:today() }; });
+    }
+    if(t.id === "qUndo"){ delete P().quests[sheet.dataset.quest]; save(); closeModal(); renderAll(); return; }
+
+    // אתגר משלי
+    if(t.closest("#cEmo")){ sheet.querySelectorAll("#cEmo button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+    if(t.id === "cAdd"){
+      var cn = document.getElementById("cName").value.trim();
+      if(!cn){ document.getElementById("cuMsg").textContent = "כתבו במשפט קצר מה עשיתם."; return; }
+      var ce = (sheet.querySelector("#cEmo .sel") || {}).textContent || "⭐", cnote = document.getElementById("cNote").value.trim();
+      closeModal(); return progress(function(){ P().custom.push({ name:cn, note:cnote, emoji:ce, date:today() }); }, "✨ רעיון מקורי! זה שלכם בלבד");
+    }
+
+    // כוח חדש
+    if(t.id === "pwSend"){
+      var f = { powerName:document.getElementById("pwName").value.trim(), when:document.getElementById("pwWhen").value.trim(), spell:document.getElementById("pwSpell").value.trim(), realName:document.getElementById("pwReal").value.trim() };
+      var m = document.getElementById("pwMsg");
+      if(!f.powerName || !f.spell){ m.className = "msg err"; m.textContent = "צריך לפחות שם לכוח ואת הלחש."; return; }
+      if(!f.realName){ m.className = "msg err"; m.textContent = "כתבו את השם האמיתי, כדי שהמורה תדע של מי הכוח."; return; }
+      t.disabled = true; m.className = "msg"; m.textContent = "שולח...";
+      P().realName = f.realName; save();
+      send({ kind:"power", nick:P().nick, realName:f.realName, powerName:f.powerName, when:f.when, spell:f.spell, timestamp:new Date().toISOString() })
+        .then(function(){ closeModal(); progress(function(){ P().powersSent.push({ name:f.powerName, date:today() }); }, "💡 הכוח נשלח! אולי הוא יעלה ללוח עם השם שלכם"); })
+        .catch(function(){ t.disabled = false; m.className = "msg err"; m.textContent = "לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."; });
+      return;
+    }
+
+    // העלאת משחק
+    if(t.closest("#gGenre")){ sheet.querySelectorAll("#gGenre button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+    if(t.id === "gSend"){
+      var gm = document.getElementById("gMsg");
+      var g = { gameName:document.getElementById("gName").value.trim(), genre:(sheet.querySelector("#gGenre .sel")||{}).textContent || "", proud:document.getElementById("gProud").value.trim(), realName:document.getElementById("gReal").value.trim() };
+      function err(x){ gm.className = "msg err"; gm.textContent = x; }
+      if(!pickedFile) return err("בחרו את קובץ המשחק.");
+      if(!g.gameName) return err("תנו למשחק שם.");
+      if(!g.proud) return err("ספרו במה אתם הכי גאים. זה יופיע בכרטיס של המשחק ⭐");
+      if(!g.realName) return err("כתבו את השם האמיתי, כדי שהמורה תדע של מי המשחק.");
+      t.disabled = true; gm.className = "msg"; gm.textContent = "שולח את המשחק... 📼";
+      P().realName = g.realName; save();
+      var reader = new FileReader();
+      reader.onload = function(){
+        send({ kind:"game", nick:P().nick, realName:g.realName, gameName:g.gameName, genre:g.genre, proud:g.proud, fileName:pickedFile.name, html:String(reader.result), timestamp:new Date().toISOString() })
+          .then(function(){ closeModal(); progress(function(){ P().uploads.push({ title:g.gameName, date:today() }); }, "📼 המשחק נשלח לארקייד! אחרי אישור המורה הוא יעלה"); })
+          .catch(function(){ t.disabled = false; err("לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."); });
+      };
+      reader.onerror = function(){ t.disabled = false; err("לא הצלחנו לקרוא את הקובץ. נסו לבחור אותו שוב."); };
+      reader.readAsText(pickedFile);
+      return;
+    }
+  });
+
+  // בחירת קובץ המשחק
+  document.body.addEventListener("change", function(e){
+    if(e.target.id !== "gFile") return;
+    var file = e.target.files[0], drop = document.getElementById("drop"), txt = document.getElementById("dropTxt"), gm = document.getElementById("gMsg");
+    pickedFile = null; drop.classList.remove("ok"); gm.textContent = "";
+    if(!file) return;
+    if(!/\.html?$/i.test(file.name)){ gm.className = "msg err"; gm.textContent = "זה לא קובץ HTML. בקובץ של המשחק הסיומת היא .html"; txt.textContent = "📂 לחצו כאן לבחירת הקובץ"; return; }
+    if(file.size > 4 * 1024 * 1024){ gm.className = "msg err"; gm.textContent = "הקובץ גדול מדי (יותר מ-4MB). דברו עם המורה."; return; }
+    pickedFile = file; drop.classList.add("ok"); txt.textContent = "✓ " + file.name;
+    var nameIn = document.getElementById("gName");
+    if(!nameIn.value) nameIn.value = file.name.replace(/\.html?$/i, "").replace(/[-_]+/g, " ").slice(0, 40);
+  });
+
+  // ---------- קונפטי ----------
+  var cv = document.getElementById("confetti"), cx = cv.getContext("2d"), parts = [], raf = null;
+  var CC = ["#ff5fa2","#3fd8ff","#ffd23f","#4ee39a","#a78bfa","#ff9f43"];
+  function confetti(n){
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    cv.width = innerWidth; cv.height = innerHeight;
+    for(var i=0;i<n;i++) parts.push({ x:innerWidth/2 + (Math.random()-.5)*innerWidth*.4, y:innerHeight*.35, vx:(Math.random()-.5)*14, vy:-Math.random()*14-4, s:Math.random()*7+4, r:Math.random()*6, vr:(Math.random()-.5)*.3, c:CC[i%CC.length], life:0 });
+    if(!raf) tick();
+  }
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    parts = parts.filter(function(p){ return p.life < 160 && p.y < cv.height + 20; });
+    parts.forEach(function(p){ p.life++; p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66); cx.restore(); });
+    raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0,0,cv.width,cv.height), null);
+  }
+
+  // ---------- התחלה ----------
+  try{ var tab = localStorage.getItem("studio.tab"); var tb = tab && document.querySelector('[data-tab="'+tab+'"]'); if(tb) tb.click(); }catch(e){}
+  renderAll();
+  if(!P()) profileModal(); else pull();
+})();
+</script>
+</body>
+</html>

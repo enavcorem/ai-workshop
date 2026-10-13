@@ -92,7 +92,7 @@ function stepHtml(pageId, step, i){
     html += promptCardHtml(step.prompt);
   }
   if(step.questions && step.questions.length){
-    html += `<div class="fillgroup">` + step.questions.map(q => fillbox(pageId, q)).join("") + `</div>`;
+    html += `<div class="fillgroup">` + step.questions.map(q => typeof q === "string" ? fillbox(pageId, q) : fillbox(pageId, q.q, q.key)).join("") + `</div>`;
   }
   html += `</div></div>`;
   return html;
