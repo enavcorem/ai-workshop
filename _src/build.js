@@ -115,7 +115,7 @@ function hackathonBoxHtml(pageId){
     <div class="hack-title">🚀 בקרוב: האקתון אלברט איינשטיין · יום חמישי 26.11</div>
     <div class="hack-text">יום שלם (9:00–17:00, מקוון) שבו צוותים של תלמידים בונים פתרון לאתגר אמיתי בעזרת AI, עם מנטורים ושופטים. <b>לא צריך ידע טכני מראש</b>, רק סקרנות ורצון להשפיע.</div>
     <div class="hack-text">ארבעה מסלולים: חדשנות פתוחה · חינוך פיננסי · קיימות וסביבה · Agency (לעצב את העתיד שלי)</div>
-    <a class="hack-link" href="https://www.hackathonalberteinstein.com" target="_blank" rel="noopener">לאתר ההאקתון ←</a>
+    <a class="hack-link" href="ideas.html">💡 לקיר הרעיונות: שלחו רעיון או הצטרפו ←</a> &nbsp;·&nbsp; <a class="hack-link" href="https://www.hackathonalberteinstein.com" target="_blank" rel="noopener">לאתר ההאקתון ←</a>
     ${fillbox(pageId, "רוצים להשתתף? (כן / אולי / עדיין לא) ועל מה הייתם רוצים לעבוד?", "hackathon")}
   </div>`;
 }

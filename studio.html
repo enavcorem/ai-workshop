@@ -116,7 +116,7 @@
   .pw-top b{font-family:var(--font-display); font-weight:900; font-size:18px; line-height:1.2;}
   .pw .lbl{font-size:11.5px; font-weight:800; color:var(--purple); letter-spacing:.3px;}
   .pw .when{font-size:14px; color:var(--ink-soft);}
-  .spell{background:rgba(0,0,0,.3); border-radius:12px; padding:10px 12px; font-size:14px; border:1px dashed rgba(255,255,255,.18);}
+  .spell{background:rgba(0,0,0,.3); border-radius:12px; padding:10px 12px; font-size:14px; border:1px dashed rgba(255,255,255,.18); overflow-wrap:anywhere;}
   .pw .by{font-size:12.5px; color:var(--ink-faint);}
   .pw .by b{color:var(--yellow);}
   .pw-actions{display:flex; gap:8px; flex-wrap:wrap; margin-top:auto;}
@@ -220,6 +220,14 @@
     .sheet{border-radius:24px 24px 0 0; max-height:92vh;}
   }
   @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+
+  /* נגן הארקייד: משחק מהגיליון רץ כאן, בתוך iframe מבודד */
+  .player{position:fixed; inset:0; z-index:70; background:#000; display:none; flex-direction:column;}
+  .player.on{display:flex;}
+  .player-bar{display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg-2); border-bottom:1px solid var(--border);}
+  .player-bar b{flex:1; font-family:var(--font-display); font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .player iframe{flex:1; width:100%; border:0; background:#fff;}
+  .player .loading{flex:1; display:grid; place-items:center; color:#fff; font-size:18px;}
 </style>
 </head>
 <body>
@@ -289,12 +297,13 @@
     <div class="secrets" id="secrets"></div>
   </section>
 
-  <div class="foot"><span id="cloudStat">ההתקדמות נשמרת בדפדפן הזה.</span> · <a href="#" id="footSave">קוד שמירה</a> · <a href="index.html">לכל התחנות</a></div>
+  <div class="foot"><span id="cloudStat">ההתקדמות נשמרת בדפדפן הזה.</span> · <a href="#" id="footSave">קוד שמירה</a> · <a href="ideas.html">💡 קיר הרעיונות להאקתון</a> · <a href="index.html">לכל התחנות</a></div>
 </div>
 
 <!-- חלונות -->
 <div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast" role="status"></div>
+<div class="player" id="player" role="dialog" aria-modal="true" aria-label="משחק מהארקייד"><div class="player-bar"><b id="playerTitle"></b><button class="btn small ghost" type="button" id="playerClose">✕ חזרה לסטודיו</button></div><div class="loading" id="playerBody"></div></div>
 
 <script src="studio-data.js"></script>
 <script>
@@ -395,7 +404,7 @@
     document.getElementById("cntPowers").textContent = S.powers.length;
     document.getElementById("powers").innerHTML = S.powers.map(function(pw, i){
       var used = p && p.powersUsed[pw.name];
-      return '<div class="pw"><div class="pw-top"><span class="pe">'+pw.emoji+'</span><b>'+esc(pw.name)+'</b></div>'
+      return '<div class="pw"><div class="pw-top"><span class="pe">'+esc(pw.emoji||"⚡")+'</span><b>'+esc(pw.name)+'</b></div>'
         + '<div><div class="lbl">מתי</div><div class="when">'+esc(pw.when)+'</div></div>'
         + '<div><div class="lbl">הלחש</div><div class="spell">'+esc(pw.spell)+'</div></div>'
         + '<div class="by">גילה/תה: <b>'+esc(pw.by)+'</b></div>'
@@ -416,12 +425,15 @@
           + '<div class="gt">'+esc(g.title)+'</div><div class="gby">מאת '+esc(g.by)+'</div>'
           + (g.genre ? '<div><span class="tag">'+esc(g.genre)+'</span></div>' : '')
           + (g.proud ? '<div class="proud">⭐ '+esc(g.proud)+'</div>' : '')
-          + '<a class="btn main" href="arcade/'+encodeURI(g.file)+'" target="_blank" rel="noopener">▶ לשחק</a></div></div>';
+          + (g.file ? '<a class="btn main" href="arcade/'+encodeURI(g.file)+'" target="_blank" rel="noopener">▶ לשחק</a>'
+                    : '<button class="btn main" type="button" data-play="'+i+'">▶ לשחק</button>') + '</div></div>';
       }).join("");
     }
     var ups = p ? p.uploads : [];
     document.getElementById("pending").innerHTML = ups.length
-      ? '<b>המשחקים ששלחתם:</b><ul>' + ups.map(function(u){ return '<li>📼 '+esc(u.title)+' · נשלח '+esc(u.date)+' · ממתין לאישור המורה</li>'; }).join("") + '</ul>' : "";
+      ? '<b>המשחקים ששלחתם:</b><ul>' + ups.map(function(u){
+          var ok = S.games.some(function(g){ return g.title === u.title && g.by === p.nick; });
+          return '<li>📼 '+esc(u.title)+' · נשלח '+esc(u.date)+' · '+(ok ? '✅ אושר! הוא בארקייד' : 'ממתין לאישור המורה')+'</li>'; }).join("") + '</ul>' : "";
   }
 
   function renderSecrets(){
@@ -498,6 +510,10 @@
     var q = findQuest(id), d = P().quests[id];
     openModal('<div class="big-e">'+q.emoji+'</div><h3>'+esc(q.name)+(q.hard?' <span style="color:var(--yellow);font-size:14px">★ מאתגר</span>':'')+'</h3><p class="sub">'+esc(q.text)+'</p>'
       + (q.prompt ? '<div class="field"><label>פרומפט להתחלה <small>(אפשר לשנות)</small></label><div class="spell" id="qPrompt">'+esc(q.prompt)+'</div><button type="button" class="btn small ghost" id="copyQ" style="align-self:flex-start;margin-top:6px">📋 העתקה</button></div>' : '')
+      // אתגר-מתכון: כמה שלבים, לכל שלב טקסט ופרומפט משלו
+      + (q.steps ? q.steps.map(function(s, i){ return '<div class="field"><label>'+esc(s.t)+(s.text ? ' <small>'+esc(s.text)+'</small>' : '')+'</label>'
+          + (s.prompt ? '<div class="spell">'+esc(s.prompt)+'</div><button type="button" class="btn small ghost" data-step="'+i+'" style="align-self:flex-start;margin-top:6px">📋 העתקה</button>' : '')+'</div>'; }).join("") : '')
+      + (q.tips ? q.tips.map(function(tp){ return '<p class="sub">'+esc(tp)+'</p>'; }).join("") : '')
       + '<div class="field"><label for="qNote">מה יצא? <small>(רשות, משפט אחד)</small></label><input type="text" id="qNote" maxlength="80" value="'+esc(d && d.note || "")+'" placeholder="למשל: עכשיו יש פיצוץ כשהחללית נפגעת"></div>'
       + '<div class="sheet-actions">'+(d ? '<button class="btn main" type="button" id="qSave">💾 שמירה</button><button class="btn ghost" type="button" id="qUndo">ביטול הסימון</button>' : '<button class="btn main" type="button" id="qDone">✓ עשיתי!</button><button class="btn ghost" type="button" data-close>אחר כך</button>')+'</div>');
     sheet.dataset.quest = id;
@@ -793,6 +809,7 @@
 
     // חלון אתגר
     if(t.id === "copyQ") return copyText(document.getElementById("qPrompt").textContent);
+    if(t.dataset.step) return copyText(findQuest(sheet.dataset.quest).steps[+t.dataset.step].prompt);
     if(t.id === "qDone" || t.id === "qSave"){
       var qid = sheet.dataset.quest, note = document.getElementById("qNote").value.trim();
       if(t.id === "qSave"){ P().quests[qid].note = note; save(); closeModal(); renderAll(); return toast("נשמר 💾"); }
@@ -877,9 +894,57 @@
     raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0,0,cv.width,cv.height), null);
   }
 
+  // ---------- מה שהמורה אישרה בגיליון (סטטוס = מאושר) ----------
+  // מצטרף למה שכתוב ב-studio-data.js. בלי רשת נשאר רק מה שבקובץ
+  var BASE = { powers:S.powers.slice(), games:S.games.slice() };
+  function loadLive(){
+    if(!S.endpoint) return;
+    fetch(S.endpoint + "?op=public").then(function(r){ return r.json(); }).then(function(j){
+      if(!j || !j.ok) return;
+      var names = BASE.powers.map(function(pw){ return pw.name; });
+      S.powers = BASE.powers.concat((j.powers || []).filter(function(pw){ return names.indexOf(pw.name) < 0; }));
+      S.games = BASE.games.concat(j.games || []);
+      renderAll();
+    }).catch(function(){});
+  }
+
+  // localStorage לא זמין בתוך iframe מבודד. במקומו זיכרון זמני, כדי שמשחקים עם טבלת שיאים לא יקרסו
+  var SHIM = '<script>(function(){try{window.localStorage.getItem("x");}catch(e){var m={};var st={getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null;},setItem:function(k,v){m[k]=String(v);},removeItem:function(k){delete m[k];},clear:function(){m={};},key:function(i){return Object.keys(m)[i]||null;}};Object.defineProperty(st,"length",{get:function(){return Object.keys(m).length;}});try{Object.defineProperty(window,"localStorage",{value:st,configurable:true});Object.defineProperty(window,"sessionStorage",{value:st,configurable:true});}catch(x){}}})();<\/script>';
+  function withShim(html){
+    if(/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, function(m){ return m + SHIM; });
+    if(/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, function(m){ return m + SHIM; });
+    return SHIM + html;
+  }
+  var player = document.getElementById("player"), playerBody = document.getElementById("playerBody");
+  function playGame(g){
+    document.getElementById("playerTitle").textContent = "🎮 " + g.title + " · מאת " + g.by;
+    player.className = "player on"; playerBody.className = "loading"; playerBody.textContent = "טוען את המשחק... 📼";
+    fetch(S.endpoint + "?op=game&id=" + encodeURIComponent(g.id)).then(function(r){ return r.json(); }).then(function(j){
+      if(!player.classList.contains("on")) return;
+      if(!j || !j.ok || !j.html) throw new Error("x");
+      var fr = document.createElement("iframe");
+      fr.setAttribute("sandbox", "allow-scripts allow-modals allow-pointer-lock");
+      fr.setAttribute("title", g.title);
+      fr.srcdoc = withShim(j.html);
+      fr.onload = function(){ try{ fr.focus(); }catch(e){} };
+      playerBody.replaceWith(fr); playerBody = fr;
+    }).catch(function(){ playerBody.textContent = "לא הצלחנו לטעון את המשחק. בדקו שיש אינטרנט ונסו שוב."; });
+  }
+  function closePlayer(){
+    player.className = "player";
+    var box = document.createElement("div"); box.id = "playerBody"; box.className = "loading";
+    playerBody.replaceWith(box); playerBody = box;
+  }
+  document.getElementById("playerClose").addEventListener("click", closePlayer);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && player.classList.contains("on")) closePlayer(); });
+  document.getElementById("games").addEventListener("click", function(e){
+    var b = e.target.closest("[data-play]"); if(b) playGame(S.games[+b.dataset.play]);
+  });
+
   // ---------- התחלה ----------
   try{ var tab = localStorage.getItem("studio.tab"); var tb = tab && document.querySelector('[data-tab="'+tab+'"]'); if(tb) tb.click(); }catch(e){}
   renderAll();
+  loadLive();
   if(!P()) profileModal(); else pull();
 })();
 </script>

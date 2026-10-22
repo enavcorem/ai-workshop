@@ -24,6 +24,13 @@
  * מעדכנים באותה דרך (Manage deployments -> New version). אין הרשאה חדשה.
  * תלמיד ששכח את הקוד: מסתכלים בעמודה "קוד סודי". אפשר גם לשנות אותו שם ל-4 ספרות אחרות.
  * את עמודת "נתונים" לא עורכים ידנית. משם הסטודיו טוען את ההתקדמות.
+ *
+ * עדכון (אישור מהגיליון + קיר הרעיונות, 21.10.2026):
+ * - מאשרים בגיליון: בעמודת "סטטוס" בוחרים "מאושר", ותוך דקה הפריט מופיע באתר לבד.
+ *   כוחות (לשונית "כוחות") עולים ללוח הכוחות, משחקים (לשונית "ארקייד") לארקייד, רעיונות (לשונית "רעיונות") לקיר הרעיונות.
+ *   "לא עכשיו" או כל דבר אחר = לא מופיע. באתר מופיע רק הכינוי, אף פעם לא השם האמיתי.
+ * - לשונית "הצטרפויות": מי רוצה להשתתף בהאקתון, ועל איזה רעיון. זו רשימת המשתתפים.
+ * מעדכנים באותה דרך (Manage deployments -> העיפרון -> New version -> Deploy). אין הרשאה חדשה.
  */
 
 function doPost(e) {
@@ -40,6 +47,9 @@ function doPost(e) {
   if (data.kind === "game") return saveGame_(ss, data);
   if (data.kind === "power") return savePower_(ss, data);
   if (data.kind === "cloud") return cloud_(ss, data);
+  // קיר הרעיונות
+  if (data.kind === "idea") return saveIdea_(ss, data);
+  if (data.kind === "join") return saveJoin_(ss, data);
 
   var trackLabel = data.track === "tichon" ? "תיכון" : "חטיבה";
 
@@ -71,7 +81,20 @@ function sheetWithHeader_(ss, name, header) {
     sh.appendRow(header);
     sh.setFrozenRows(1);
   }
+  statusMenu_(sh);
   return sh;
+}
+
+// תפריט נפתח בעמודת "סטטוס" (פעם אחת לכל לשונית). אפשר גם להקליד ידנית
+var STATUS_LIST = ["חדש", "ממתין לאישור", "מאושר", "לא עכשיו"];
+function statusMenu_(sh) {
+  var head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  var col = head.indexOf("סטטוס") + 1;
+  if (!col || sh.getMaxRows() < 2) return;
+  var cell = sh.getRange(2, col);
+  if (cell.getDataValidation()) return;
+  var rule = SpreadsheetApp.newDataValidation().requireValueInList(STATUS_LIST, true).setAllowInvalid(true).build();
+  sh.getRange(2, col, sh.getMaxRows() - 1, 1).setDataValidation(rule);
 }
 
 function clean_(v, max) {
@@ -188,4 +211,86 @@ function cloud_(ss, data) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ---------- קיר הרעיונות (ideas.html) ----------
+var IDEA_HEAD = ["זמן", "שם (למורה)", "כיתה", "כינוי לתצוגה", "שם הרעיון", "מה הבעיה", "איך AI עוזר", "מסלול", "רוצה להשתתף", "מזהה", "סטטוס"];
+var JOIN_HEAD = ["זמן", "שם", "כיתה", "מזהה רעיון", "שם הרעיון"];
+
+function saveIdea_(ss, data) {
+  var id = "i" + new Date().getTime().toString(36);
+  var sh = sheetWithHeader_(ss, "רעיונות", IDEA_HEAD);
+  sh.appendRow([
+    new Date(), text_(clean_(data.realName, 60)), text_(clean_(data.cls, 20)), text_(clean_(data.nick, 30)),
+    text_(clean_(data.title, 60)), text_(clean_(data.problem, 300)), text_(clean_(data.how, 300)),
+    clean_(data.track, 40), data.wants ? "כן" : "", id, "חדש"
+  ]);
+  // מי שהציע ורוצה להשתתף נכנס גם לרשימת המשתתפים, על הרעיון שלו
+  if (data.wants) saveJoin_(ss, { realName: data.realName, cls: data.cls, ideaId: id, ideaTitle: data.title });
+  return ok_();
+}
+
+// "אני בפנים": מצטרפים לרעיון, או נרשמים להאקתון בלי רעיון (ideaId = "כללי")
+function saveJoin_(ss, data) {
+  var sh = sheetWithHeader_(ss, "הצטרפויות", JOIN_HEAD);
+  sh.appendRow([new Date(), text_(clean_(data.realName, 60)), text_(clean_(data.cls, 20)),
+    clean_(data.ideaId, 30) || "כללי", text_(clean_(data.ideaTitle, 60))]);
+  return ok_();
+}
+
+// ---------- מה שמתפרסם באתר (רק מה שאושר) ----------
+// ?op=public -> כוחות, משחקים ורעיונות מאושרים, בלי שמות אמיתיים
+// ?op=game&id=N -> ה-HTML של משחק מאושר (N = מספר השורה בלשונית "ארקייד")
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.op === "game") return json_(game_(p.id));
+  var cache = CacheService.getScriptCache(), hit = cache.get("public");
+  if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);
+  var out = JSON.stringify(public_());
+  try { cache.put("public", out, 60); } catch (err) {}
+  return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
+}
+
+function approved_(v) {
+  return /^\s*מאושר/.test(String(v || ""));
+}
+
+// כל שורות הלשונית כאובייקטים לפי שם העמודה, עם מספר השורה ב-_row
+function table_(ss, name) {
+  var sh = ss.getSheetByName(name);
+  if (!sh || sh.getLastRow() < 2) return [];
+  statusMenu_(sh);
+  var v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues(), head = v.shift();
+  return v.map(function (r, i) {
+    var o = { _row: i + 2 };
+    head.forEach(function (h, j) { o[h] = r[j]; });
+    return o;
+  });
+}
+
+function public_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var powers = table_(ss, "כוחות").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
+    return { emoji: "⚡", name: String(r["שם הכוח"]), when: String(r["מתי משתמשים"]), spell: String(r["הלחש"]), by: String(r["כינוי"]) };
+  });
+  var games = table_(ss, "ארקייד").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
+    return { id: r._row, emoji: "🎮", title: String(r["שם המשחק"]), by: String(r["כינוי בארקייד"]), genre: String(r["ענף"]), proud: String(r["במה אני הכי גאה"]) };
+  });
+  var count = {}, joins = table_(ss, "הצטרפויות");
+  joins.forEach(function (r) { var k = String(r["מזהה רעיון"]); count[k] = (count[k] || 0) + 1; });
+  var ideas = table_(ss, "רעיונות").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
+    var id = String(r["מזהה"]);
+    return { id: id, title: String(r["שם הרעיון"]), problem: String(r["מה הבעיה"]), how: String(r["איך AI עוזר"]),
+      track: String(r["מסלול"]), by: String(r["כינוי לתצוגה"]), joins: count[id] || 0 };
+  }).reverse();
+  return { ok: true, powers: powers, games: games, ideas: ideas, joinsTotal: joins.length };
+}
+
+function game_(id) {
+  var r = table_(SpreadsheetApp.getActiveSpreadsheet(), "ארקייד").filter(function (x) { return String(x._row) === String(id); })[0];
+  if (!r || !approved_(r["סטטוס"])) return { ok: false };
+  var m = String(r["קובץ"]).match(/[-\w]{25,}/);
+  if (!m) return { ok: false };
+  try { return { ok: true, html: DriveApp.getFileById(m[0]).getBlob().getDataAsString("UTF-8") }; }
+  catch (err) { return { ok: false }; }
 }

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14112a">
+<meta name="description" content="האקתון אלברט איינשטיין, 26.11: יש לכם רעיון לפתרון עם AI? שלחו אותו לקיר, או הצטרפו לרעיון של מישהו אחר.">
+<meta property="og:title" content="💡 קיר הרעיונות להאקתון">
+<meta property="og:description" content="יום שלם של בנייה עם AI, ב-26.11. לא צריך לדעת לתכנת. שלחו רעיון או הצטרפו לרעיון.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%92%A1%3C%2Ftext%3E%3C%2Fsvg%3E">
+<title>קיר הרעיונות — האקתון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800;900&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* קיר הרעיונות: אותה שפה עיצובית של הסטודיו (כהה בכוונה). לכל בית הספר, מגיעים בעיקר מטלפון (QR / וואטסאפ) */
+  :root{
+    --bg:#14112a; --bg-2:#1b1738; --surface:#221d45; --surface-2:#2c2658; --border:#3a3370;
+    --ink:#f4f2ff; --ink-soft:#bdb7e3; --ink-faint:#8a84b8;
+    --pink:#ff5fa2; --cyan:#3fd8ff; --yellow:#ffd23f; --green:#4ee39a; --purple:#a78bfa; --orange:#ff9f43;
+    --radius:18px;
+    --font-display:'Rubik', system-ui, sans-serif; --font-body:'Heebo', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    background-image:radial-gradient(1200px 500px at 85% -10%, rgba(255,210,63,.16), transparent 60%),
+                     radial-gradient(900px 500px at 0% 10%, rgba(78,227,154,.12), transparent 60%);
+    background-attachment:fixed;
+    color:var(--ink); font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit; color:inherit;}
+  a{color:var(--cyan);}
+  .wrap{max-width:980px; margin:0 auto; padding:0 16px 80px;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:900; font-size:22px; text-decoration:none; color:var(--ink);}
+  .logo .mark{width:38px; height:38px; border-radius:12px; display:grid; place-items:center; font-size:22px;
+    background:linear-gradient(135deg, var(--yellow), var(--orange) 55%, var(--pink)); box-shadow:0 6px 20px -6px rgba(255,210,63,.6);}
+  .logo small{display:block; font-family:var(--font-body); font-weight:500; font-size:11.5px; color:var(--ink-faint);}
+  .count-chip{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:6px 12px; font-weight:800; font-size:13.5px; font-family:var(--font-display); white-space:nowrap;}
+
+  .hero{position:relative; overflow:hidden; border-radius:24px; padding:24px 22px; margin-top:6px;
+    background:linear-gradient(135deg, #3b2a12, #3b1f5c 55%, #1d2f63); border:1px solid rgba(255,255,255,.08); box-shadow:0 20px 50px -25px rgba(0,0,0,.8);}
+  .hero:after{content:""; position:absolute; inset:auto -60px -80px auto; width:280px; height:280px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,210,63,.28), transparent 65%); pointer-events:none;}
+  .hero .when{display:inline-flex; gap:6px; align-items:center; padding:4px 12px; border-radius:999px; font-weight:800; font-size:13.5px;
+    background:rgba(255,210,63,.16); color:var(--yellow); border:1px solid rgba(255,210,63,.35); font-family:var(--font-display);}
+  .hero h1{font-family:var(--font-display); font-weight:900; font-size:clamp(26px, 6.5vw, 40px); line-height:1.15; margin:12px 0 8px;}
+  .hero p{margin:0 0 14px; color:var(--ink-soft); font-size:15.5px; max-width:640px;}
+  .countdown{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .cd{background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:8px 14px; font-weight:700; font-size:13.5px;}
+  .cd b{display:block; font-family:var(--font-display); font-size:26px; line-height:1.1; color:var(--yellow);}
+  .hero-actions{display:flex; gap:8px; flex-wrap:wrap; position:relative; z-index:1;}
+
+  .btn{border:none; border-radius:999px; padding:11px 18px; font-weight:800; font-size:15px; cursor:pointer; font-family:var(--font-display); display:inline-flex; align-items:center; gap:6px; justify-content:center; text-decoration:none;}
+  .btn.main{background:linear-gradient(135deg, var(--yellow), var(--orange)); color:#2a1a05; box-shadow:0 8px 20px -8px rgba(255,159,67,.7);}
+  .btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--border);}
+  .btn.small{padding:7px 12px; font-size:13px;}
+  .btn.on{background:rgba(78,227,154,.18); color:var(--green); border:1px solid rgba(78,227,154,.5);}
+  .btn:disabled{opacity:.6; cursor:default;}
+
+  .sec-head{display:flex; align-items:baseline; gap:10px; margin:26px 0 10px; flex-wrap:wrap;}
+  .sec-head h2{margin:0; font-family:var(--font-display); font-weight:900; font-size:21px;}
+  .sec-head span{color:var(--ink-faint); font-size:13.5px;}
+
+  /* מסלולים = גם סינון */
+  .tracks{display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;}
+  .track{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px; cursor:pointer; text-align:start; display:flex; flex-direction:column; gap:2px; transition:transform .12s, border-color .12s;}
+  .track:hover{transform:translateY(-2px); border-color:var(--yellow);}
+  .track .te{font-size:28px; line-height:1.2;}
+  .track b{font-family:var(--font-display); font-size:16px;}
+  .track small{color:var(--ink-soft); font-size:12.5px;}
+  .track[aria-pressed="true"]{border-color:var(--yellow); background:var(--surface-2); box-shadow:0 0 0 2px rgba(255,210,63,.3) inset;}
+
+  /* מכונת הניצוצות */
+  .spark{margin-top:14px; border-radius:var(--radius); padding:16px; background:var(--surface); border:1px solid var(--border); border-inline-start:5px solid var(--green);
+    display:flex; gap:14px; align-items:center;}
+  .spark .se{font-size:40px; flex:0 0 auto;}
+  .spark .lb{font-size:12px; font-weight:800; color:var(--green);}
+  .spark .q{font-family:var(--font-display); font-weight:800; font-size:18px; margin:2px 0 10px; min-height:27px;}
+  .spark .row{display:flex; gap:8px; flex-wrap:wrap;}
+  .spark .body{flex:1; min-width:0;}
+
+  /* הקיר */
+  .filter{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;}
+  .filter button{border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:6px 12px; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .filter button[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+  .wall{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px;}
+  .idea{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; flex-direction:column; gap:8px; animation:fade .3s ease;}
+  .idea.example{border-style:dashed; opacity:.85;}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+  .idea .tag{align-self:flex-start; font-size:12px; font-weight:800; padding:3px 10px; border-radius:999px; background:var(--surface-2); color:var(--ink-soft);}
+  .idea h3{margin:0; font-family:var(--font-display); font-weight:900; font-size:19px; line-height:1.25;}
+  .idea .lbl{font-size:11.5px; font-weight:800; color:var(--ink-faint);}
+  .idea .txt{font-size:14.5px;}
+  .idea .by{font-size:12.5px; color:var(--ink-faint);}
+  .idea .foot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; padding-top:6px; flex-wrap:wrap;}
+  .idea .joins{font-size:13px; font-weight:700; color:var(--yellow);}
+  .empty{text-align:center; padding:24px 16px; border:2px dashed var(--border); border-radius:20px; color:var(--ink-soft); grid-column:1/-1;}
+  .empty b{display:block; font-family:var(--font-display); font-size:18px; color:var(--ink); margin:4px 0;}
+  .mine{margin-top:14px; font-size:14px; color:var(--ink-soft);}
+  .mine ul{margin:4px 0 0; padding-inline-start:20px;}
+
+  /* איך זה עובד */
+  .steps{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; counter-reset:s;}
+  .step{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px;}
+  .step:before{counter-increment:s; content:counter(s); display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--yellow); color:#2a1a05; font-weight:900; font-family:var(--font-display); margin-bottom:6px;}
+  .step b{font-family:var(--font-display);}
+  .step p{margin:2px 0 0; font-size:13.5px; color:var(--ink-soft);}
+
+  .foot-links{margin-top:30px; text-align:center; font-size:13.5px; color:var(--ink-faint);}
+
+  /* חלון קופץ (גיליון תחתון בטלפון) */
+  .modal{position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(6,4,18,.7); backdrop-filter:blur(3px);}
+  .modal.on{display:flex;}
+  .sheet{width:100%; max-width:520px; max-height:88vh; overflow:auto; background:var(--bg-2); border:1px solid var(--border); border-radius:24px; padding:20px; animation:pop .2s ease;}
+  @keyframes pop{from{transform:scale(.96); opacity:0} to{transform:none; opacity:1}}
+  .sheet h3{margin:0 0 4px; font-family:var(--font-display); font-weight:900; font-size:22px;}
+  .sheet .sub{color:var(--ink-soft); font-size:14.5px; margin:0 0 6px;}
+  .sheet .big-e{font-size:44px; line-height:1;}
+  .field{display:flex; flex-direction:column; gap:5px; margin:12px 0;}
+  .field label{font-weight:700; font-size:14px;}
+  .field label small{font-weight:500; color:var(--ink-faint);}
+  .field input[type=text], .field textarea{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 12px; color:var(--ink); font:inherit; font-size:16px;}
+  .field textarea{min-height:70px; resize:vertical;}
+  .field input:focus, .field textarea:focus{outline:2px solid var(--yellow); border-color:transparent;}
+  .two{display:grid; grid-template-columns:2fr 1fr; gap:8px;}
+  .private{background:rgba(0,0,0,.2); border:1px solid var(--border); border-radius:14px; padding:2px 12px 10px; margin-top:14px;}
+  .private .ph{font-size:12.5px; font-weight:800; color:var(--ink-faint); margin-top:10px;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .chips button{border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:6px 11px; font-size:13.5px; font-weight:600; cursor:pointer;}
+  .chips button.sel{background:var(--yellow); color:#2a1a05; border-color:var(--yellow);}
+  .check{display:flex; gap:10px; align-items:flex-start; margin-top:14px; padding:12px; border-radius:14px; background:rgba(78,227,154,.08); border:1px solid rgba(78,227,154,.35); cursor:pointer; font-weight:700; font-size:14.5px;}
+  .check input{width:20px; height:20px; margin:1px 0 0; accent-color:var(--green); flex:0 0 auto;}
+  .sheet-actions{display:flex; gap:8px; margin-top:16px; flex-wrap:wrap;}
+  .sheet-actions .btn{flex:1;}
+  .msg{font-size:13.5px; font-weight:700; min-height:18px; margin-top:8px;}
+  .msg.err{color:var(--pink);}
+
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(140px); z-index:60; background:var(--ink); color:var(--bg);
+    padding:12px 18px; border-radius:16px; font-weight:800; font-family:var(--font-display); font-size:15.5px; box-shadow:0 12px 30px -10px rgba(0,0,0,.6);
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.3); max-width:calc(100vw - 32px); text-align:center;}
+  .toast.on{transform:translateX(-50%) translateY(0);}
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:80;}
+
+  @media (max-width:720px){
+    .tracks{grid-template-columns:repeat(2, 1fr);}
+    .steps{grid-template-columns:1fr;}
+    .spark{flex-direction:column; align-items:flex-start;}
+    .hero-actions .btn{flex:1 1 auto;}
+    .modal{align-items:flex-end; padding:0;}
+    .sheet{border-radius:24px 24px 0 0; max-height:92vh;}
+    .two{grid-template-columns:1fr 1fr;}
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important;} }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="wrap">
+  <header class="topbar">
+    <a class="logo" href="index.html"><span class="mark">💡</span><span>קיר הרעיונות<small>לקראת האקתון אלברט איינשטיין</small></span></a>
+    <span class="count-chip" id="countChip">🙋 מצטרפים...</span>
+  </header>
+
+  <section class="hero">
+    <span class="when" id="heroWhen"></span>
+    <h1>יש לכם רעיון שיכול לשנות משהו? 💡</h1>
+    <p id="heroPitch"></p>
+    <div class="countdown" id="countdown"></div>
+    <div class="hero-actions">
+      <button class="btn main" type="button" id="ideaBtn">💡 יש לי רעיון</button>
+      <button class="btn ghost" type="button" id="joinBtn">🙋 רוצים להשתתף</button>
+      <a class="btn ghost" id="siteLink" target="_blank" rel="noopener">לאתר ההאקתון ←</a>
+    </div>
+  </section>
+
+  <div class="sec-head"><h2>🧭 ארבעה מסלולים</h2><span>לחצו על מסלול כדי לראות רק את הרעיונות שלו</span></div>
+  <div class="tracks" id="tracks"></div>
+
+  <section class="spark" aria-live="polite">
+    <div class="se">🎲</div>
+    <div class="body">
+      <div class="lb">אין עדיין רעיון? מכונת הניצוצות</div>
+      <div class="q" id="sparkQ"></div>
+      <div class="row">
+        <button class="btn small ghost" type="button" id="sparkNext">🎲 עוד שאלה</button>
+        <button class="btn small ghost" type="button" id="sparkCopy">📋 פרומפט לסיעור מוחות עם גימני</button>
+        <button class="btn small main" type="button" id="sparkGo">💡 זה נותן לי רעיון!</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sec-head"><h2>🧱 הקיר</h2><span id="wallSub">רעיונות שאושרו, מכל בית הספר</span></div>
+  <div class="filter" id="filter"></div>
+  <div class="wall" id="wall"></div>
+  <div class="mine" id="mine"></div>
+
+  <div class="sec-head"><h2>⚙️ איך זה עובד</h2></div>
+  <div class="steps">
+    <div class="step"><b>שולחים רעיון</b><p>בעיה אמיתית, ואם יש, גם כיוון לפתרון עם AI. רעיון חצי-אפוי זה מעולה.</p></div>
+    <div class="step"><b>הוא עולה לקיר</b><p>אחרי אישור של המורה, עם הכינוי שבחרתם. השם האמיתי לא מופיע.</p></div>
+    <div class="step"><b>בונים צוות</b><p>מי שלוחץ "אני בפנים" רוצה לעבוד על הרעיון. ביום ההאקתון נפגשים ובונים.</p></div>
+  </div>
+
+  <div class="foot-links"><a href="studio.html">🎮 הסטודיו</a> · <a href="index.html">לכל התחנות</a></div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="ideas-data.js"></script>
+<script>
+(function(){
+  var D = window.IDEAS, H = D.hackathon;
+  var live = null, filter = "", sparkI = -1, lastFocus = null, toastT = null;
+
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function $(id){ return document.getElementById(id); }
+
+  // ---------- זיכרון בדפדפן ----------
+  // רק מזהים וכותרות (localStorage). השם והכיתה רק לביקור הזה (sessionStorage), כי יש מחשבים משותפים
+  function getJ(store, k, d){ try{ var v = JSON.parse(window[store].getItem(k)); return v == null ? d : v; }catch(e){ return d; } }
+  function setJ(store, k, v){ try{ window[store].setItem(k, JSON.stringify(v)); }catch(e){} }
+  var joined = getJ("localStorage", "ideas.joined", {});
+  var sent = getJ("localStorage", "ideas.sent", []);
+  var me = getJ("sessionStorage", "ideas.me", { name:"", cls:"" });
+
+  // ---------- הירו ----------
+  $("heroWhen").innerHTML = "🚀 " + esc(H.name) + " · " + esc(H.when) + ' · <span dir="ltr">' + esc(H.hours) + "</span>";
+  $("heroPitch").textContent = H.pitch;
+  $("siteLink").href = H.url;
+  (function(){
+    var now = new Date(), d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var p = H.date.split("-"), day = new Date(+p[0], +p[1]-1, +p[2]);
+    var days = Math.round((day - d0) / 86400000), html;
+    if(days > 1) html = '<div class="cd"><b>'+days+'</b>ימים להאקתון</div>';
+    else if(days === 1) html = '<div class="cd"><b>מחר!</b>ההאקתון</div>';
+    else if(days === 0) html = '<div class="cd"><b>היום! 🎉</b>ההאקתון</div>';
+    else html = '<div class="cd"><b>תודה! 💛</b>ההאקתון הסתיים</div>';
+    $("countdown").innerHTML = html + '<div class="cd"><b>0</b>שורות קוד צריך לדעת</div>';
+  })();
+
+  // ---------- מסלולים וסינון ----------
+  function trackOf(name){ return D.tracks.filter(function(t){ return t.name === name; })[0]; }
+  function renderTracks(){
+    $("tracks").innerHTML = D.tracks.map(function(t){
+      return '<button type="button" class="track" data-track="'+esc(t.name)+'" aria-pressed="'+(filter === t.name)+'"><span class="te">'+t.emoji+'</span><b>'+esc(t.name)+'</b><small>'+esc(t.text)+'</small></button>';
+    }).join("");
+    $("filter").innerHTML = ['<button type="button" data-track="" aria-pressed="'+(!filter)+'">הכול</button>'].concat(D.tracks.map(function(t){
+      return '<button type="button" data-track="'+esc(t.name)+'" aria-pressed="'+(filter === t.name)+'">'+t.emoji+' '+esc(t.name)+'</button>';
+    })).join("");
+  }
+
+  // ---------- הקיר ----------
+  function card(it, example){
+    var t = trackOf(it.track), isIn = !example && joined[it.id];
+    return '<div class="idea'+(example?' example':'')+'">'
+      + '<span class="tag">'+(example ? '✨ דוגמה' : (t ? t.emoji + ' ' + esc(t.name) : '🧭 עוד לא בחרו מסלול'))+'</span>'
+      + '<h3>'+esc(it.title)+'</h3>'
+      + '<div><div class="lbl">הבעיה</div><div class="txt">'+esc(it.problem)+'</div></div>'
+      + (it.how ? '<div><div class="lbl">ואיך AI עוזר</div><div class="txt">'+esc(it.how)+'</div></div>' : '')
+      + (example ? '' : '<div class="by">הציע/ה: '+esc(it.by || "מישהו מבית הספר")+'</div>'
+        + '<div class="foot"><span class="joins">🙋 '+(it.joins ? it.joins + (it.joins === 1 ? ' רוצה' : ' רוצים') + ' לעבוד על זה' : 'עוד אין מצטרפים. תהיו ראשונים?')+'</span>'
+        + '<button type="button" class="btn small '+(isIn?'on':'main')+'" data-join="'+esc(it.id)+'"'+(isIn?' disabled':'')+'>'+(isIn?'✓ אתם בפנים':'🙋 אני בפנים')+'</button></div>')
+      + '</div>';
+  }
+  function renderWall(){
+    var wall = $("wall");
+    if(live === null){ wall.innerHTML = '<div class="empty">טוען את הקיר... 🧱</div>'; return; }
+    var list = (live.ideas || []).filter(function(it){ return !filter || it.track === filter; });
+    if(live.ideas && live.ideas.length){
+      wall.innerHTML = list.length ? list.map(function(it){ return card(it); }).join("")
+        : '<div class="empty"><b>עוד אין רעיונות במסלול הזה</b>אולי שלכם יהיה הראשון? <br><br><button class="btn main small" type="button" data-new="1">💡 יש לי רעיון</button></div>';
+    } else {
+      wall.innerHTML = '<div class="empty"><b>'+(live.off ? 'הקיר לא נטען כרגע' : 'הקיר מחכה לרעיון הראשון')+'</b>'
+        + (live.off ? 'אפשר לשלוח רעיון בכל זאת. בינתיים, כמה דוגמאות:' : 'כמה דוגמאות, כדי לראות איך רעיון נראה:')+'</div>'
+        + D.examples.map(function(it){ return card(it, true); }).join("");
+    }
+    var n = live.joinsTotal || 0;
+    $("countChip").textContent = live.off ? "💡 קיר הרעיונות" : "🙋 " + n + " כבר בפנים";
+    $("wallSub").textContent = live.ideas && live.ideas.length ? live.ideas.length + " רעיונות שאושרו, מכל בית הספר" : "רעיונות שאושרו, מכל בית הספר";
+    renderMine();
+  }
+  function renderMine(){
+    if(!sent.length){ $("mine").innerHTML = ""; return; }
+    var titles = ((live && live.ideas) || []).map(function(it){ return it.title; });
+    $("mine").innerHTML = '<b>הרעיונות ששלחתם מהמכשיר הזה:</b><ul>' + sent.map(function(s){
+      return '<li>💡 '+esc(s.title)+' · '+(titles.indexOf(s.title) >= 0 ? '✅ על הקיר!' : 'ממתין לאישור המורה')+'</li>';
+    }).join("") + '</ul>';
+  }
+
+  function load(){
+    if(!D.endpoint){ live = { off:true }; return renderWall(); }
+    fetch(D.endpoint + "?op=public").then(function(r){ return r.json(); }).then(function(j){
+      live = j && j.ok ? j : { off:true };
+    }).catch(function(){ live = { off:true }; }).then(renderWall);
+  }
+
+  // ---------- מכונת הניצוצות ----------
+  function nextSpark(){
+    var i; do { i = Math.floor(Math.random() * D.sparks.length); } while(D.sparks.length > 1 && i === sparkI);
+    sparkI = i; $("sparkQ").textContent = D.sparks[i];
+  }
+
+  // ---------- חלונות ----------
+  var modal = $("modal"), sheet = $("sheet");
+  function openModal(html){
+    lastFocus = document.activeElement;
+    sheet.innerHTML = html; modal.className = "modal on";
+    var f = sheet.querySelector("textarea, input[type=text]"); if(f) setTimeout(function(){ f.focus(); }, 30);
+  }
+  function closeModal(){ modal.className = "modal"; sheet.innerHTML = ""; if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+  function toast(t){ var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove("on"); }, 3200); }
+
+  function privateFields(){
+    return '<div class="private"><div class="ph">🔒 רק המורה רואה, כדי לדעת מי אתם</div><div class="two">'
+      + '<div class="field"><label for="fName">השם שלכם</label><input type="text" id="fName" maxlength="40" autocomplete="name" value="'+esc(me.name)+'"></div>'
+      + '<div class="field"><label for="fCls">כיתה</label><input type="text" id="fCls" maxlength="10" placeholder="ח׳2" value="'+esc(me.cls)+'"></div></div></div>';
+  }
+  function readPrivate(m){
+    var name = $("fName").value.trim(), cls = $("fCls").value.trim();
+    if(!name || !cls){ m.className = "msg err"; m.textContent = "כתבו שם וכיתה, כדי שהמורה תדע מי אתם. על הקיר הם לא יופיעו."; return null; }
+    me = { name:name, cls:cls }; setJ("sessionStorage", "ideas.me", me);
+    return me;
+  }
+
+  function ideaModal(problem){
+    openModal('<div class="big-e">💡</div><h3>יש לי רעיון!</h3><p class="sub">שלוש שורות וזהו. גם רעיון חצי-אפוי זה מעולה, את השאר בונים ביחד.</p>'
+      + '<div class="field"><label for="iProblem">מה מעצבן, חסר או כואב? ולמי?</label><textarea id="iProblem" maxlength="300" placeholder="למשל: מי שחדש בבית הספר לא יודע עם מי לשבת בהפסקה">'+esc(problem||"")+'</textarea></div>'
+      + '<div class="field"><label for="iHow">ואיך AI יכול לעזור? <small>(רשות)</small></label><textarea id="iHow" maxlength="300"></textarea></div>'
+      + '<div class="field"><label for="iTitle">שם קצר לרעיון</label><input type="text" id="iTitle" maxlength="40" placeholder="למשל: חבר להפסקה"></div>'
+      + '<div class="field"><label>מסלול</label><div class="chips" id="iTrack">'+D.tracks.map(function(t){ return '<button type="button" data-v="'+esc(t.name)+'">'+t.emoji+' '+esc(t.name)+'</button>'; }).join("")
+      + '<button type="button" data-v="" class="sel">🤷 עוד לא יודעים</button></div></div>'
+      + '<div class="field"><label for="iNick">כינוי שיופיע על הקיר <small>(רשות. בלי כינוי יופיע "מישהו מבית הספר")</small></label><input type="text" id="iNick" maxlength="24"></div>'
+      + privateFields()
+      + '<label class="check"><input type="checkbox" id="iWants"><span>🙋 אני רוצה להשתתף בהאקתון<br><small style="font-weight:500;color:var(--ink-soft)">לא מחייב. המורה תחזור אליכם עם פרטים</small></span></label>'
+      + '<div class="msg" id="iMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="iSend">🚀 שליחה לקיר</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+  }
+
+  // id = מזהה רעיון, או "כללי" להרשמה בלי רעיון
+  function joinModal(id){
+    var it = id === "כללי" ? null : ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0];
+    openModal('<div class="big-e">🙋</div><h3>'+(it ? 'אני בפנים!' : 'רוצים להשתתף בהאקתון')+'</h3>'
+      + '<p class="sub">'+(it ? 'רוצים לעבוד על <b>'+esc(it.title)+'</b>. ' : 'גם בלי רעיון. בונים צוות ביחד. ')+'לא מחייב: המורה תחזור אליכם עם פרטים.</p>'
+      + privateFields()
+      + '<div class="msg" id="jMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="jSend" data-id="'+esc(id)+'">🙋 אני בפנים</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+  }
+
+  function send(payload){
+    if(!D.endpoint) return Promise.reject(new Error("no endpoint"));
+    return fetch(D.endpoint, { method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+  }
+
+  // ---------- לחיצות ----------
+  document.body.addEventListener("click", function(e){
+    var t = e.target.closest("button, a"); if(!t) return;
+    if(t.hasAttribute("data-close")) return closeModal();
+    if(t.dataset.track !== undefined){ filter = t.dataset.track === filter ? "" : t.dataset.track; renderTracks(); renderWall(); if(t.classList.contains("track")) $("filter").scrollIntoView({ behavior:"smooth", block:"start" }); return; }
+    if(t.id === "ideaBtn" || t.dataset.new) return ideaModal();
+    if(t.id === "sparkGo") return ideaModal();
+    if(t.id === "joinBtn") return joined["כללי"] ? toast("כבר נרשמתם 🙌 המורה תחזור אליכם") : joinModal("כללי");
+    if(t.dataset.join) return joinModal(t.dataset.join);
+    if(t.id === "sparkNext") return nextSpark();
+    if(t.id === "sparkCopy") return copyText(D.sparkPrompt);
+    if(t.parentNode && t.parentNode.id === "iTrack"){ sheet.querySelectorAll("#iTrack button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+
+    if(t.id === "iSend"){
+      var m = $("iMsg");
+      var f = { problem:$("iProblem").value.trim(), how:$("iHow").value.trim(), title:$("iTitle").value.trim(), nick:$("iNick").value.trim(),
+        track:(sheet.querySelector("#iTrack .sel") || {}).dataset.v || "", wants:$("iWants").checked };
+      if(!f.problem){ m.className = "msg err"; m.textContent = "ספרו מה הבעיה. זה הדבר הכי חשוב ברעיון."; return $("iProblem").focus(); }
+      if(!f.title){ m.className = "msg err"; m.textContent = "תנו לרעיון שם קצר."; return $("iTitle").focus(); }
+      var who = readPrivate(m); if(!who) return;
+      if(sent.some(function(s){ return s.title === f.title; })){ m.className = "msg err"; m.textContent = "כבר שלחתם רעיון בשם הזה. אם זה רעיון אחר, תנו לו שם אחר."; return; }
+      t.disabled = true; m.className = "msg"; m.textContent = "שולח... 🚀";
+      send({ kind:"idea", realName:who.name, cls:who.cls, nick:f.nick, title:f.title, problem:f.problem, how:f.how, track:f.track, wants:f.wants, timestamp:new Date().toISOString() })
+        .then(function(){
+          sent.push({ title:f.title, date:new Date().toISOString().slice(0,10) }); setJ("localStorage", "ideas.sent", sent);
+          if(f.wants){ joined["כללי"] = true; setJ("localStorage", "ideas.joined", joined); }
+          closeModal(); renderMine(); confetti(140); toast("💡 הרעיון נשלח! אחרי אישור הוא יעלה לקיר");
+        })
+        .catch(function(){ t.disabled = false; m.className = "msg err"; m.textContent = "לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."; });
+      return;
+    }
+
+    if(t.id === "jSend"){
+      var jm = $("jMsg"), id = t.dataset.id, who2 = readPrivate(jm); if(!who2) return;
+      var it = ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0];
+      t.disabled = true; jm.className = "msg"; jm.textContent = "שולח...";
+      send({ kind:"join", realName:who2.name, cls:who2.cls, ideaId:id, ideaTitle:it ? it.title : "", timestamp:new Date().toISOString() })
+        .then(function(){
+          joined[id] = true; if(id !== "כללי") joined["כללי"] = true; setJ("localStorage", "ideas.joined", joined);
+          if(it){ it.joins = (it.joins || 0) + 1; }
+          if(live && !live.off) live.joinsTotal = (live.joinsTotal || 0) + 1;
+          closeModal(); renderWall(); confetti(100); toast(it ? "🙋 אתם בפנים! נתראה בהאקתון" : "🙋 נרשמתם! המורה תחזור אליכם עם פרטים");
+        })
+        .catch(function(){ t.disabled = false; jm.className = "msg err"; jm.textContent = "לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."; });
+      return;
+    }
+  });
+  modal.addEventListener("click", function(e){ if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape" && modal.classList.contains("on")) closeModal(); });
+
+  function copyText(txt){
+    if(navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(txt).then(function(){ toast("הועתק 📋 הדביקו בגימני"); }, fallback);
+    fallback();
+    function fallback(){ var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); toast("הועתק 📋 הדביקו בגימני"); }catch(e){} ta.remove(); }
+  }
+
+  // ---------- קונפטי ----------
+  var cv = $("confetti"), cx = cv.getContext("2d"), parts = [], raf = null;
+  var CC = ["#ff5fa2","#3fd8ff","#ffd23f","#4ee39a","#a78bfa","#ff9f43"];
+  function confetti(n){
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    cv.width = innerWidth; cv.height = innerHeight;
+    for(var i=0;i<n;i++) parts.push({ x:innerWidth/2 + (Math.random()-.5)*innerWidth*.4, y:innerHeight*.35, vx:(Math.random()-.5)*14, vy:-Math.random()*14-4, s:Math.random()*7+4, r:Math.random()*6, vr:(Math.random()-.5)*.3, c:CC[i%CC.length], life:0 });
+    if(!raf) tick();
+  }
+  function tick(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    parts = parts.filter(function(p){ return p.life < 160 && p.y < cv.height + 20; });
+    parts.forEach(function(p){ p.life++; p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*.66); cx.restore(); });
+    raf = parts.length ? requestAnimationFrame(tick) : (cx.clearRect(0,0,cv.width,cv.height), null);
+  }
+
+  // ---------- התחלה ----------
+  renderTracks(); nextSpark(); renderWall(); load();
+})();
+</script>
+</body>
+</html>
