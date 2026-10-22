@@ -350,9 +350,12 @@
       + '<div class="msg" id="jMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="jSend" data-id="'+esc(id)+'">🙋 אני בפנים</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
   }
 
+  // הסקריפט עונה לאט (עד חצי דקה). keepalive ממשיך לשלוח גם אם סוגרים את הדף, ולכן לא מחכים לתשובה יותר מ-3 שניות.
+  // בלי אינטרנט ה-fetch נכשל מיד, וההודעה מופיעה כרגיל
   function send(payload){
     if(!D.endpoint) return Promise.reject(new Error("no endpoint"));
-    return fetch(D.endpoint, { method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+    var req = fetch(D.endpoint, { method:"POST", mode:"no-cors", keepalive:true, headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
+    return Promise.race([req, new Promise(function(res){ setTimeout(res, 3000); })]);
   }
 
   // ---------- לחיצות ----------

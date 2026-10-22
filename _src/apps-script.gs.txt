@@ -31,17 +31,11 @@
  *   "לא עכשיו" או כל דבר אחר = לא מופיע. באתר מופיע רק הכינוי, אף פעם לא השם האמיתי.
  * - לשונית "הצטרפויות": מי רוצה להשתתף בהאקתון, ועל איזה רעיון. זו רשימת המשתתפים.
  * מעדכנים באותה דרך (Manage deployments -> העיפרון -> New version -> Deploy). אין הרשאה חדשה.
+ * (22.10) מה שמתפרסם נשמר בעותק מהיר, ומתחדש לבד בכל עריכה בלשוניות האלה (onEdit). אם משהו לא התעדכן: לערוך תא כלשהו בלשונית.
  */
 
 function doPost(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("תשובות") || ss.insertSheet("תשובות");
-
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["זמן שליחה", "שם תלמיד/ה", "מסלול", "תחנה", "שאלה", "תשובה", "תאריך (מהתלמיד)", "עבד/ה בזוג עם", "מזהה שליחה"]);
-    sheet.setFrozenRows(1);
-  }
-
   var data = JSON.parse(e.postData.contents);
   // הסטודיו: משחק או כוח. שליחה רגילה מדף תחנה ממשיכה כמו קודם
   if (data.kind === "game") return saveGame_(ss, data);
@@ -50,6 +44,12 @@ function doPost(e) {
   // קיר הרעיונות
   if (data.kind === "idea") return saveIdea_(ss, data);
   if (data.kind === "join") return saveJoin_(ss, data);
+
+  var sheet = ss.getSheetByName("תשובות") || ss.insertSheet("תשובות");
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["זמן שליחה", "שם תלמיד/ה", "מסלול", "תחנה", "שאלה", "תשובה", "תאריך (מהתלמיד)", "עבד/ה בזוג עם", "מזהה שליחה"]);
+    sheet.setFrozenRows(1);
+  }
 
   var trackLabel = data.track === "tichon" ? "תיכון" : "חטיבה";
 
@@ -235,20 +235,45 @@ function saveJoin_(ss, data) {
   var sh = sheetWithHeader_(ss, "הצטרפויות", JOIN_HEAD);
   sh.appendRow([new Date(), text_(clean_(data.realName, 60)), text_(clean_(data.cls, 20)),
     clean_(data.ideaId, 30) || "כללי", text_(clean_(data.ideaTitle, 60))]);
+  var cache = CacheService.getScriptCache(), hit = cache.get(PUB_KEY);
+  if (hit) {
+    try {
+      var o = JSON.parse(hit), id = clean_(data.ideaId, 30) || "כללי";
+      o.joinsTotal = (o.joinsTotal || 0) + 1;
+      (o.ideas || []).forEach(function (it) { if (it.id === id) it.joins = (it.joins || 0) + 1; });
+      cache.put(PUB_KEY, JSON.stringify(o), PUB_TTL);
+    } catch (err) { cache.remove(PUB_KEY); }
+  }
   return ok_();
 }
 
 // ---------- מה שמתפרסם באתר (רק מה שאושר) ----------
 // ?op=public -> כוחות, משחקים ורעיונות מאושרים, בלי שמות אמיתיים
 // ?op=game&id=N -> ה-HTML של משחק מאושר (N = מספר השורה בלשונית "ארקייד")
+// פתיחת הגיליון איטית (10-30 שניות), ולכן התשובה נשמרת בעותק ל-6 שעות ומתחדשת לבד בכל עריכה בגיליון
+var PUB_KEY = "public", PUB_TTL = 21600, PUB_SHEETS = ["כוחות", "ארקייד", "רעיונות", "הצטרפויות"];
+
 function doGet(e) {
   var p = (e && e.parameter) || {};
   if (p.op === "game") return json_(game_(p.id));
-  var cache = CacheService.getScriptCache(), hit = cache.get("public");
-  if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);
-  var out = JSON.stringify(public_());
-  try { cache.put("public", out, 60); } catch (err) {}
-  return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.JSON);
+  var hit = CacheService.getScriptCache().get(PUB_KEY);
+  return ContentService.createTextOutput(hit || refreshPublic_()).setMimeType(ContentService.MimeType.JSON);
+}
+
+function refreshPublic_() {
+  var t0 = new Date().getTime(), o = public_();
+  o.ms = new Date().getTime() - t0;
+  var out = JSON.stringify(o);
+  try { CacheService.getScriptCache().put(PUB_KEY, out, PUB_TTL); } catch (err) {}
+  return out;
+}
+
+// טריגר פשוט, רץ לבד כשהמורה עורכת את הגיליון (למשל סטטוס = מאושר). אין צורך להתקין אותו
+function onEdit(e) {
+  var name = e && e.range ? e.range.getSheet().getName() : "";
+  if (PUB_SHEETS.indexOf(name) < 0) return;
+  CacheService.getScriptCache().remove(PUB_KEY);
+  try { refreshPublic_(); } catch (err) {}
 }
 
 function approved_(v) {
@@ -259,7 +284,6 @@ function approved_(v) {
 function table_(ss, name) {
   var sh = ss.getSheetByName(name);
   if (!sh || sh.getLastRow() < 2) return [];
-  statusMenu_(sh);
   var v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues(), head = v.shift();
   return v.map(function (r, i) {
     var o = { _row: i + 2 };
@@ -287,8 +311,11 @@ function public_() {
 }
 
 function game_(id) {
-  var r = table_(SpreadsheetApp.getActiveSpreadsheet(), "ארקייד").filter(function (x) { return String(x._row) === String(id); })[0];
-  if (!r || !approved_(r["סטטוס"])) return { ok: false };
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ארקייד"), row = parseInt(id, 10);
+  if (!sh || !(row >= 2) || row > sh.getLastRow()) return { ok: false };
+  var cols = sh.getLastColumn(), head = sh.getRange(1, 1, 1, cols).getValues()[0], vals = sh.getRange(row, 1, 1, cols).getValues()[0], r = {};
+  head.forEach(function (h, j) { r[h] = vals[j]; });
+  if (!approved_(r["סטטוס"])) return { ok: false };
   var m = String(r["קובץ"]).match(/[-\w]{25,}/);
   if (!m) return { ok: false };
   try { return { ok: true, html: DriveApp.getFileById(m[0]).getBlob().getDataAsString("UTF-8") }; }
