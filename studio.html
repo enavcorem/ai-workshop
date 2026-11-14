@@ -181,6 +181,13 @@
   .chips{display:flex; flex-wrap:wrap; gap:6px;}
   .chips button{border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:6px 11px; font-size:13.5px; font-weight:600; cursor:pointer;}
   .chips button.sel{background:var(--cyan); color:#05222b; border-color:var(--cyan);}
+  /* בונה פרומפטים: בוחרים בכפתורים, הפרומפט נבנה לבד */
+  .bld{background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:16px; padding:4px 12px; margin:12px 0;}
+  .bld .chips button{color:var(--ink); font-size:14px; padding:8px 12px;}
+  .bld .chips button.sel{color:#05222b;}
+  .bld .spell{white-space:pre-wrap; max-height:220px; overflow:auto;}
+  .bld .brow{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
+  .bld .brow a{text-decoration:none;}
   .avatars{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px;}
   .avatars button{font-size:26px; padding:6px 0; border-radius:12px; border:2px solid transparent; background:var(--surface); cursor:pointer;}
   .avatars button.sel{border-color:var(--yellow); background:var(--surface-2);}
@@ -506,9 +513,38 @@
 
   // ---------- אתגרים ----------
   function findQuest(id){ var r = null; S.worlds.forEach(function(w){ w.quests.forEach(function(q){ if(q.id === id) r = q; }); }); return r; }
+  // ---------- בונה פרומפטים (builder ב-studio-data.js) ----------
+  // הבחירות נשמרות לכל אתגר עד שסוגרים את הדף, כדי שאפשר לחזור לביס הבא
+  var bselAll = {}, starterCode = {};
+  function bOpt(b, sel, fid){ var f = b.fields.filter(function(x){ return x.id === fid; })[0]; return f.options[sel[fid] || 0]; }
+  function bKey(b, sel){ return (b.key || []).map(function(fid){ return bOpt(b, sel, fid).k || "*"; }).join("-"); }
+  function bFill(b, sel, tpl){ b.fields.forEach(function(f){ tpl = tpl.split("{"+f.id+"}").join(bOpt(b, sel, f.id).v); }); return tpl; }
+  function bPrompt(b, sel){ return bFill(b, sel, b.prompts[bKey(b, sel)] || b.prompts["*"] || "") + (S.guard ? "\n\n" + S.guard : ""); }
+  function bHidden(b, sel, f){ return !!f.hideIf && Object.keys(f.hideIf).some(function(fid){ return bOpt(b, sel, fid).k === f.hideIf[fid]; }); }
+  function builderInner(b, sel){
+    var st = b.starter && bKey(b, sel) === b.starter.when;
+    return b.fields.map(function(f){
+        return '<div class="field"'+(bHidden(b, sel, f) ? ' style="display:none"' : '')+'><label>'+esc(f.label)+'</label><div class="chips">'
+          + f.options.map(function(o, i){ var on = i === (sel[f.id] || 0); return '<button type="button" data-bf="'+esc(f.id)+'" data-bi="'+i+'" aria-pressed="'+on+'"'+(on ? ' class="sel"' : '')+'>'+esc(o.t)+'</button>'; }).join("")
+          + '</div></div>';
+      }).join("")
+      + '<div class="field"><label>הפרומפט שלכם <small>(נבנה ממה שבחרתם. את מה שבסוגריים [ ] משלימים אחרי ההדבקה)</small></label><div class="spell" id="bPrompt">'+esc(bPrompt(b, sel))+'</div>'
+      + '<div class="brow"><button type="button" class="btn small main" id="copyB">📋 העתקה לגימני</button></div></div>'
+      + (st ? '<div class="field"><label>🧰 קוד התחלה שעובד <small>(גימני מתבלבל? מתחילים מקוד שבדקנו)</small></label>'
+          + '<div class="brow"><a class="btn small ghost" href="'+esc(b.starter.file)+'" target="_blank" rel="noopener">▶️ נסו את הדוגמה בשתי לשוניות</a>'
+          + '<button type="button" class="btn small ghost" id="copyStarter">📋 העתקת קוד ההתחלה לגימני</button></div></div>' : '');
+  }
+  function loadStarter(file){
+    if(starterCode[file]) return Promise.resolve(starterCode[file]);
+    return fetch(file).then(function(r){ if(!r.ok) throw 0; return r.text(); }).then(function(t){ starterCode[file] = t; return t; });
+  }
+
   function questModal(id){
     var q = findQuest(id), d = P().quests[id];
+    var sel = q.builder ? (bselAll[id] = bselAll[id] || {}) : null;
+    if(q.builder && q.builder.starter) loadStarter(q.builder.starter.file).catch(function(){});
     openModal('<div class="big-e">'+q.emoji+'</div><h3>'+esc(q.name)+(q.hard?' <span style="color:var(--yellow);font-size:14px">★ מאתגר</span>':'')+'</h3><p class="sub">'+esc(q.text)+'</p>'
+      + (q.builder ? '<div class="bld" id="bld">'+builderInner(q.builder, sel)+'</div>' : '')
       + (q.prompt ? '<div class="field"><label>פרומפט להתחלה <small>(אפשר לשנות)</small></label><div class="spell" id="qPrompt">'+esc(q.prompt)+'</div><button type="button" class="btn small ghost" id="copyQ" style="align-self:flex-start;margin-top:6px">📋 העתקה</button></div>' : '')
       // אתגר-מתכון: כמה שלבים, לכל שלב טקסט ופרומפט משלו
       + (q.steps ? q.steps.map(function(s, i){ return '<div class="field"><label>'+esc(s.t)+(s.text ? ' <small>'+esc(s.text)+'</small>' : '')+'</label>'
@@ -810,6 +846,20 @@
     // חלון אתגר
     if(t.id === "copyQ") return copyText(document.getElementById("qPrompt").textContent);
     if(t.dataset.step) return copyText(findQuest(sheet.dataset.quest).steps[+t.dataset.step].prompt);
+    if(t.dataset.bf){
+      var bq = findQuest(sheet.dataset.quest), bs = bselAll[bq.id];
+      bs[t.dataset.bf] = +t.dataset.bi;
+      document.getElementById("bld").innerHTML = builderInner(bq.builder, bs);
+      var back = sheet.querySelector('[data-bf="'+t.dataset.bf+'"][data-bi="'+t.dataset.bi+'"]'); if(back) back.focus();
+      return;
+    }
+    if(t.id === "copyB"){ var cq = findQuest(sheet.dataset.quest); return copyText(bPrompt(cq.builder, bselAll[cq.id])); }
+    if(t.id === "copyStarter"){
+      var sq = findQuest(sheet.dataset.quest), sb = sq.builder;
+      return loadStarter(sb.starter.file).then(function(code){
+        copyText(bFill(sb, bselAll[sq.id], sb.starter.prompt) + "\n\n" + code);
+      }, function(){ toast("קוד ההתחלה לא נטען. פתחו את הדוגמה, ולחצו Ctrl+U כדי לראות ולהעתיק אותו."); });
+    }
     if(t.id === "qDone" || t.id === "qSave"){
       var qid = sheet.dataset.quest, note = document.getElementById("qNote").value.trim();
       if(t.id === "qSave"){ P().quests[qid].note = note; save(); closeModal(); renderAll(); return toast("נשמר 💾"); }

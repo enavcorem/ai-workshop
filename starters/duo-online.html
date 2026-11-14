@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>קוד התחלה: משחק לשניים בשני מחשבים</title>
+<!-- PeerJS: מחבר שני דפדפנים ישירות. השרת החינמי שלהם רק עוזר להם למצוא זה את זה -->
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  body{font-family:system-ui, Arial, sans-serif; background:#14122b; color:#fff; text-align:center; margin:0; padding:16px;}
+  button, input{font:inherit; font-size:18px; padding:8px 14px; border-radius:10px; border:none; margin:4px;}
+  button{background:#22d3ee; color:#05222b; font-weight:bold; cursor:pointer;}
+  input{width:90px; text-align:center;}
+  #code{font-size:48px; font-weight:bold; letter-spacing:6px; color:#facc15;}
+  #status{min-height:28px; margin:8px;}
+  canvas{background:#0b1a33; border-radius:12px; max-width:100%; display:none; margin:auto;}
+</style>
+</head>
+<body>
+  <h2>🌐 משחק לשניים: מכשיר הקשר</h2>
+  <div id="lobby">
+    <button id="hostBtn">🏠 צור חדר</button>
+    <div id="code"></div>
+    <p>או הקלידו את הקוד של החבר:</p>
+    <input id="joinIn" inputmode="numeric" maxlength="4" placeholder="1234">
+    <button id="joinBtn">🔗 התחבר</button>
+  </div>
+  <div id="status">בכיתה: פתחו את הדף בשתי לשוניות. באחת צרו חדר, ובשנייה התחברו.</div>
+  <canvas id="game" width="600" height="400"></canvas>
+
+<script>
+  var PREFIX = "studio-duo-";            // קידומת קבועה, כדי שהקוד יהיה רק 4 ספרות
+  var peer = null, conn = null;
+  var me = { x: 150, y: 200 };            // הנקודה הכחולה שלי
+  var friend = { x: 450, y: 200 };        // הנקודה האדומה של החבר
+  var keys = {};
+  var statusEl = document.getElementById("status");
+  var canvas = document.getElementById("game"), ctx = canvas.getContext("2d");
+
+  function say(t){ statusEl.textContent = t; }
+
+  // המארח: יוצר חדר עם 4 ספרות אקראיות
+  function host(){
+    var digits = String(Math.floor(1000 + Math.random() * 9000));
+    peer = new Peer(PREFIX + digits);
+    peer.on("open", function(){ document.getElementById("code").textContent = digits; say("החדר מוכן. תנו לחבר את הקוד ⬆️"); });
+    peer.on("connection", function(c){ conn = c; setup(); });
+    peer.on("error", function(e){
+      if(e.type === "unavailable-id"){ peer.destroy(); return host(); }   // הקוד תפוס? מגרילים אחר
+      say("שגיאה: " + e.type + ". בדקו שיש אינטרנט ונסו שוב.");
+    });
+  }
+
+  // האורח: מתחבר לחדר לפי 4 הספרות
+  function join(){
+    var digits = document.getElementById("joinIn").value.trim();
+    if(!/^\d{4}$/.test(digits)) return say("צריך בדיוק 4 ספרות.");
+    say("מתחבר...");
+    if(peer) peer.destroy();
+    peer = new Peer();
+    peer.on("open", function(){ conn = peer.connect(PREFIX + digits); setup(); });
+    peer.on("error", function(e){ say(e.type === "peer-unavailable" ? "אין חדר עם הקוד הזה. בדקו את הספרות." : "שגיאה: " + e.type); });
+  }
+
+  // מרגע שיש חיבור: מסתירים את הלובי ומתחילים
+  function setup(){
+    conn.on("open", function(){
+      document.getElementById("lobby").style.display = "none";
+      canvas.style.display = "block";
+      say("✅ מחובר! זוזו עם החצים");
+      // שולחים את המיקום שלי 20 פעמים בשנייה, לא בכל פריים, כדי שלא ייתקע
+      setInterval(function(){ if(conn.open) conn.send({ x: me.x, y: me.y }); }, 50);
+    });
+    conn.on("data", function(d){ friend.x = d.x; friend.y = d.y; });   // הגיע מיקום מהחבר
+    conn.on("close", function(){ say("❌ החבר התנתק. רעננו את הדף כדי להתחיל מחדש."); });
+  }
+
+  // מקלדת: שומרים מה לחוץ, והחצים לא גוללים את הדף
+  document.addEventListener("keydown", function(e){ keys[e.key] = true; if(e.key.indexOf("Arrow") === 0) e.preventDefault(); });
+  document.addEventListener("keyup", function(e){ keys[e.key] = false; });
+
+  function loop(){
+    var sp = 4;
+    if(keys.ArrowUp) me.y -= sp;
+    if(keys.ArrowDown) me.y += sp;
+    if(keys.ArrowLeft) me.x -= sp;
+    if(keys.ArrowRight) me.x += sp;
+    me.x = Math.max(15, Math.min(canvas.width - 15, me.x));
+    me.y = Math.max(15, Math.min(canvas.height - 15, me.y));
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    dot(friend, "#f43f5e");   // החבר באדום
+    dot(me, "#38bdf8");       // אני בכחול
+    requestAnimationFrame(loop);
+  }
+  function dot(p, color){ ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p.x, p.y, 15, 0, Math.PI * 2); ctx.fill(); }
+
+  document.getElementById("hostBtn").onclick = function(){ this.disabled = true; host(); };
+  document.getElementById("joinBtn").onclick = join;
+  loop();
+</script>
+</body>
+</html>

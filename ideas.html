@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#14112a">
 <meta name="description" content="האקתון אלברט איינשטיין, 26.11: יש לכם רעיון לפתרון עם AI? שלחו אותו לקיר, או הצטרפו לרעיון של מישהו אחר.">
 <meta property="og:title" content="💡 קיר הרעיונות להאקתון">
-<meta property="og:description" content="יום שלם של בנייה עם AI, ב-26.11. לא צריך לדעת לתכנת. שלחו רעיון או הצטרפו לרעיון.">
+<meta property="og:description" content="ערב של בנייה עם AI, ב-26.11 (16:30–21:00). לא צריך לדעת לתכנת. שלחו רעיון או הצטרפו לרעיון.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%92%A1%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>קיר הרעיונות — האקתון</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -97,6 +97,12 @@
   .idea .txt{font-size:14.5px;}
   .idea .by{font-size:12.5px; color:var(--ink-faint);}
   .idea .foot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; padding-top:6px; flex-wrap:wrap;}
+  /* בנק האתגרים */
+  .bank{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;}
+  .idea.bk{border-color:rgba(255,159,67,.45); background:linear-gradient(170deg, rgba(255,159,67,.10), var(--surface) 45%);}
+  .idea.bk .be{font-size:34px; line-height:1;}
+  .idea.bk .remix{font-size:13px; color:var(--ink-soft);}
+  .idea.bk .acts{display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:6px;}
   .idea .joins{font-size:13px; font-weight:700; color:var(--yellow);}
   .empty{text-align:center; padding:24px 16px; border:2px dashed var(--border); border-radius:20px; color:var(--ink-soft); grid-column:1/-1;}
   .empty b{display:block; font-family:var(--font-display); font-size:18px; color:var(--ink); margin:4px 0;}
@@ -178,6 +184,9 @@
     </div>
   </section>
 
+  <div class="sec-head"><h2>🔥 בנק האתגרים</h2><span>בוחרים בעיה, מעתיקים פרומפט לגימני, ותוך דקה יש גרסה ראשונה ביד</span></div>
+  <div class="bank" id="bank"></div>
+
   <div class="sec-head"><h2>🧭 ארבעה מסלולים</h2><span>לחצו על מסלול כדי לראות רק את הרעיונות שלו</span></div>
   <div class="tracks" id="tracks"></div>
 
@@ -194,7 +203,7 @@
     </div>
   </section>
 
-  <div class="sec-head"><h2>🧱 הקיר</h2><span id="wallSub">רעיונות שאושרו, מכל בית הספר</span></div>
+  <div class="sec-head"><h2>🧱 הקיר</h2><span id="wallSub">רעיונות שאושרו על הקיר</span></div>
   <div class="filter" id="filter"></div>
   <div class="wall" id="wall"></div>
   <div class="mine" id="mine"></div>
@@ -241,6 +250,13 @@
     else if(days === 1) html = '<div class="cd"><b>מחר!</b>ההאקתון</div>';
     else if(days === 0) html = '<div class="cd"><b>היום! 🎉</b>ההאקתון</div>';
     else html = '<div class="cd"><b>תודה! 💛</b>ההאקתון הסתיים</div>';
+    // ספירה לאחור לסגירת ההרשמה, רק עד התאריך עצמו
+    if(H.deadline){
+      var q = H.deadline.split("-"), dl = Math.round((new Date(+q[0], +q[1]-1, +q[2]) - d0) / 86400000);
+      if(dl > 1) html += '<div class="cd"><b>'+dl+'</b>ימים להרשמה</div>';
+      else if(dl === 1) html += '<div class="cd"><b>מחר!</b>נסגרת ההרשמה</div>';
+      else if(dl === 0) html += '<div class="cd"><b>היום!</b>נסגרת ההרשמה</div>';
+    }
     $("countdown").innerHTML = html + '<div class="cd"><b>0</b>שורות קוד צריך לדעת</div>';
   })();
 
@@ -253,6 +269,24 @@
     $("filter").innerHTML = ['<button type="button" data-track="" aria-pressed="'+(!filter)+'">הכול</button>'].concat(D.tracks.map(function(t){
       return '<button type="button" data-track="'+esc(t.name)+'" aria-pressed="'+(filter === t.name)+'">'+t.emoji+' '+esc(t.name)+'</button>';
     })).join("");
+  }
+
+  // ---------- בנק האתגרים ----------
+  function bankOf(id){ return (D.bank || []).filter(function(b){ return "bank-" + b.id === id; })[0]; }
+  function renderBank(){
+    $("bank").innerHTML = (D.bank || []).map(function(b){
+      var t = trackOf(b.track), isIn = joined["bank-" + b.id];
+      return '<div class="idea bk">'
+        + '<span class="tag">'+(t ? t.emoji + ' ' + esc(t.name) : '')+'</span>'
+        + '<div class="be">'+b.emoji+'</div><h3>'+esc(b.title)+'</h3>'
+        + '<div><div class="lbl">הבעיה</div><div class="txt">'+esc(b.problem)+'</div></div>'
+        + '<div><div class="lbl">מה בונים</div><div class="txt">'+esc(b.build)+'</div></div>'
+        + (b.remix && b.remix.length ? '<div class="remix">🔀 <b>אותו מנגנון, בעיה אחרת:</b> '+b.remix.map(esc).join(' · ')+'</div>' : '')
+        + '<div class="acts"><button type="button" class="btn small main" data-kit="'+esc(b.id)+'">🚀 העתקת פרומפט לגימני</button>'
+        + '<button type="button" class="btn small '+(isIn ? 'on' : 'ghost')+'" data-bjoin="'+esc(b.id)+'"'+(isIn ? ' disabled' : '')+'>'+(isIn ? '✓ מעניין אותי' : '🙋 מעניין אותי')+'</button>'
+        + '<button type="button" class="btn small ghost" data-twist="'+esc(b.id)+'">✨ יש לי טוויסט</button></div>'
+        + '</div>';
+    }).join("");
   }
 
   // ---------- הקיר ----------
@@ -282,7 +316,7 @@
     }
     var n = live.joinsTotal || 0;
     $("countChip").textContent = live.off ? "💡 קיר הרעיונות" : "🙋 " + n + " כבר בפנים";
-    $("wallSub").textContent = live.ideas && live.ideas.length ? live.ideas.length + " רעיונות שאושרו, מכל בית הספר" : "רעיונות שאושרו, מכל בית הספר";
+    $("wallSub").textContent = live.ideas && live.ideas.length ? live.ideas.length + " רעיונות שאושרו על הקיר" : "רעיונות שאושרו על הקיר";
     renderMine();
   }
   function renderMine(){
@@ -328,13 +362,13 @@
     return me;
   }
 
-  function ideaModal(problem){
+  function ideaModal(problem, how, track){
     openModal('<div class="big-e">💡</div><h3>יש לי רעיון!</h3><p class="sub">שלוש שורות וזהו. גם רעיון חצי-אפוי זה מעולה, את השאר בונים ביחד.</p>'
       + '<div class="field"><label for="iProblem">מה מעצבן, חסר או כואב? ולמי?</label><textarea id="iProblem" maxlength="300" placeholder="למשל: מי שחדש בבית הספר לא יודע עם מי לשבת בהפסקה">'+esc(problem||"")+'</textarea></div>'
-      + '<div class="field"><label for="iHow">ואיך AI יכול לעזור? <small>(רשות)</small></label><textarea id="iHow" maxlength="300"></textarea></div>'
+      + '<div class="field"><label for="iHow">ואיך AI יכול לעזור? <small>(רשות)</small></label><textarea id="iHow" maxlength="300">'+esc(how||"")+'</textarea></div>'
       + '<div class="field"><label for="iTitle">שם קצר לרעיון</label><input type="text" id="iTitle" maxlength="40" placeholder="למשל: חבר להפסקה"></div>'
-      + '<div class="field"><label>מסלול</label><div class="chips" id="iTrack">'+D.tracks.map(function(t){ return '<button type="button" data-v="'+esc(t.name)+'">'+t.emoji+' '+esc(t.name)+'</button>'; }).join("")
-      + '<button type="button" data-v="" class="sel">🤷 עוד לא יודעים</button></div></div>'
+      + '<div class="field"><label>מסלול</label><div class="chips" id="iTrack">'+D.tracks.map(function(t){ return '<button type="button" data-v="'+esc(t.name)+'"'+(track === t.name ? ' class="sel"' : '')+'>'+t.emoji+' '+esc(t.name)+'</button>'; }).join("")
+      + '<button type="button" data-v=""'+(track ? '' : ' class="sel"')+'>🤷 עוד לא יודעים</button></div></div>'
       + '<div class="field"><label for="iNick">כינוי שיופיע על הקיר <small>(רשות. בלי כינוי יופיע "מישהו מבית הספר")</small></label><input type="text" id="iNick" maxlength="24"></div>'
       + privateFields()
       + '<label class="check"><input type="checkbox" id="iWants"><span>🙋 אני רוצה להשתתף בהאקתון<br><small style="font-weight:500;color:var(--ink-soft)">לא מחייב. המורה תחזור אליכם עם פרטים</small></span></label>'
@@ -343,7 +377,7 @@
 
   // id = מזהה רעיון, או "כללי" להרשמה בלי רעיון
   function joinModal(id){
-    var it = id === "כללי" ? null : ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0];
+    var it = id === "כללי" ? null : (bankOf(id) || ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0]);
     openModal('<div class="big-e">🙋</div><h3>'+(it ? 'אני בפנים!' : 'רוצים להשתתף בהאקתון')+'</h3>'
       + '<p class="sub">'+(it ? 'רוצים לעבוד על <b>'+esc(it.title)+'</b>. ' : 'גם בלי רעיון. בונים צוות ביחד. ')+'לא מחייב: המורה תחזור אליכם עם פרטים.</p>'
       + privateFields()
@@ -367,6 +401,9 @@
     if(t.id === "sparkGo") return ideaModal();
     if(t.id === "joinBtn") return joined["כללי"] ? toast("כבר נרשמתם 🙌 המורה תחזור אליכם") : joinModal("כללי");
     if(t.dataset.join) return joinModal(t.dataset.join);
+    if(t.dataset.kit) return copyText(bankOf("bank-" + t.dataset.kit).prompt);
+    if(t.dataset.bjoin) return joinModal("bank-" + t.dataset.bjoin);
+    if(t.dataset.twist){ var tb = bankOf("bank-" + t.dataset.twist); return ideaModal(tb.problem, "הטוויסט שלי על \"" + tb.title + "\": ", tb.track); }
     if(t.id === "sparkNext") return nextSpark();
     if(t.id === "sparkCopy") return copyText(D.sparkPrompt);
     if(t.parentNode && t.parentNode.id === "iTrack"){ sheet.querySelectorAll("#iTrack button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
@@ -392,14 +429,14 @@
 
     if(t.id === "jSend"){
       var jm = $("jMsg"), id = t.dataset.id, who2 = readPrivate(jm); if(!who2) return;
-      var it = ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0];
+      var bk = bankOf(id), it = ((live && live.ideas) || []).filter(function(x){ return x.id === id; })[0];
       t.disabled = true; jm.className = "msg"; jm.textContent = "שולח...";
-      send({ kind:"join", realName:who2.name, cls:who2.cls, ideaId:id, ideaTitle:it ? it.title : "", timestamp:new Date().toISOString() })
+      send({ kind:"join", realName:who2.name, cls:who2.cls, ideaId:id, ideaTitle:it ? it.title : (bk ? "בנק: " + bk.title : ""), timestamp:new Date().toISOString() })
         .then(function(){
           joined[id] = true; if(id !== "כללי") joined["כללי"] = true; setJ("localStorage", "ideas.joined", joined);
           if(it){ it.joins = (it.joins || 0) + 1; }
           if(live && !live.off) live.joinsTotal = (live.joinsTotal || 0) + 1;
-          closeModal(); renderWall(); confetti(100); toast(it ? "🙋 אתם בפנים! נתראה בהאקתון" : "🙋 נרשמתם! המורה תחזור אליכם עם פרטים");
+          closeModal(); renderWall(); renderBank(); confetti(100); toast(it || bk ? "🙋 אתם בפנים! נתראה בהאקתון" : "🙋 נרשמתם! המורה תחזור אליכם עם פרטים");
         })
         .catch(function(){ t.disabled = false; jm.className = "msg err"; jm.textContent = "לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."; });
       return;
@@ -432,7 +469,7 @@
   }
 
   // ---------- התחלה ----------
-  renderTracks(); nextSpark(); renderWall(); load();
+  renderBank(); renderTracks(); nextSpark(); renderWall(); load();
 })();
 </script>
 </body>
