@@ -567,6 +567,26 @@
     if(!S.endpoint) return Promise.reject(new Error("no endpoint"));
     return fetch(S.endpoint, { method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
   }
+  // שליחת משחק: לא no-cors, כדי לדעת אם המשחק באמת נשמר. סקריפט ישן עונה בלי game:true
+  var GAME_ERR = {
+    off:"לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב.",
+    old:"המשחק לא נשמר: הסקריפט בגיליון עוד לא עודכן. ספרו למורה, ושמרו את הקובץ אצלכם.",
+    empty:"הקובץ ריק. בדקו שבחרתם את הקובץ הנכון.",
+    big:"הקובץ גדול מדי. דברו עם המורה.",
+    server:"המשחק לא נשמר בגלל תקלה אצל גוגל. שמרו את הקובץ אצלכם וספרו למורה."
+  };
+  function sendGame(payload){
+    if(!S.endpoint) return Promise.reject(new Error("old"));
+    return fetch(S.endpoint, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) })
+      .then(function(r){ return r.json(); }, function(){ throw new Error("off"); })
+      .then(function(j){
+        // סקריפט ישן: אי אפשר לדעת בוודאות, אז מתנהגים כמו פעם (נשלח)
+        if(j && j.ok && !j.game) return { ok:true, old:true };
+        if(!j || !j.game) throw new Error("server");
+        if(!j.ok) throw new Error(j.err || "server");
+        return j;
+      });
+  }
   function today(){ var d = new Date(); return d.getDate() + "." + (d.getMonth()+1); }
 
   // ---------- שמירה בענן (כינוי + קוד סודי, דרך אותו סקריפט. לשונית "התקדמות" בגיליון) ----------
@@ -904,9 +924,9 @@
       P().realName = g.realName; save();
       var reader = new FileReader();
       reader.onload = function(){
-        send({ kind:"game", nick:P().nick, realName:g.realName, gameName:g.gameName, genre:g.genre, proud:g.proud, fileName:pickedFile.name, html:String(reader.result), timestamp:new Date().toISOString() })
-          .then(function(){ closeModal(); progress(function(){ P().uploads.push({ title:g.gameName, date:today() }); }, "📼 המשחק נשלח לארקייד! אחרי אישור המורה הוא יעלה"); })
-          .catch(function(){ t.disabled = false; err("לא הצליח לשלוח. בדקו שיש אינטרנט ונסו שוב."); });
+        sendGame({ kind:"game", nick:P().nick, realName:g.realName, gameName:g.gameName, genre:g.genre, proud:g.proud, fileName:pickedFile.name, html:String(reader.result), timestamp:new Date().toISOString() })
+          .then(function(j){ closeModal(); progress(function(){ P().uploads.push({ title:g.gameName, date:today() }); }, j.old ? "📼 המשחק נשלח לארקייד! אחרי אישור המורה הוא יעלה" : "📼 המשחק התקבל ✓ אחרי אישור המורה הוא יעלה לארקייד"); })
+          .catch(function(e){ t.disabled = false; err(GAME_ERR[e && e.message] || GAME_ERR.server); });
       };
       reader.onerror = function(){ t.disabled = false; err("לא הצלחנו לקרוא את הקובץ. נסו לבחור אותו שוב."); };
       reader.readAsText(pickedFile);

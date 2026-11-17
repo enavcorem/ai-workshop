@@ -32,6 +32,9 @@
  * - לשונית "הצטרפויות": מי רוצה להשתתף בהאקתון, ועל איזה רעיון. זו רשימת המשתתפים.
  * מעדכנים באותה דרך (Manage deployments -> העיפרון -> New version -> Deploy). אין הרשאה חדשה.
  * (22.10) מה שמתפרסם נשמר בעותק מהיר, ומתחדש לבד בכל עריכה בלשוניות האלה (onEdit). אם משהו לא התעדכן: לערוך תא כלשהו בלשונית.
+ *
+ * עדכון (14.11.2026): שליחת משחק עונה תשובה אמיתית (game:true + ok/err), והסטודיו מראה לתלמיד אם המשחק באמת נשמר.
+ * אם תלמיד רואה "הסקריפט בגיליון עוד לא עודכן", זה סימן שהפריסה הפעילה ישנה: Manage deployments -> העיפרון -> New version -> Deploy.
  */
 
 function doPost(e) {
@@ -102,9 +105,34 @@ function clean_(v, max) {
 }
 
 // שומר את קובץ ה-HTML בתיקייה בדרייב, ושורה בלשונית "ארקייד". לא מתפרסם לשום מקום בלי אישור המורה
+// בדיקה חד פעמית למורה: בעורך בוחרים checkDrive בתפריט הפונקציות ולוחצים Run.
+// אם גוגל מבקש הרשאה לדרייב, מאשרים. ביומן (Execution log) מופיע הקישור לתיקיית המשחקים וכמה קבצים יש בה
+function checkDrive() {
+  var folderName = "ארקייד הסטודיו - משחקים שהוגשו";
+  var it = DriveApp.getFoldersByName(folderName);
+  var folder = it.hasNext() ? it.next() : DriveApp.createFolder(folderName);
+  var n = 0, files = folder.getFiles();
+  while (files.hasNext()) { files.next(); n++; }
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ארקייד");
+  Logger.log("תיקיית המשחקים: " + folder.getUrl());
+  Logger.log("קבצים בתיקייה: " + n + " | שורות בלשונית ארקייד: " + (sh ? Math.max(sh.getLastRow() - 1, 0) : "אין לשונית"));
+}
+
+// התשובה כוללת game:true, כדי שהסטודיו ידע שהמשחק באמת נשמר (סקריפט ישן עונה בלי game)
+function gameReply_(o) {
+  o.game = true;
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+
 function saveGame_(ss, data) {
+  try { return saveGameIn_(ss, data); }
+  catch (err) { return gameReply_({ ok: false, err: "server", detail: String(err && err.message || err).slice(0, 200) }); }
+}
+
+function saveGameIn_(ss, data) {
   var html = String(data.html || "");
-  if (!html || html.length > 5000000) return ok_();
+  if (!html) return gameReply_({ ok: false, err: "empty" });
+  if (html.length > 5000000) return gameReply_({ ok: false, err: "big" });
 
   var folderName = "ארקייד הסטודיו - משחקים שהוגשו";
   var it = DriveApp.getFoldersByName(folderName);
@@ -120,7 +148,7 @@ function saveGame_(ss, data) {
     new Date(), clean_(data.realName, 60), clean_(data.nick, 30), clean_(data.gameName, 60),
     clean_(data.genre, 40), clean_(data.proud, 300), file.getUrl(), "ממתין לאישור"
   ]);
-  return ok_();
+  return gameReply_({ ok: true });
 }
 
 // כוח חדש שתלמיד גילה. המורה מחליטה אם הוא עולה ללוח
