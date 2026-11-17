@@ -304,8 +304,25 @@ function onEdit(e) {
   try { refreshPublic_(); } catch (err) {}
 }
 
+// "מאושר", "אושר", "✅ מאושר" — כן. "לא מאושר", "ממתין לאישור" — לא
 function approved_(v) {
-  return /^\s*מאושר/.test(String(v || ""));
+  var t = String(v || "").replace(/[^֐-׿ ]/g, "").trim();
+  return /^(מאושר|אושר)/.test(t);
+}
+
+// לבדיקה של המורה: בעורך בוחרים refreshNow ולוחצים Run.
+// מנקה את העותק המהיר, בונה אותו מחדש, ומדפיס ביומן מה יש בלשונית "ארקייד" ומה עלה לארקייד
+function refreshNow() {
+  CacheService.getScriptCache().remove(PUB_KEY);
+  var o = JSON.parse(refreshPublic_());
+  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("ארקייד");
+  if (!sh) { Logger.log("אין לשונית בשם ארקייד"); return; }
+  var head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  Logger.log("כותרות: " + head.map(function (h, i) { return (i + 1) + "=[" + h + "]"; }).join(" "));
+  table_(SpreadsheetApp.getActiveSpreadsheet(), "ארקייד").forEach(function (r) {
+    Logger.log("שורה " + r._row + ": " + r["שם המשחק"] + " | סטטוס=[" + r["סטטוס"] + "] | " + (approved_(r["סטטוס"]) ? "עולה לארקייד" : "לא עולה"));
+  });
+  Logger.log("משחקים באתר עכשיו: " + o.games.length);
 }
 
 // כל שורות הלשונית כאובייקטים לפי שם העמודה, עם מספר השורה ב-_row
@@ -315,7 +332,7 @@ function table_(ss, name) {
   var v = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues(), head = v.shift();
   return v.map(function (r, i) {
     var o = { _row: i + 2 };
-    head.forEach(function (h, j) { o[h] = r[j]; });
+    head.forEach(function (h, j) { o[String(h).trim()] = r[j]; });
     return o;
   });
 }
