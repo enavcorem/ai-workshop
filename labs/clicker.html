@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>המאפייה המתוקה</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; font-family: "Varela Round", "Segoe UI", system-ui, sans-serif; background: linear-gradient(160deg, #ffe4ef, #fff6e0 55%, #e3f4ff); color: #5b3a4a; display: flex; flex-direction: column; align-items: center; padding: 64px 16px 24px; user-select: none; }
+  h1 { margin: 0; font-size: 28px; color: #e2558b; text-shadow: 0 2px 0 #fff; }
+  .goal { margin: 6px 0 14px; font-size: 15px; }
+  .bar { width: min(420px, 100%); height: 18px; background: #fff; border-radius: 999px; box-shadow: inset 0 2px 4px rgba(0,0,0,.08); overflow: hidden; }
+  .bar div { height: 100%; width: 0; background: linear-gradient(90deg, #ff9ec4, #ffcf6b); border-radius: 999px; transition: width .2s; }
+  .count { font-size: 40px; font-weight: 800; margin: 14px 0 0; color: #c2477a; }
+  .rate { font-size: 14px; opacity: .8; }
+  #cookie { font-size: 130px; line-height: 1; background: radial-gradient(circle, #fff 0 55%, transparent 56%); border: 0; cursor: pointer; margin: 16px 0; transition: transform .08s; filter: drop-shadow(0 10px 14px rgba(194,71,122,.25)); position: relative; }
+  #cookie:active { transform: scale(.92); }
+  .shop { background: #fff; border-radius: 22px; padding: 14px 18px; width: min(420px, 100%); box-shadow: 0 8px 22px rgba(226,85,139,.15); display: flex; align-items: center; gap: 12px; }
+  .shop .e { font-size: 38px; }
+  .shop .t { flex: 1; }
+  .shop b { display: block; font-size: 17px; }
+  .shop small { font-size: 13px; opacity: .8; }
+  #buy { background: #e2558b; color: #fff; border: 0; border-radius: 16px; padding: 12px 16px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; }
+  #buy:disabled { background: #e8c6d4; cursor: not-allowed; }
+  .pop { position: fixed; pointer-events: none; font-weight: 800; color: #e2558b; font-size: 22px; animation: up .8s ease-out forwards; }
+  @keyframes up { to { transform: translateY(-60px); opacity: 0; } }
+  #win { position: fixed; inset: 0; background: rgba(255,228,239,.92); display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-size: 22px; padding: 16px; }
+  #win button { margin-top: 14px; background: #e2558b; color: #fff; border: 0; border-radius: 16px; padding: 12px 22px; font-size: 18px; font-weight: 800; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+  <h1>🍪 המאפייה המתוקה</h1>
+  <div class="goal">המטרה: לאפות 500 עוגיות</div>
+  <div class="bar"><div id="bar"></div></div>
+  <div class="count" id="count">0</div>
+  <div class="rate" id="rate">עוגיות בשנייה: 0</div>
+  <button id="cookie" type="button" aria-label="לחצו לאפות עוגייה">🍪</button>
+  <div class="shop">
+    <div class="e">🧁</div>
+    <div class="t"><b>תנור קטן</b><small>אופה לבד. יש לכם: <span id="owned">0</span></small></div>
+    <button id="buy" type="button">קנייה: <span id="cost">10</span> 🍪</button>
+  </div>
+  <div id="win"><div>🎉 ניצחת!<br>500 עוגיות ב-<span id="secs"></span> שניות</div><button id="again" type="button">עוד סיבוב</button></div>
+
+<script>
+  // ===== הגדרות המשחק: המספרים שקובעים איך הוא מרגיש =====
+  var CFG = {
+    priceGrowth: 3,   // פי כמה עולה המחיר של כל תנור חדש
+    clickPower: 1,    // כמה עוגיות נותנת לחיצה אחת
+    autoRate: 0.2     // כמה עוגיות בשנייה אופה כל תנור
+  };
+
+  var GOAL = 500, BASE_COST = 10;
+  var cookies, owned, start, won;
+
+  function cost() { return Math.round(BASE_COST * Math.pow(CFG.priceGrowth, owned)); }
+
+  function reset() { cookies = 0; owned = 0; start = Date.now(); won = false; document.getElementById("win").style.display = "none"; draw(); }
+
+  function draw() {
+    document.getElementById("count").textContent = Math.floor(cookies);
+    document.getElementById("rate").textContent = "עוגיות בשנייה: " + (owned * CFG.autoRate).toFixed(1);
+    document.getElementById("owned").textContent = owned;
+    document.getElementById("cost").textContent = cost();
+    document.getElementById("buy").disabled = cookies < cost();
+    document.getElementById("bar").style.width = Math.min(100, cookies / GOAL * 100) + "%";
+  }
+
+  function addCookies(n) {
+    cookies += n;
+    if (!won && cookies >= GOAL) {
+      won = true;
+      document.getElementById("secs").textContent = Math.round((Date.now() - start) / 1000);
+      document.getElementById("win").style.display = "flex";
+    }
+    draw();
+  }
+
+  // לחיצה על העוגייה, עם "+1" שעף למעלה
+  document.getElementById("cookie").addEventListener("click", function (e) {
+    addCookies(CFG.clickPower);
+    var p = document.createElement("div");
+    p.className = "pop"; p.textContent = "+" + CFG.clickPower;
+    p.style.left = (e.clientX || innerWidth / 2) + "px"; p.style.top = (e.clientY || innerHeight / 2) + "px";
+    document.body.appendChild(p); setTimeout(function () { p.remove(); }, 800);
+  });
+
+  document.getElementById("buy").addEventListener("click", function () {
+    if (cookies < cost()) return;
+    cookies -= cost(); owned++; draw();
+  });
+  document.getElementById("again").addEventListener("click", reset);
+
+  // התנורים אופים 10 פעמים בשנייה
+  setInterval(function () {
+    if (won) return;
+    addCookies(owned * CFG.autoRate / 10);
+    // נתקע: עבר זמן, והתנור הבא יקר מדי
+    if ((Date.now() - start) > 20000 && cost() >= 90 && window.labStuck) labStuck();
+  }, 100);
+
+  reset();
+</script>
+<!-- LAB:START -->
+<script>
+  var LAB = { sliders: [
+    { key: "priceGrowth", label: "📈 כמה המחיר קופץ", min: 1.05, max: 4, step: 0.05 },
+    { key: "clickPower", label: "👆 כוח הלחיצה", min: 1, max: 10, step: 1 },
+    { key: "autoRate", label: "🧁 כמה אופה כל תנור", min: 0.1, max: 5, step: 0.1 }
+  ] };
+</script>
+<script src="lab.js"></script>
+<!-- LAB:END -->
+</body>
+</html>

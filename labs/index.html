@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>משחקים שבורים</title>
+<meta name="robots" content="noindex">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #0f172a; color: #f1f5f9; font-family: "Segoe UI", system-ui, sans-serif; padding: 28px 16px 40px; }
+  .in { max-width: 860px; margin: 0 auto; }
+  h1 { margin: 0 0 6px; font-size: 30px; }
+  .lead { font-size: 17px; line-height: 1.6; color: #cbd5e1; margin: 0 0 8px; }
+  ol { font-size: 16px; line-height: 1.7; color: #e2e8f0; padding-inline-start: 22px; margin: 0 0 22px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  .card { display: block; text-decoration: none; border-radius: 20px; padding: 20px; min-height: 190px; transition: transform .15s; }
+  .card:hover, .card:focus-visible { transform: translateY(-4px); }
+  .card .e { font-size: 52px; }
+  .card b { display: block; font-size: 22px; margin: 6px 0 4px; }
+  .card span { font-size: 15px; line-height: 1.5; }
+  .clicker { background: linear-gradient(160deg, #ffe4ef, #fff6e0); color: #7a2e52; border-radius: 28px; }
+  .runner { background: linear-gradient(180deg, #12001f, #3b0764 70%, #ff2e88); color: #fff; box-shadow: 0 0 0 2px #ff2e88, 0 0 20px rgba(255,46,136,.4); }
+  .catch { background: #000; color: #39ff14; font-family: "Courier New", monospace; border: 3px solid #39ff14; border-radius: 4px; }
+  .vote { margin-top: 26px; background: #1e293b; border-radius: 16px; padding: 16px 18px; font-size: 16px; line-height: 1.6; }
+  .vote b { color: #fbbf24; }
+  a.back { color: #93c5fd; display: inline-block; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="in">
+  <h1>🔧 משחקים שבורים</h1>
+  <p class="lead">שלושה משחקים קטנים. כל אחד מהם נשבר אחרי כמה שניות של משחק, וכל אחד בדרך אחרת.</p>
+  <ol>
+    <li>בוחרים משחק ומשחקים עד שהוא נתקע.</li>
+    <li>לוחצים <b>🔧 פריצה</b> ומזיזים את המספרים עד שהמשחק כיף.</li>
+    <li>בוחרים משחק נוסף. מה נשבר בו?</li>
+  </ol>
+  <div class="cards">
+    <a class="card clicker" href="clicker.html"><div class="e">🍪</div><b>המאפייה המתוקה</b><span>קליקר: לוחצים, אופים, קונים תנורים. מתי זה מפסיק להתקדם?</span></a>
+    <a class="card runner" href="runner.html"><div class="e">🏄</div><b>גולש הניאון</b><span>ריצה בלי סוף: קופצים מעל גלים. כמה זמן תחזיקו?</span></a>
+    <a class="card catch" href="catch.html"><div class="e">👾</div><b>פולשי הפיקסלים</b><span>יריות: אל תתנו לפולשים לנחות. למה הם לא נגמרים?</span></a>
+  </div>
+  <div class="vote">🗳️ <b>בסוף נצביע:</b> באיזה משחק הכי כיף לשחק? איזה הכי כיף לתקן? ומה הייתם משנים בו בעצמכם?</div>
+  <a class="back" href="../studio.html">← חזרה לסטודיו</a>
+</div>
+</body>
+</html>

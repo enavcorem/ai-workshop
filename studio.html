@@ -188,6 +188,11 @@
   .bld .spell{white-space:pre-wrap; max-height:220px; overflow:auto;}
   .bld .brow{display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;}
   .bld .brow a{text-decoration:none;}
+  /* "💡 למה ככה?" בראש הבונה */
+  .why{background:rgba(255,210,63,.08); border:1px solid rgba(255,210,63,.35); border-radius:14px; padding:10px 12px; margin:10px 0 4px;}
+  .why b.wt{display:block; color:var(--yellow); font-size:15px; margin-bottom:4px;}
+  .why ol,.why ul{margin:0; padding-inline-start:20px;}
+  .why li{font-size:14px; line-height:1.55; margin:3px 0;}
   .avatars{display:grid; grid-template-columns:repeat(6, 1fr); gap:6px;}
   .avatars button{font-size:26px; padding:6px 0; border-radius:12px; border:2px solid transparent; background:var(--surface); cursor:pointer;}
   .avatars button.sel{border-color:var(--yellow); background:var(--surface-2);}
@@ -523,7 +528,10 @@
   function bHidden(b, sel, f){ return !!f.hideIf && Object.keys(f.hideIf).some(function(fid){ return bOpt(b, sel, fid).k === f.hideIf[fid]; }); }
   function builderInner(b, sel){
     var st = b.starter && bKey(b, sel) === b.starter.when;
-    return b.fields.map(function(f){
+    // why = הסבר קצר ל"למה", לפני השדות. showIf = { שדה: k } מציג רק כשהבחירה מתאימה. ol = רשימה ממוספרת
+    var why = (b.why || []).filter(function(w){ return !w.showIf || Object.keys(w.showIf).every(function(fid){ return bOpt(b, sel, fid).k === w.showIf[fid]; }); })
+      .map(function(w){ var tag = w.ol ? "ol" : "ul"; return '<div class="why"><b class="wt">'+esc(w.title)+'</b><'+tag+'>'+w.lines.map(function(l){ return '<li>'+esc(l)+'</li>'; }).join("")+'</'+tag+'></div>'; }).join("");
+    return why + b.fields.map(function(f){
         return '<div class="field"'+(bHidden(b, sel, f) ? ' style="display:none"' : '')+'><label>'+esc(f.label)+'</label><div class="chips">'
           + f.options.map(function(o, i){ var on = i === (sel[f.id] || 0); return '<button type="button" data-bf="'+esc(f.id)+'" data-bi="'+i+'" aria-pressed="'+on+'"'+(on ? ' class="sel"' : '')+'>'+esc(o.t)+'</button>'; }).join("")
           + '</div></div>';

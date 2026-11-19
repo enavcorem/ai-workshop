@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>גולש הניאון</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #12001f; overflow: hidden; font-family: "Segoe UI", system-ui, sans-serif; }
+  canvas { display: block; width: 100vw; height: 100vh; touch-action: manipulation; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  // ===== הגדרות המשחק: המספרים שקובעים איך הוא מרגיש =====
+  var CFG = {
+    speedUp: 30,      // בכמה המהירות עולה בכל שנייה
+    maxSpeed: 2000,   // המהירות הכי גבוהה שמותרת (תקרה)
+    gapSize: 380      // מרחק מינימלי בין שני גלים
+  };
+
+  var c = document.getElementById("c"), ctx = c.getContext("2d");
+  var W, H, GROUND;
+  function resize() { W = c.width = innerWidth; H = c.height = innerHeight; GROUND = Math.round(H * 0.72); }
+  addEventListener("resize", resize); resize();
+
+  var START_SPEED = 320, JUMP = 760, GRAVITY = 2100;
+  var state, speed, dist, time, player, waves, sinceWave, nextGap, best = 0;
+
+  function reset() {
+    state = "ready"; speed = START_SPEED; dist = 0; time = 0; sinceWave = 0; nextGap = 400;
+    player = { x: Math.max(70, W * 0.18), y: GROUND, vy: 0, w: 34, h: 46 };
+    waves = [];
+  }
+
+  function jump() {
+    if (state === "ready") { state = "run"; }
+    else if (state === "dead") { reset(); state = "run"; return; }
+    if (player.y >= GROUND) player.vy = -JUMP;
+  }
+  addEventListener("keydown", function (e) {
+    if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); jump(); }
+  });
+  c.addEventListener("pointerdown", function (e) { e.preventDefault(); jump(); });
+
+  function update(dt) {
+    if (state !== "run") return;
+    time += dt;
+    speed = Math.min(CFG.maxSpeed, speed + CFG.speedUp * dt);
+    dist += speed * dt;
+
+    // קפיצה וכוח משיכה
+    player.vy += GRAVITY * dt; player.y += player.vy * dt;
+    if (player.y > GROUND) { player.y = GROUND; player.vy = 0; }
+
+    // גלים חדשים
+    sinceWave += speed * dt;
+    if (sinceWave > nextGap) {
+      sinceWave = 0; nextGap = CFG.gapSize + Math.random() * CFG.gapSize;
+      var hgt = 34 + Math.random() * 18;
+      waves.push({ x: W + 20, w: 34, h: hgt });
+    }
+    waves.forEach(function (w) { w.x -= speed * dt; });
+    waves = waves.filter(function (w) { return w.x > -60; });
+
+    // התנגשות (קצת סלחנית)
+    waves.forEach(function (w) {
+      var px1 = player.x - player.w / 2 + 6, px2 = player.x + player.w / 2 - 6;
+      if (px2 > w.x + 6 && px1 < w.x + w.w - 6 && player.y > GROUND - w.h + 8) die();
+    });
+
+    // נתקע: מהר מדי
+    if (speed > 900 && window.labStuck) labStuck();
+  }
+
+  function die() {
+    state = "dead"; best = Math.max(best, Math.floor(dist / 10));
+    if (time > 6 && window.labStuck) labStuck();
+  }
+
+  // ===== ציור בסגנון סינת'ווייב =====
+  function draw() {
+    var sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+    sky.addColorStop(0, "#12001f"); sky.addColorStop(0.6, "#3b0764"); sky.addColorStop(1, "#ff2e88");
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, GROUND);
+
+    // שמש עם פסים
+    var sr = Math.min(W, H) * 0.18, sx = W * 0.62, sy = GROUND - sr * 0.35;
+    var sun = ctx.createLinearGradient(0, sy - sr, 0, sy + sr);
+    sun.addColorStop(0, "#ffe66d"); sun.addColorStop(1, "#ff2e88");
+    ctx.save(); ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = sun; ctx.fillRect(sx - sr, sy - sr, sr * 2, sr * 2);
+    ctx.fillStyle = "#3b0764";
+    for (var i = 0; i < 6; i++) ctx.fillRect(sx - sr, sy + i * sr * 0.16, sr * 2, 2 + i * 1.6);
+    ctx.restore();
+
+    // רצפת רשת שזזה
+    ctx.fillStyle = "#12001f"; ctx.fillRect(0, GROUND, W, H - GROUND);
+    ctx.strokeStyle = "rgba(255,46,136,.55)"; ctx.lineWidth = 1;
+    var frac = (dist * 0.003) % 1, N = 8;
+    for (var i = 0; i < N; i++) {
+      var yy = GROUND + Math.pow((i + frac) / N, 2) * (H - GROUND);
+      ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke();
+    }
+    for (var k = -12; k <= 12; k++) {
+      ctx.beginPath(); ctx.moveTo(W / 2 + k * 30, GROUND); ctx.lineTo(W / 2 + k * 160, H); ctx.stroke();
+    }
+    ctx.strokeStyle = "#ff2e88"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, GROUND); ctx.lineTo(W, GROUND); ctx.stroke();
+
+    // גלים (מכשולים)
+    ctx.shadowBlur = 16; ctx.shadowColor = "#00f0ff"; ctx.fillStyle = "#00f0ff";
+    waves.forEach(function (w) {
+      ctx.beginPath(); ctx.moveTo(w.x, GROUND); ctx.quadraticCurveTo(w.x + w.w * 0.2, GROUND - w.h * 1.2, w.x + w.w, GROUND - w.h);
+      ctx.lineTo(w.x + w.w * 0.75, GROUND); ctx.closePath(); ctx.fill();
+    });
+
+    // הגולש
+    ctx.shadowColor = "#ffe66d"; ctx.fillStyle = "#ffe66d";
+    var p = player;
+    ctx.fillRect(p.x - p.w / 2 - 6, p.y - 6, p.w + 12, 6);                     // גלשן
+    ctx.fillStyle = "#ff2e88"; ctx.shadowColor = "#ff2e88";
+    ctx.fillRect(p.x - 7, p.y - p.h + 14, 14, p.h - 20);                       // גוף
+    ctx.beginPath(); ctx.arc(p.x, p.y - p.h + 8, 9, 0, Math.PI * 2); ctx.fill(); // ראש
+    ctx.shadowBlur = 0;
+
+    // ניקוד ומהירות
+    ctx.fillStyle = "#fff"; ctx.font = "bold 20px system-ui"; ctx.textAlign = "right";
+    ctx.fillText("ניקוד: " + Math.floor(dist / 10) + "   שיא: " + best, W - 16, 34);
+    ctx.font = "15px system-ui"; ctx.fillStyle = speed > 900 ? "#ff5c5c" : "#c4b5fd";
+    ctx.fillText("מהירות: " + Math.round(speed), W - 16, 58);
+
+    // הודעות
+    ctx.textAlign = "center";
+    if (state === "ready") banner("🏄 גולש הניאון", "רווח, חץ למעלה או הקשה = קפיצה. קפצו מעל הגלים!");
+    if (state === "dead") banner("💥 נפלת! ניקוד " + Math.floor(dist / 10), "רווח או הקשה כדי לנסות שוב");
+  }
+  function banner(a, b) {
+    ctx.fillStyle = "rgba(18,0,31,.75)"; ctx.fillRect(0, H * 0.28, W, 100);
+    ctx.fillStyle = "#ffe66d"; ctx.font = "bold 30px system-ui"; ctx.fillText(a, W / 2, H * 0.28 + 44);
+    ctx.fillStyle = "#fff"; ctx.font = "16px system-ui"; ctx.fillText(b, W / 2, H * 0.28 + 76);
+  }
+
+  var last = performance.now();
+  function loop(now) {
+    var dt = Math.min(0.033, (now - last) / 1000); last = now;
+    update(dt); draw(); requestAnimationFrame(loop);
+  }
+  reset(); requestAnimationFrame(loop);
+</script>
+<!-- LAB:START -->
+<script>
+  var LAB = { sliders: [
+    { key: "speedUp", label: "🚀 כמה מהר מאיצים", min: 0, max: 80, step: 1 },
+    { key: "maxSpeed", label: "🛑 תקרת מהירות", min: 300, max: 2000, step: 50 },
+    { key: "gapSize", label: "↔️ מרחק בין גלים", min: 120, max: 600, step: 10 }
+  ] };
+</script>
+<script src="lab.js"></script>
+<!-- LAB:END -->
+</body>
+</html>
