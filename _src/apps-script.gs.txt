@@ -35,6 +35,11 @@
  *
  * עדכון (14.11.2026): שליחת משחק עונה תשובה אמיתית (game:true + ok/err), והסטודיו מראה לתלמיד אם המשחק באמת נשמר.
  * אם תלמיד רואה "הסקריפט בגיליון עוד לא עודכן", זה סימן שהפריסה הפעילה ישנה: Manage deployments -> העיפרון -> New version -> Deploy.
+ *
+ * עדכון (החנות, 26.11.2026): הארקייד הפך ל"חנות". מעדכנים באותה דרך (Manage deployments -> העיפרון -> New version -> Deploy). אין הרשאה חדשה.
+ * - בלשונית "ארקייד" נוספות לבד 4 עמודות בסוף: אמוג'י, למי זה, מה עוד חסר, מצב (בבנייה / גמור).
+ * - לשונית חדשה "תגובות": כל משחק ששיחקו בו, ❤️, 🐞 באג ו-💡 רעיון. תגובה לא נעימה? בעמודת "הסתרה" כותבים "מוסתר".
+ * - תלמיד ששולח גרסה חדשה של אותו משחק (אותו כינוי ואותו שם): מאשרים את השורה החדשה, והיא מחליפה את הישנה בחנות. הלבבות והתגובות נשמרים.
  */
 
 function doPost(e) {
@@ -47,6 +52,8 @@ function doPost(e) {
   // קיר הרעיונות
   if (data.kind === "idea") return saveIdea_(ss, data);
   if (data.kind === "join") return saveJoin_(ss, data);
+  // החנות: מונה משחקים ותגובות
+  if (data.kind === "react") return saveReact_(ss, data);
 
   var sheet = ss.getSheetByName("תשובות") || ss.insertSheet("תשובות");
   if (sheet.getLastRow() === 0) {
@@ -144,11 +151,61 @@ function saveGameIn_(ss, data) {
 
   var sh = sheetWithHeader_(ss, "ארקייד",
     ["זמן", "שם (למורה)", "כינוי בארקייד", "שם המשחק", "ענף", "במה אני הכי גאה", "קובץ", "סטטוס"]);
-  sh.appendRow([
-    new Date(), clean_(data.realName, 60), clean_(data.nick, 30), clean_(data.gameName, 60),
-    clean_(data.genre, 40), clean_(data.proud, 300), file.getUrl(), "ממתין לאישור"
-  ]);
+  // עמודות החנות (26.11) נוספות בסוף, כדי שגיליון קיים ימשיך לעבוד
+  var head = ensureCols_(sh, STORE_COLS);
+  var row = {
+    "זמן": new Date(), "שם (למורה)": clean_(data.realName, 60), "כינוי בארקייד": clean_(data.nick, 30),
+    "שם המשחק": clean_(data.gameName, 60), "ענף": clean_(data.genre, 40), "במה אני הכי גאה": clean_(data.proud, 300),
+    "קובץ": file.getUrl(), "סטטוס": "ממתין לאישור",
+    "אמוג'י": clean_(data.emoji, 8), "למי זה": clean_(data.forWho, 120),
+    "מה עוד חסר": clean_(data.missing, 160), "מצב": data.done ? "גמור" : "בבנייה"
+  };
+  sh.appendRow(head.map(function (h) { return row.hasOwnProperty(h) ? row[h] : ""; }));
   return gameReply_({ ok: true });
+}
+
+// ---------- החנות (26.11): מונה משחקים ותגובות ----------
+var STORE_COLS = ["אמוג'י", "למי זה", "מה עוד חסר", "מצב"];
+var REACT_HEAD = ["זמן", "משחק", "סוג", "כינוי", "טקסט", "הסתרה"];
+var REACT_TYPES = { play: 1, love: 1, bug: 1, idea: 1 };
+
+// מוסיף לשורת הכותרת עמודות שחסרות, ומחזיר את הכותרת המלאה
+function ensureCols_(sh, names) {
+  var head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(function (h) { return String(h).trim(); });
+  names.forEach(function (n) {
+    if (head.indexOf(n) < 0) { head.push(n); sh.getRange(1, head.length).setValue(n); }
+  });
+  return head;
+}
+
+// מפתח של משחק = כינוי + שם. גרסה חדשה של אותו משחק שומרת על הלבבות והתגובות
+function gameKey_(by, title) {
+  return nickKey_(by) + "|" + String(title || "").trim();
+}
+
+// תגובה מהחנות: play / love / bug / idea. טקסט רק לבאג ולרעיון.
+// המורה יכולה להסתיר תגובה: בעמודת "הסתרה" בלשונית "תגובות" כותבים "מוסתר"
+function saveReact_(ss, data) {
+  var type = String(data.type || "");
+  if (!REACT_TYPES[type]) return ok_();
+  var key = clean_(data.game, 100), text = (type === "bug" || type === "idea") ? clean_(data.text, 140) : "";
+  if (!key || ((type === "bug" || type === "idea") && !text)) return ok_();
+  var sh = sheetWithHeader_(ss, "תגובות", REACT_HEAD);
+  sh.appendRow([new Date(), text_(key), type, text_(clean_(data.nick, 30)), text_(text), ""]);
+  // מעדכנים גם את העותק המהיר, כדי שהמונה יזוז בלי לחכות
+  var cache = CacheService.getScriptCache(), hit = cache.get(PUB_KEY);
+  if (hit) {
+    try {
+      var o = JSON.parse(hit);
+      (o.games || []).forEach(function (g) {
+        if (g.key !== key) return;
+        g[type] = (g[type] || 0) + 1;
+        if (text) { g.notes = (g.notes || []).concat([{ type: type, by: clean_(data.nick, 30), text: text }]).slice(-8); }
+      });
+      cache.put(PUB_KEY, JSON.stringify(o), PUB_TTL);
+    } catch (err) { cache.remove(PUB_KEY); }
+  }
+  return ok_();
 }
 
 // כוח חדש שתלמיד גילה. המורה מחליטה אם הוא עולה ללוח
@@ -279,7 +336,7 @@ function saveJoin_(ss, data) {
 // ?op=public -> כוחות, משחקים ורעיונות מאושרים, בלי שמות אמיתיים
 // ?op=game&id=N -> ה-HTML של משחק מאושר (N = מספר השורה בלשונית "ארקייד")
 // פתיחת הגיליון איטית (10-30 שניות), ולכן התשובה נשמרת בעותק לשתי דקות, ומתחדשת גם בכל עריכה בגיליון. לא עלה משהו? להריץ refreshNow
-var PUB_KEY = "public", PUB_TTL = 120, PUB_SHEETS = ["כוחות", "ארקייד", "רעיונות", "הצטרפויות"];
+var PUB_KEY = "public", PUB_TTL = 120, PUB_SHEETS = ["כוחות", "ארקייד", "רעיונות", "הצטרפויות", "תגובות"];
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
@@ -342,9 +399,27 @@ function public_() {
   var powers = table_(ss, "כוחות").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
     return { emoji: "⚡", name: String(r["שם הכוח"]), when: String(r["מתי משתמשים"]), spell: String(r["הלחש"]), by: String(r["כינוי"]) };
   });
-  var games = table_(ss, "ארקייד").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
-    return { id: r._row, emoji: "🎮", title: String(r["שם המשחק"]), by: String(r["כינוי בארקייד"]), genre: String(r["ענף"]), proud: String(r["במה אני הכי גאה"]) };
+  // החנות: גרסה חדשה של אותו משחק (אותו כינוי ושם) מחליפה את הקודמת, והמונים נשמרים
+  var byKey = {}, order = [];
+  table_(ss, "ארקייד").filter(function (r) { return approved_(r["סטטוס"]); }).forEach(function (r) {
+    var by = String(r["כינוי בארקייד"]), title = String(r["שם המשחק"]), key = gameKey_(by, title);
+    var prev = byKey[key];
+    if (!prev) order.push(key);
+    byKey[key] = { id: r._row, key: key, emoji: String(r["אמוג'י"] || "") || "🎮", title: title, by: by,
+      genre: String(r["ענף"] || ""), proud: String(r["במה אני הכי גאה"] || ""), forWho: String(r["למי זה"] || ""),
+      missing: String(r["מה עוד חסר"] || ""), wip: String(r["מצב"] || "") === "בבנייה",
+      version: prev ? prev.version + 1 : 1, play: 0, love: 0, bug: 0, idea: 0, notes: [] };
   });
+  table_(ss, "תגובות").forEach(function (r) {
+    var g = byKey[String(r["משחק"])], type = String(r["סוג"]);
+    if (!g || !REACT_TYPES[type] || /מוסתר/.test(String(r["הסתרה"]))) return;
+    g[type]++;
+    if (r["טקסט"]) g.notes.push({ type: type, by: String(r["כינוי"]), text: String(r["טקסט"]) });
+  });
+  // החדש ביותר (או זה שעודכן אחרון) ראשון
+  var games = order.map(function (k) { return byKey[k]; }).sort(function (a, b) { return b.id - a.id; });
+  // העותק המהיר מוגבל ל-100KB, ולכן רק 8 התגובות האחרונות לכל משחק
+  games.forEach(function (g) { g.notes = g.notes.slice(-8); });
   var count = {}, joins = table_(ss, "הצטרפויות");
   joins.forEach(function (r) { var k = String(r["מזהה רעיון"]); count[k] = (count[k] || 0) + 1; });
   var ideas = table_(ss, "רעיונות").filter(function (r) { return approved_(r["סטטוס"]); }).map(function (r) {
@@ -352,7 +427,7 @@ function public_() {
     return { id: id, title: String(r["שם הרעיון"]), problem: String(r["מה הבעיה"]), how: String(r["איך AI עוזר"]),
       track: String(r["מסלול"]), by: String(r["כינוי לתצוגה"]), joins: count[id] || 0 };
   }).reverse();
-  return { ok: true, powers: powers, games: games, ideas: ideas, joinsTotal: joins.length };
+  return { ok: true, store: true, powers: powers, games: games, ideas: ideas, joinsTotal: joins.length };
 }
 
 function game_(id) {

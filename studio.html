@@ -146,6 +146,18 @@
   .tag{display:inline-block; font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; background:var(--surface-2); color:var(--cyan); border:1px solid var(--border);}
   .proud{font-size:13.5px; color:var(--ink); background:rgba(255,210,63,.08); border-inline-start:3px solid var(--yellow); padding:6px 10px; border-radius:6px;}
   .game .btn{margin-top:auto;}
+  /* החנות (26.11): גישה מוקדמת, מונים ותגובות */
+  .game .cover{position:relative;}
+  .wip{position:absolute; top:8px; inset-inline-start:8px; font-size:11.5px; font-weight:900; padding:3px 9px; border-radius:999px; background:rgba(12,10,30,.75); color:var(--yellow); border:1px solid rgba(255,210,63,.5);}
+  .ver{position:absolute; top:8px; inset-inline-end:8px; font-size:11.5px; font-weight:800; padding:3px 9px; border-radius:999px; background:rgba(12,10,30,.75); color:var(--cyan);}
+  .forwho{font-size:13.5px; color:var(--ink-soft);}
+  .missing{font-size:13px; color:var(--ink); background:rgba(255,210,63,.08); border-inline-start:3px solid var(--yellow); padding:6px 10px; border-radius:6px;}
+  .gstats{display:flex; gap:10px; flex-wrap:wrap; font-size:13px; color:var(--ink-soft); font-weight:700;}
+  .reacts{display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;}
+  .reacts .btn{margin-top:0; padding:7px 4px; font-size:13px;}
+  .notes-btn{background:none; border:none; color:var(--cyan); font-weight:700; font-size:13px; cursor:pointer; padding:0; text-align:start;}
+  .note-li{list-style:none; padding:8px 10px; border-radius:10px; background:var(--surface-2); margin-bottom:6px; font-size:14px;}
+  .note-li small{color:var(--ink-faint);}
   .empty{text-align:center; padding:28px 16px; border:2px dashed var(--border); border-radius:20px; color:var(--ink-soft);}
   .empty .ee{font-size:46px;}
   .empty b{display:block; font-family:var(--font-display); font-size:18px; color:var(--ink); margin:6px 0 4px;}
@@ -271,7 +283,7 @@
   <nav class="tabs" role="tablist" aria-label="אזורי הסטודיו">
     <button class="tab" role="tab" data-tab="quests" aria-selected="true">🗺️ אתגרים</button>
     <button class="tab" role="tab" data-tab="powers" aria-selected="false">⚡ כוחות <span class="cnt" id="cntPowers"></span></button>
-    <button class="tab" role="tab" data-tab="arcade" aria-selected="false">🕹️ ארקייד <span class="cnt" id="cntGames"></span></button>
+    <button class="tab" role="tab" data-tab="arcade" aria-selected="false">🛒 החנות <span class="cnt" id="cntGames"></span></button>
     <button class="tab" role="tab" data-tab="secrets" aria-selected="false">🔓 סודות</button>
   </nav>
 
@@ -292,11 +304,11 @@
 
   <!-- ארקייד -->
   <section class="panel" id="panel-arcade" role="tabpanel">
-    <div class="sec-head"><h2>🕹️ ארקייד הסטודיו</h2><span>כל משחק כאן נבנה על ידי מישהו מהסטודיו</span></div>
+    <div class="sec-head"><h2>🛒 החנות של הסטודיו</h2><span>כל משחק כאן נבנה על ידי מישהו מהסטודיו</span></div>
     <div class="upload-cta">
-      <div class="ue">📼</div>
-      <div><b>הכניסו את המשחק שלכם לארקייד</b><small>מעלים את קובץ ה-HTML, ואחרי אישור של המורה כולם יוכלו לשחק בו.</small></div>
-      <button class="btn main" type="button" id="uploadBtn">⬆️ העלאת משחק</button>
+      <div class="ue">🚀</div>
+      <div><b>המשחק שלכם בחנות</b><small>גם אם הוא לא גמור: מסמנים 🚧 "בבנייה", והשחקנים עוזרים לכם עם 🐞 ו-💡. אחרי אישור המורה הוא עולה.</small></div>
+      <button class="btn main" type="button" id="uploadBtn">⬆️ העלאה לחנות</button>
     </div>
     <div class="games" id="games"></div>
     <div class="pending" id="pending"></div>
@@ -309,7 +321,7 @@
     <div class="secrets" id="secrets"></div>
   </section>
 
-  <div class="foot"><span id="cloudStat">ההתקדמות נשמרת בדפדפן הזה.</span> · <a href="#" id="footSave">קוד שמירה</a> · <a href="ideas.html">💡 קיר הרעיונות להאקתון</a> · <a href="index.html">לכל התחנות</a></div>
+  <div class="foot"><span id="cloudStat">ההתקדמות נשמרת בדפדפן הזה.</span> · <a href="#" id="footSave">קוד שמירה</a> · <a href="ideas.html">💡 קיר הרעיונות</a> · <a href="index.html">לכל התחנות</a></div>
 </div>
 
 <!-- חלונות -->
@@ -432,20 +444,31 @@
     if(!S.games.length){
       document.getElementById("games").innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="ee">🕹️</div><b>הארקייד נפתח!</b>המשחקים הראשונים יופיעו כאן אחרי שהמורה תאשר אותם. אולי שלכם יהיה הראשון?</div>';
     } else {
+      var loved = (p && p.loved) || {};
       document.getElementById("games").innerHTML = S.games.map(function(g, i){
-        return '<div class="game"><div class="cover" style="background:'+COVERS[i % COVERS.length]+'">'+esc(g.emoji||"🎮")+'</div><div class="gb">'
+        var live = STORE && g.key, nn = (g.notes || []).length;
+        return '<div class="game"><div class="cover" style="background:'+COVERS[i % COVERS.length]+'">'+esc(g.emoji||"🎮")
+          + (g.wip ? '<span class="wip">🚧 בבנייה</span>' : '') + (g.version > 1 ? '<span class="ver">גרסה '+g.version+'</span>' : '') + '</div><div class="gb">'
           + '<div class="gt">'+esc(g.title)+'</div><div class="gby">מאת '+esc(g.by)+'</div>'
-          + (g.genre ? '<div><span class="tag">'+esc(g.genre)+'</span></div>' : '')
-          + (g.proud ? '<div class="proud">⭐ '+esc(g.proud)+'</div>' : '')
+          + (g.forWho ? '<div class="forwho">🎯 '+esc(g.forWho)+'</div>' : '')
+          + (!g.forWho && g.genre ? '<div><span class="tag">'+esc(g.genre)+'</span></div>' : '')
+          + (!g.forWho && g.proud ? '<div class="proud">⭐ '+esc(g.proud)+'</div>' : '')
+          + (g.wip && g.missing ? '<div class="missing">🚧 עוד חסר: '+esc(g.missing)+'</div>' : '')
+          + (live ? '<div class="gstats"><span title="כמה פעמים שיחקו">▶ '+(g.play||0)+'</span><span>❤️ '+(g.love||0)+'</span><span>🐞 '+(g.bug||0)+'</span><span>💡 '+(g.idea||0)+'</span></div>' : '')
+          + (live && nn ? '<button class="notes-btn" type="button" data-notes="'+i+'">💬 מה כתבו השחקנים ('+nn+')</button>' : '')
           + (g.file ? '<a class="btn main" href="arcade/'+encodeURI(g.file)+'" target="_blank" rel="noopener">▶ לשחק</a>'
-                    : '<button class="btn main" type="button" data-play="'+i+'">▶ לשחק</button>') + '</div></div>';
+                    : '<button class="btn main" type="button" data-play="'+i+'">▶ לשחק</button>')
+          + (live ? '<div class="reacts"><button class="btn small ghost'+(loved[g.key]?' on':'')+'" type="button" data-react="love" data-g="'+i+'">❤️ אהבתי</button>'
+                  + '<button class="btn small ghost" type="button" data-react="bug" data-g="'+i+'">🐞 באג</button>'
+                  + '<button class="btn small ghost" type="button" data-react="idea" data-g="'+i+'">💡 רעיון</button></div>' : '')
+          + '</div></div>';
       }).join("");
     }
     var ups = p ? p.uploads : [];
     document.getElementById("pending").innerHTML = ups.length
       ? '<b>המשחקים ששלחתם:</b><ul>' + ups.map(function(u){
           var ok = S.games.some(function(g){ return g.title === u.title && g.by === p.nick; });
-          return '<li>📼 '+esc(u.title)+' · נשלח '+esc(u.date)+' · '+(ok ? '✅ אושר! הוא בארקייד' : 'ממתין לאישור המורה')+'</li>'; }).join("") + '</ul>' : "";
+          return '<li>📼 '+esc(u.title)+' · נשלח '+esc(u.date)+' · '+(ok ? '✅ אושר! הוא בחנות' : 'ממתין לאישור המורה')+'</li>'; }).join("") + '</ul>' : "";
   }
 
   function renderSecrets(){
@@ -640,7 +663,7 @@
   }
   function normalize(p){
     ["custom","powersSent","uploads"].forEach(function(k){ if(!Array.isArray(p[k])) p[k] = []; });
-    ["quests","powersUsed","secrets"].forEach(function(k){ if(!p[k] || typeof p[k] !== "object") p[k] = {}; });
+    ["quests","powersUsed","secrets","loved"].forEach(function(k){ if(!p[k] || typeof p[k] !== "object") p[k] = {}; });
     return p;
   }
   // "נינג׳ה  הפיקסלים" ו"נינג'ה הפיקסלים" הם אותו כינוי (כמו בסקריפט)
@@ -651,7 +674,7 @@
   function merge(a, b){
     var m = normalize(JSON.parse(JSON.stringify(b)));
     a = normalize(a);
-    ["quests","powersUsed","secrets"].forEach(function(k){ Object.keys(a[k]).forEach(function(id){ m[k][id] = a[k][id]; }); });
+    ["quests","powersUsed","secrets","loved"].forEach(function(k){ Object.keys(a[k]).forEach(function(id){ m[k][id] = a[k][id]; }); });
     ["custom","powersSent","uploads"].forEach(function(k){
       var seen = {}; m[k].forEach(function(x){ seen[JSON.stringify(x)] = 1; });
       a[k].forEach(function(x){ if(!seen[JSON.stringify(x)]) m[k].push(x); });
@@ -742,15 +765,18 @@
   }
 
   var pickedFile = null;
+  var GAME_EMO = ["🎮","🚀","🏄","🐉","⚽","🧩","🏎️","👾","🐱","🍕","⚔️","🌈"];
   function uploadModal(){
     pickedFile = null;
-    openModal('<div class="big-e">📼</div><h3>העלאת משחק לארקייד</h3><p class="sub">המשחק יגיע למורה, ואחרי אישור יעלה לארקייד וכולם יוכלו לשחק בו.</p>'
+    openModal('<div class="big-e">🚀</div><h3>העלאה לחנות</h3><p class="sub">המשחק לא חייב להיות גמור. הוא צריך רק להיפתח, ושאפשר יהיה לשחק בו 30 שניות. אחרי אישור המורה הוא בחנות.</p>'
       + '<div class="field"><label>קובץ המשחק <small>(קובץ ה-HTML שהורדתם מ-Canvas)</small></label><label class="file-drop" id="drop"><input type="file" id="gFile" accept=".html,.htm,text/html"><span id="dropTxt">📂 לחצו כאן לבחירת הקובץ</span></label></div>'
-      + '<div class="field"><label for="gName">שם המשחק</label><input type="text" id="gName" maxlength="40"></div>'
-      + '<div class="field"><label>מאיזה ענף?</label><div class="chips" id="gGenre">'+S.genres.map(function(g){ return '<button type="button">'+esc(g)+'</button>'; }).join("")+'</div></div>'
-      + '<div class="field"><label for="gProud">במה אתם הכי גאים במשחק? ⭐</label><input type="text" id="gProud" maxlength="100" placeholder="למשל: הבוס בסוף משנה צורה"></div>'
-      + '<div class="field"><label for="gReal">השם האמיתי שלכם <small>(רק המורה רואה. בארקייד יופיע הכינוי: '+esc(P().nick)+')</small></label><input type="text" id="gReal" maxlength="40" value="'+esc(P().realName||"")+'"></div>'
-      + '<div class="msg" id="gMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="gSend">⬆️ שליחה לארקייד</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+      + '<div class="field"><label for="gName">שם המשחק <small>(גרסה חדשה? אותו שם בדיוק, והלבבות נשמרים)</small></label><input type="text" id="gName" maxlength="40"></div>'
+      + '<div class="field"><label>האייקון של המשחק</label><div class="chips" id="gEmo">'+GAME_EMO.map(function(x, i){ return '<button type="button"'+(i===0?' class="sel"':'')+'>'+x+'</button>'; }).join("")+'</div></div>'
+      + '<div class="field"><label for="gFor">למי המשחק, ולמה ישחקו בו? 🎯</label><input type="text" id="gFor" maxlength="100" placeholder="למשל: למי שיש לו 2 דקות בהפסקה ואוהב להתחרות"></div>'
+      + '<div class="field"><label>איפה המשחק עומד?</label><div class="chips" id="gState"><button type="button" class="sel" data-wip="1">🚧 בבנייה</button><button type="button" data-wip="0">✅ גמור</button></div></div>'
+      + '<div class="field" id="gMissBox"><label for="gMiss">מה עוד חסר? <small>(השחקנים יראו, ויוכלו לעזור)</small></label><input type="text" id="gMiss" maxlength="120" placeholder="למשל: אין עדיין שלב 2, והקפיצה קצת תקועה"></div>'
+      + '<div class="field"><label for="gReal">השם האמיתי שלכם <small>(רק המורה רואה. בחנות יופיע הכינוי: '+esc(P().nick)+')</small></label><input type="text" id="gReal" maxlength="40" value="'+esc(P().realName||"")+'"></div>'
+      + '<div class="msg" id="gMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="gSend">⬆️ שליחה לחנות</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
   }
 
   // ---------- העתקה ----------
@@ -919,21 +945,25 @@
     }
 
     // העלאת משחק
-    if(t.closest("#gGenre")){ sheet.querySelectorAll("#gGenre button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+    if(t.closest("#gEmo")){ sheet.querySelectorAll("#gEmo button").forEach(function(b){ b.classList.toggle("sel", b === t); }); return; }
+    if(t.closest("#gState")){ sheet.querySelectorAll("#gState button").forEach(function(b){ b.classList.toggle("sel", b === t); }); document.getElementById("gMissBox").style.display = t.dataset.wip === "1" ? "" : "none"; return; }
     if(t.id === "gSend"){
       var gm = document.getElementById("gMsg");
-      var g = { gameName:document.getElementById("gName").value.trim(), genre:(sheet.querySelector("#gGenre .sel")||{}).textContent || "", proud:document.getElementById("gProud").value.trim(), realName:document.getElementById("gReal").value.trim() };
+      var wip = ((sheet.querySelector("#gState .sel") || {}).dataset || {}).wip !== "0";
+      var g = { gameName:document.getElementById("gName").value.trim(), emoji:(sheet.querySelector("#gEmo .sel")||{}).textContent || "🎮", forWho:document.getElementById("gFor").value.trim(),
+        missing:wip ? document.getElementById("gMiss").value.trim() : "", done:!wip, realName:document.getElementById("gReal").value.trim() };
       function err(x){ gm.className = "msg err"; gm.textContent = x; }
       if(!pickedFile) return err("בחרו את קובץ המשחק.");
       if(!g.gameName) return err("תנו למשחק שם.");
-      if(!g.proud) return err("ספרו במה אתם הכי גאים. זה יופיע בכרטיס של המשחק ⭐");
+      if(!g.forWho) return err("כתבו למי המשחק. זה מה שגורם לאנשים ללחוץ ▶ 🎯");
+      if(wip && !g.missing) return err("כתבו מה עוד חסר. כך השחקנים ידעו במה לעזור 🚧");
       if(!g.realName) return err("כתבו את השם האמיתי, כדי שהמורה תדע של מי המשחק.");
       t.disabled = true; gm.className = "msg"; gm.textContent = "שולח את המשחק... 📼";
       P().realName = g.realName; save();
       var reader = new FileReader();
       reader.onload = function(){
-        sendGame({ kind:"game", nick:P().nick, realName:g.realName, gameName:g.gameName, genre:g.genre, proud:g.proud, fileName:pickedFile.name, html:String(reader.result), timestamp:new Date().toISOString() })
-          .then(function(j){ closeModal(); progress(function(){ P().uploads.push({ title:g.gameName, date:today() }); }, j.old ? "📼 המשחק נשלח לארקייד! אחרי אישור המורה הוא יעלה" : "📼 המשחק התקבל ✓ אחרי אישור המורה הוא יעלה לארקייד"); })
+        sendGame({ kind:"game", nick:P().nick, realName:g.realName, gameName:g.gameName, emoji:g.emoji, forWho:g.forWho, missing:g.missing, done:g.done, genre:"", proud:"", fileName:pickedFile.name, html:String(reader.result), timestamp:new Date().toISOString() })
+          .then(function(j){ closeModal(); progress(function(){ P().uploads.push({ title:g.gameName, date:today() }); }, j.old ? "🚀 המשחק נשלח! אחרי אישור המורה הוא יעלה לחנות" : "🚀 המשחק התקבל ✓ אחרי אישור המורה הוא בחנות"); })
           .catch(function(e){ t.disabled = false; err(GAME_ERR[e && e.message] || GAME_ERR.server); });
       };
       reader.onerror = function(){ t.disabled = false; err("לא הצלחנו לקרוא את הקובץ. נסו לבחור אותו שוב."); };
@@ -975,6 +1005,8 @@
   // ---------- מה שהמורה אישרה בגיליון (סטטוס = מאושר) ----------
   // מצטרף למה שכתוב ב-studio-data.js. בלי רשת נשאר רק מה שבקובץ
   var BASE = { powers:S.powers.slice(), games:S.games.slice() };
+  // STORE = הסקריפט בגיליון כבר מעודכן לחנות (מונים ותגובות). סקריפט ישן: החנות עובדת בלי מונים
+  var STORE = false;
   function loadLive(){
     if(!S.endpoint) return;
     fetch(S.endpoint + "?op=public").then(function(r){ return r.json(); }).then(function(j){
@@ -982,6 +1014,7 @@
       var names = BASE.powers.map(function(pw){ return pw.name; });
       S.powers = BASE.powers.concat((j.powers || []).filter(function(pw){ return names.indexOf(pw.name) < 0; }));
       S.games = BASE.games.concat(j.games || []);
+      STORE = !!j.store;
       renderAll();
     }).catch(function(){});
   }
@@ -1016,8 +1049,65 @@
   document.getElementById("playerClose").addEventListener("click", closePlayer);
   document.addEventListener("keydown", function(e){ if(e.key === "Escape" && player.classList.contains("on")) closePlayer(); });
   document.getElementById("games").addEventListener("click", function(e){
-    var b = e.target.closest("[data-play]"); if(b) playGame(S.games[+b.dataset.play]);
+    var b = e.target.closest("[data-play]"); if(b){ var pg = S.games[+b.dataset.play]; countPlay(pg); return playGame(pg); }
+    var n = e.target.closest("[data-notes]"); if(n) return notesModal(S.games[+n.dataset.notes]);
+    var r = e.target.closest("[data-react]"); if(!r) return;
+    if(!P()) return profileModal();
+    var g = S.games[+r.dataset.g], type = r.dataset.react;
+    if(mine(g)) return toast("זה המשחק שלכם 😉 תנו לאחרים להגיב");
+    if(type === "love"){
+      P().loved = P().loved || {};
+      if(P().loved[g.key]) return toast("כבר אהבתם את המשחק הזה ❤️");
+      P().loved[g.key] = today(); save();
+      return react(g, "love", "");
+    }
+    reactModal(g, type);
   });
+
+  // ---------- החנות: מונה משחקים ותגובות ----------
+  var played = {};
+  function mine(g){ return !!P() && nickKey(g.by) === nickKey(P().nick); }
+  // כל משחק נספר פעם אחת בכל כניסה לדף. משחק במשחק של עצמכם לא נספר, כדי שהנתונים יהיו אמיתיים
+  function countPlay(g){
+    if(!STORE || !g || !g.key || played[g.key] || mine(g)) return;
+    played[g.key] = 1; react(g, "play", "", true);
+  }
+  function react(g, type, text, quiet){
+    g[type] = (g[type] || 0) + 1;
+    if(text) (g.notes = g.notes || []).push({ type:type, by:P() ? P().nick : "", text:text });
+    send({ kind:"react", game:g.key, type:type, text:text, nick:P() ? P().nick : "", timestamp:new Date().toISOString() }).catch(function(){});
+    renderArcade();
+    if(!quiet) toast(type === "love" ? "❤️ היוצר יראה את זה!" : "✓ נשלח. תודה שעזרתם לסיים את המשחק!");
+  }
+  var REACT_TXT = {
+    bug: { e:"🐞", h:"מצאתי באג", l:"מה עשיתי, מה ציפיתי, ומה קרה?", ph:"למשל: קפצתי על הפלטפורמה הכחולה ונפלתי דרכה" },
+    idea: { e:"💡", h:"יש לי רעיון", l:"מה היה עושה את המשחק עוד יותר טוב?", ph:"למשל: שהמהירות תעלה בכל 10 נקודות" }
+  };
+  function reactModal(g, type){
+    var c = REACT_TXT[type];
+    openModal('<div class="big-e">'+c.e+'</div><h3>'+c.h+' · '+esc(g.title)+'</h3><p class="sub">כתבו כמו שהייתם רוצים לקבל על המשחק שלכם. היוצר יראה את זה עם הכינוי שלכם.</p>'
+      + '<div class="field"><label for="rText">'+c.l+'</label><input type="text" id="rText" maxlength="140" placeholder="'+esc(c.ph)+'"></div>'
+      + '<div class="msg" id="rMsg"></div><div class="sheet-actions"><button class="btn main" type="button" id="rSend" data-g="'+S.games.indexOf(g)+'" data-type="'+type+'">שליחה</button><button class="btn ghost" type="button" data-close>ביטול</button></div>');
+    setTimeout(function(){ var i = document.getElementById("rText"); if(i) i.focus(); }, 50);
+  }
+  function notesModal(g){
+    var ns = (g.notes || []).slice().reverse();
+    openModal('<div class="big-e">💬</div><h3>מה כתבו על '+esc(g.title)+'</h3><p class="sub">▶ '+(g.play||0)+' · ❤️ '+(g.love||0)+' · 🐞 '+(g.bug||0)+' · 💡 '+(g.idea||0)+'</p><ul style="padding:0;margin:0">'
+      + ns.map(function(x){ return '<li class="note-li">'+(x.type === "bug" ? "🐞 " : "💡 ")+esc(x.text)+' <small>· '+esc(x.by)+'</small></li>'; }).join("")
+      + '</ul><div class="sheet-actions"><button class="btn ghost" type="button" data-close>סגירה</button></div>');
+  }
+  document.body.addEventListener("click", function(e){
+    var t = e.target.closest("#rSend"); if(!t) return;
+    var text = document.getElementById("rText").value.trim();
+    if(text.length < 4){ var m = document.getElementById("rMsg"); m.className = "msg err"; m.textContent = "כתבו קצת יותר, כדי שהיוצר יבין."; return; }
+    var g = S.games[+t.dataset.g]; closeModal(); if(g) react(g, t.dataset.type, text);
+  });
+  document.body.addEventListener("keydown", function(e){ if(e.key === "Enter" && e.target.id === "rText"){ var b = document.getElementById("rSend"); if(b) b.click(); } });
+  // בזמן שהחנות פתוחה, המונים מתעדכנים כל דקה
+  setInterval(function(){
+    var pa = document.getElementById("panel-arcade");
+    if(!document.hidden && pa && pa.classList.contains("on") && !player.classList.contains("on") && !modal.classList.contains("on")) loadLive();
+  }, 60000);
 
   // ---------- התחלה ----------
   try{ var tab = localStorage.getItem("studio.tab"); var tb = tab && document.querySelector('[data-tab="'+tab+'"]'); if(tb) tb.click(); }catch(e){}
