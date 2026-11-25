@@ -67,6 +67,12 @@
   .today .lb{font-size:12px; font-weight:800; color:var(--cyan); letter-spacing:.3px;}
   .today .tt{font-family:var(--font-display); font-weight:800; font-size:18px; margin:2px 0 4px;}
   .today .tx{font-size:14.5px; color:var(--ink-soft);}
+  .today .help{margin-top:10px; padding-top:10px; border-top:1px dashed var(--border);}
+  .today .help-h{font-size:13px; font-weight:800; margin-bottom:6px;}
+  .today details{display:inline-block; vertical-align:top; margin:0 0 6px 6px; padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); font-size:14px; max-width:100%;}
+  .today details[open]{display:block; margin-inline-start:0;}
+  .today summary{cursor:pointer; font-weight:700;}
+  .today details p{margin:6px 0 2px; color:var(--ink-soft);}
 
   /* לשוניות */
   .tabs{position:sticky; top:0; z-index:20; display:flex; gap:6px; padding:12px 0; margin-top:8px; overflow-x:auto; scrollbar-width:none;
@@ -392,7 +398,9 @@
 
   function renderToday(){
     var t = S.today;
-    document.getElementById("today").innerHTML = '<div class="lb">📣 '+esc(t.label)+'</div><div class="tt">'+esc(t.title)+'</div><div class="tx">'+esc(t.text)+'</div>';
+    document.getElementById("today").innerHTML = '<div class="lb">📣 '+esc(t.label)+'</div><div class="tt">'+esc(t.title)+'</div><div class="tx">'+esc(t.text)+'</div>'
+      + (t.help && t.help.length ? '<div class="help"><div class="help-h">'+esc(t.helpTitle || "🆘 תקועים?")+'</div>'
+        + t.help.map(function(h){ return '<details><summary>'+esc(h.q)+'</summary><p>'+esc(h.a)+'</p></details>'; }).join("") + '</div>' : '');
   }
 
   function renderQuests(){
