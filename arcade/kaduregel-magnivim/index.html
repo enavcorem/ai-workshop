@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!-- publish-arcade -->
+<title>כדורגל מגניבים – משחק של יונירורן | סטודיו המשחקים</title>
+<meta name="description" content="כדורגל מגניבים: כדורגל ריאליסטי 3D - סקילים, שוערים, 1v1 ונגד המחשב. משחק דפדפן שנבנה ע״י יונירורן בסטודיו המשחקים. משחקים בחינם, בלי התקנה.">
+<link rel="canonical" href="https://enavcorem.github.io/ai-workshop/arcade/kaduregel-magnivim/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="כדורגל מגניבים – משחק של יונירורן | סטודיו המשחקים">
+<meta property="og:description" content="כדורגל מגניבים: כדורגל ריאליסטי 3D - סקילים, שוערים, 1v1 ונגד המחשב. משחק דפדפן שנבנה ע״י יונירורן בסטודיו המשחקים. משחקים בחינם, בלי התקנה.">
+<meta property="og:url" content="https://enavcorem.github.io/ai-workshop/arcade/kaduregel-magnivim/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"כדורגל מגניבים","url":"https://enavcorem.github.io/ai-workshop/arcade/kaduregel-magnivim/","description":"כדורגל מגניבים: כדורגל ריאליסטי 3D - סקילים, שוערים, 1v1 ונגד המחשב. משחק דפדפן שנבנה ע״י יונירורן בסטודיו המשחקים. משחקים בחינם, בלי התקנה.","inLanguage":"he","gamePlatform":"Web browser","author":{"@type":"Person","name":"יונירורן"}}</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,400;0,600;0,800;1,900&display=swap" rel="stylesheet">
+    <!-- Three.js r128 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: #040814;
+            color: #f8fafc;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #canvas-wrapper {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* לוח תוצאות עליון בסגנון שידור טלוויזיה */
+        #hud-top {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 1240px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .scoreboard-pill {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(7, 11, 20, 0.96));
+            backdrop-filter: blur(14px);
+            padding: 8px 24px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
+        }
+
+        .team-tag {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.15rem;
+        }
+
+        .badge-blue {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+            background: #2563eb;
+            box-shadow: 0 0 10px #3b82f6;
+            border: 1px solid #93c5fd;
+        }
+
+        .badge-red {
+            width: 15px;
+            height: 15px;
+            border-radius: 4px;
+            background: #dc2626;
+            box-shadow: 0 0 10px #ef4444;
+            border: 1px solid #fca5a5;
+        }
+
+        .score-box {
+            font-size: 1.95rem;
+            font-weight: 900;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 14px;
+            border-radius: 10px;
+            min-width: 46px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .clock-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 102px;
+            border-left: 1px solid rgba(255, 255, 255, 0.12);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0 12px;
+        }
+
+        #timer-text {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fbbf24;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #rule-text {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .hud-actions {
+            pointer-events: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .hud-btn {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #f8fafc;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+        }
+
+        .hud-btn:hover {
+            background: rgba(30, 41, 59, 0.96);
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.5);
+        }
+
+        /* סרגלי 6 הסקילים ומד עוצמת בעיטה בתחתית המסך */
+        #skills-hud {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 1320px;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 10;
+            pointer-events: none;
+            gap: 12px;
+        }
+
+        .player-skills-panel {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 16px;
+            padding: 9px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+        }
+
+        .player-skills-panel.blue { border-bottom: 3px solid #3b82f6; }
+        .player-skills-panel.red { border-bottom: 3px solid #ef4444; }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+            gap: 10px;
+        }
+
+        .power-meter-bg {
+            width: 120px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .power-meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+            transition: width 0.04s linear;
+        }
+
+        .skills-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .skill-slot {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            background: rgba(30, 41, 59, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .skill-slot.ready {
+            border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+
+        .skill-slot.active-flash {
+            transform: scale(1.14);
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.28);
+        }
+
+        .skill-cd-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            background: rgba(7, 11, 20, 0.78);
+            transition: height 0.06s linear;
+            z-index: 3;
+        }
+
+        .skill-icon { font-size: 1.18rem; z-index: 2; }
+        .skill-name { font-size: 0.64rem; font-weight: 700; color: #e2e8f0; z-index: 2; margin-top: 1px; }
+        .skill-key {
+            position: absolute;
+            top: 3px;
+            right: 4px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.18);
+            padding: 0 4px;
+            border-radius: 4px;
+            color: #f8fafc;
+            z-index: 4;
+        }
+
+        /* באנר גול מרכזי */
+        #center-announcer {
+            position: absolute;
+            top: 34%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            text-align: center;
+            pointer-events: none;
+            z-index: 20;
+            transition: transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #center-announcer.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #announcer-title {
+            font-size: 4.5rem;
+            font-weight: 900;
+            font-style: italic;
+            color: #fbbf24;
+            text-shadow: 0 6px 0 #78350f, 0 18px 40px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+        }
+
+        #announcer-sub {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95);
+            margin-top: -4px;
+        }
+
+        /* התראת סקיל / הצלת שוער קופצת */
+        #skill-toast {
+            position: absolute;
+            top: 17%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(30, 58, 138, 0.94));
+            border: 1px solid rgba(56, 189, 248, 0.55);
+            color: #fff;
+            padding: 7px 22px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 1.04rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+            pointer-events: none;
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.18s, transform 0.18s;
+        }
+
+        #skill-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-6px);
+        }
+
+        /* מודאלים: תפריט ראשי וסיום משחק */
+        .overlay-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(4, 8, 20, 0.84);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            padding: 16px;
+        }
+
+        .hidden { display: none !important; }
+
+        .modal-card {
+            background: linear-gradient(165deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 22px 26px;
+            width: 100%;
+            max-width: 750px;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, 0.85);
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.3rem;
+            font-weight: 900;
+            background: linear-gradient(to left, #4ade80, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .hero-sub {
+            color: #94a3b8;
+            font-size: 0.92rem;
+            margin-bottom: 14px;
+        }
+
+        .opt-label {
+            display: block;
+            text-align: right;
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .btn-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .choice-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 9px 8px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.16s;
+        }
+
+        .choice-btn:hover { background: rgba(255, 255, 255, 0.12); }
+        .choice-btn.active {
+            background: rgba(56, 189, 248, 0.22);
+            border-color: #38bdf8;
+            color: #fff;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+        }
+
+        .controls-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+            text-align: right;
+        }
+
+        .ctrl-card {
+            background: rgba(0, 0, 0, 0.38);
+            border-radius: 14px;
+            padding: 11px 12px;
+            font-size: 0.79rem;
+            line-height: 1.72;
+        }
+
+        .ctrl-card.blue { border-right: 4px solid #3b82f6; }
+        .ctrl-card.red { border-right: 4px solid #ef4444; }
+
+        kbd {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 5px;
+            padding: 1px 5px;
+            font-family: monospace;
+            font-size: 0.78rem;
+            color: #f8fafc;
+        }
+
+        .combo-tip {
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: #fde68a;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .cta-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(22, 163, 74, 0.45);
+            transition: all 0.18s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+        }
+
+        .sec-btn {
+            width: 100%;
+            padding: 11px;
+            margin-top: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
+            background: transparent;
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 0.98rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .sec-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+        @media (max-width: 900px) {
+            .controls-showcase { grid-template-columns: 1fr; }
+            .btn-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+            .skill-slot { width: 42px; height: 48px; }
+            .skill-name { font-size: 0.52rem; }
+            #announcer-title { font-size: 2.8rem; }
+            .scoreboard-pill { padding: 6px 14px; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- קנבס תלת-ממד -->
+    <div id="canvas-wrapper"></div>
+
+    <!-- לוח תוצאות עליון -->
+    <header id="hud-top">
+        <div class="hud-actions">
+            <button id="btn-camera" class="hud-btn" title="החלף זווית מצלמה (מקש V)">🎥 מצלמת שידור</button>
+            <button id="btn-mute" class="hud-btn" title="השתק / הפעל שמע">🔊</button>
+        </div>
+
+        <div class="scoreboard-pill">
+            <div class="team-tag">
+                <span class="badge-blue"></span>
+                <span id="lbl-p1">כחול</span>
+                <span id="score-p1" class="score-box">0</span>
+            </div>
+
+            <div class="clock-box">
+                <span id="timer-text">00:00</span>
+                <span id="rule-text">עד 5 שערים</span>
+            </div>
+
+            <div class="team-tag">
+                <span id="score-p2" class="score-box">0</span>
+                <span id="lbl-p2">מחשב</span>
+                <span class="badge-red"></span>
+            </div>
+        </div>
+
+        <div class="hud-actions">
+            <button id="btn-menu" class="hud-btn">🏠 תפריט</button>
+        </div>
+    </header>
+
+    <!-- התראת סקיל / הצלת שוער קופצת -->
+    <div id="skill-toast">🌈 ריינבואו פליק!</div>
+
+    <!-- באנר גול / סיום -->
+    <div id="center-announcer">
+        <div id="announcer-title">גוללללל! ⚽</div>
+        <div id="announcer-sub">שער מרהיב לחיבורים!</div>
+    </div>
+
+    <!-- מד 6 הסקילים ועוצמת בעיטה בתחתית המסך -->
+    <div id="skills-hud">
+        <!-- פאנל שחקן 1 (כחול) -->
+        <div class="player-skills-panel blue">
+            <div class="panel-header">
+                <span style="color:#60a5fa;">שחקן 1 (כחול #10)</span>
+                <div class="power-meter-bg" title="עוצמת בעיטה (החזק Space)">
+                    <div id="p1-power-bar" class="power-meter-fill"></div>
+                </div>
+            </div>
+            <div class="skills-row">
+                <div class="skill-slot ready" id="p1-skill-rainbow">
+                    <span class="skill-key">Q</span>
+                    <span class="skill-icon">🌈</span>
+                    <span class="skill-name">ריינבואו</span>
+                    <div class="skill-cd-overlay" id="p1-cd-rainbow"></div>
+                </div>
+                <div class="skill-slot ready" id="p1-skill-bicycle">
+                    <span class="skill-key">E</span>
+                    <span class="skill-icon">🤸</span>
+                    <span class="skill-name">מספרת</span>
+                    <div class="skill-cd-overlay" id="p1-cd-bicycle"></div>
+                </div>
+                <div class="skill-slot ready" id="p1-skill-dash">
+                    <span class="skill-key">Shift</span>
+                    <span class="skill-icon">⚡</span>
+                    <span class="skill-name">פדלדה</span>
+                    <div class="skill-cd-overlay" id="p1-cd-dash"></div>
+                </div>
+                <div class="skill-slot ready" id="p1-skill-curve">
+                    <span class="skill-key">C</span>
+                    <span class="skill-icon">🌀</span>
+                    <span class="skill-name">מסובבת</span>
+                    <div class="skill-cd-overlay" id="p1-cd-curve"></div>
+                </div>
+                <div class="skill-slot ready" id="p1-skill-chip">
+                    <span class="skill-key">F</span>
+                    <span class="skill-icon">🎯</span>
+                    <span class="skill-name">צ'יפ</span>
+                    <div class="skill-cd-overlay" id="p1-cd-chip"></div>
+                </div>
+                <div class="skill-slot ready" id="p1-skill-spin">
+                    <span class="skill-key">R</span>
+                    <span class="skill-icon">🔄</span>
+                    <span class="skill-name">טרנספין</span>
+                    <div class="skill-cd-overlay" id="p1-cd-spin"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- פאנל שחקן 2 (אדום / מחשב) -->
+        <div class="player-skills-panel red" id="p2-skills-panel">
+            <div class="panel-header">
+                <span style="color:#f87171;" id="p2-panel-title">מחשב (AI #7)</span>
+                <div class="power-meter-bg" title="עוצמת בעיטה (החזק Enter)">
+                    <div id="p2-power-bar" class="power-meter-fill"></div>
+                </div>
+            </div>
+            <div class="skills-row">
+                <div class="skill-slot ready" id="p2-skill-rainbow">
+                    <span class="skill-key">.</span>
+                    <span class="skill-icon">🌈</span>
+                    <span class="skill-name">ריינבואו</span>
+                    <div class="skill-cd-overlay" id="p2-cd-rainbow"></div>
+                </div>
+                <div class="skill-slot ready" id="p2-skill-bicycle">
+                    <span class="skill-key">/</span>
+                    <span class="skill-icon">🤸</span>
+                    <span class="skill-name">מספרת</span>
+                    <div class="skill-cd-overlay" id="p2-cd-bicycle"></div>
+                </div>
+                <div class="skill-slot ready" id="p2-skill-dash">
+                    <span class="skill-key">,</span>
+                    <span class="skill-icon">⚡</span>
+                    <span class="skill-name">פדלדה</span>
+                    <div class="skill-cd-overlay" id="p2-cd-dash"></div>
+                </div>
+                <div class="skill-slot ready" id="p2-skill-curve">
+                    <span class="skill-key">M</span>
+                    <span class="skill-icon">🌀</span>
+                    <span class="skill-name">מסובבת</span>
+                    <div class="skill-cd-overlay" id="p2-cd-curve"></div>
+                </div>
+                <div class="skill-slot ready" id="p2-skill-chip">
+                    <span class="skill-key">L</span>
+                    <span class="skill-icon">🎯</span>
+                    <span class="skill-name">צ'יפ</span>
+                    <div class="skill-cd-overlay" id="p2-cd-chip"></div>
+                </div>
+                <div class="skill-slot ready" id="p2-skill-spin">
+                    <span class="skill-key">K</span>
+                    <span class="skill-icon">🔄</span>
+                    <span class="skill-name">טרנספין</span>
+                    <div class="skill-cd-overlay" id="p2-cd-spin"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- מסך פתיחה והגדרות -->
+    <div id="menu-modal" class="overlay-modal">
+        <div class="modal-card">
+            <h1 class="hero-title">כדורגל ריאליסטי 3D ⚽</h1>
+            <p class="hero-sub">שחקנים מפרקיים, שוערים מזנקים, ריינבואו פליק שחוזר לרגל, טרנספין 360°, מספרת, פדלדה, בננה וצ'יפ!</p>
+
+            <label class="opt-label">מצב משחק:</label>
+            <div class="btn-grid" id="opt-mode">
+                <button class="choice-btn active" data-val="ai">🤖 נגד המחשב</button>
+                <button class="choice-btn" data-val="1v1">👥 1v1 מקומי (2 שחקנים)</button>
+            </div>
+
+            <div id="diff-wrapper">
+                <label class="opt-label">רמת קושי של המחשב:</label>
+                <div class="btn-grid cols-3" id="opt-diff">
+                    <button class="choice-btn" data-val="easy">קל</button>
+                    <button class="choice-btn active" data-val="medium">בינוני</button>
+                    <button class="choice-btn" data-val="hard">מקצוען</button>
+                </div>
+            </div>
+
+            <label class="opt-label">פורמט משחק:</label>
+            <div class="btn-grid cols-4" id="opt-limit">
+                <button class="choice-btn" data-type="goals" data-val="3">עד 3 שערים</button>
+                <button class="choice-btn active" data-type="goals" data-val="5">עד 5 שערים</button>
+                <button class="choice-btn" data-type="goals" data-val="7">עד 7 שערים</button>
+                <button class="choice-btn" data-type="time" data-val="120">2 דקות</button>
+            </div>
+
+            <div class="combo-tip">
+                💡 <strong>איך עוברים שחקן ומנצחים את השוער?</strong> בצע <b>טרנספין 360°</b> (<kbd>R</kbd>/<kbd>K</kbd>) או <b>ריינבואו פליק</b> (<kbd>Q</kbd>/<kbd>.</kbd>) שחוזר לרגל, ובעט <b>מספרת</b> (<kbd>E</kbd>/<kbd>/</kbd>), <b>בננה</b> (<kbd>C</kbd>/<kbd>M</kbd>) או <b>צ'יפ</b> (<kbd>F</kbd>/<kbd>L</kbd>)!
+            </div>
+
+            <div class="controls-showcase">
+                <div class="ctrl-card blue">
+                    <strong style="color:#60a5fa; font-size:0.9rem;">🔵 שחקן 1 (כחול #10 - תוקף שמאלה)</strong><br>
+                    ריצה: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> | בעיטה / גלישה: <kbd>Space</kbd><br>
+                    🌈 ריינבואו: <kbd>Q</kbd> | 🔄 טרנספין: <kbd>R</kbd> | ⚡ פדלדה: <kbd>Shift</kbd><br>
+                    🤸 מספרת: <kbd>E</kbd> | 🌀 בננה: <kbd>C</kbd> | 🎯 צ'יפ: <kbd>F</kbd>
+                </div>
+                <div class="ctrl-card red" id="p2-ctrl-info">
+                    <strong style="color:#f87171; font-size:0.9rem;">🔴 מחשב (AI #7 - תוקף ימינה)</strong><br>
+                    נשלט ע"י בינה מלאכותית חכמה עם שוער פעיל בשער<br>
+                    מבצע ריינבואו פליק, טרנספין 360°, מספרת, פדלדה, בננה וצ'יפ!
+                </div>
+            </div>
+
+            <button id="btn-start" class="cta-btn">עלה למגרש! 🏟️</button>
+        </div>
+    </div>
+
+    <!-- מסך סיום משחק -->
+    <div id="gameover-modal" class="overlay-modal hidden">
+        <div class="modal-card">
+            <h2 id="winner-heading" class="hero-title" style="font-size:2.7rem;">הכחול ניצח! 🏆</h2>
+            <p id="final-score-lbl" style="font-size:1.55rem; font-weight:900; margin:14px 0 24px;">5 - 2</p>
+            <button id="btn-rematch" class="cta-btn">משחק חוזר 🔄</button>
+            <button id="btn-to-menu" class="sec-btn">חזרה לתפריט</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // קבועי המגרש, הפיזיקה ומצב המשחק
+        // ==========================================
+        const PITCH = {
+            HALF_W: 23.0,
+            HALF_D: 14.5,
+            GOAL_HALF_D: 3.65,
+            GOAL_H: 2.75,
+            PLAYER_R: 0.62,
+            BALL_R: 0.28,
+            GRAVITY: -24.5
+        };
+
+        const state = {
+            mode: 'ai',
+            diff: 'medium',
+            limitType: 'goals',
+            limitVal: 5,
+            phase: 'menu',
+            p1Score: 0,
+            p2Score: 0,
+            elapsed: 0,
+            remaining: 120,
+            goalTimer: 0,
+            slowMoTimer: 0,
+            lastScorer: 1,
+            shake: 0,
+            cameraMode: 0,
+            lastTime: 0
+        };
+
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+                e.preventDefault();
+            }
+            if (!keys[e.code] && e.code === 'KeyV') {
+                cycleCameraMode();
+            }
+            keys[e.code] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // משתני סצנת Three.js גלובליים
+        let scene, camera, renderer;
+        let player1 = null, player2 = null, gkBlue = null, gkRed = null, ball = null;
+        let ballMesh, ballShadow, landingRingMesh, landingDotMesh, volleyHaloMesh;
+        let leftGoalNet = null, rightGoalNet = null;
+        let ledTexture = null, ledOffset = 0;
+        const cornerFlags = [];
+        const spectators = [];
+        const particles3D = [];
+
+        // ==========================================
+        // מנוע אודיו פרוצדורלי (Web Audio API)
+        // ==========================================
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) this.ctx = new AudioCtx();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle() {
+                this.muted = !this.muted;
+                return this.muted;
+            }
+
+            playKick(intensity = 1.0, isPower = false) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = isPower ? 'sawtooth' : 'triangle';
+                osc.frequency.setValueAtTime(isPower ? 185 : 135, now);
+                osc.frequency.exponentialRampToValueAtTime(38, now + 0.14);
+
+                const vol = Math.min(0.45, 0.22 * intensity);
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            }
+
+            playSkillWhoosh(baseFreq = 420) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(baseFreq * 0.7, now);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45, now + 0.18);
+
+                gain.gain.setValueAtTime(0.14, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.21);
+            }
+
+            playPostClang() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                [520, 785].forEach((freq) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.36);
+                });
+            }
+
+            playWhistle(isFinal = false) {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const blasts = isFinal ? [0, 0.28, 0.56] : [0];
+                blasts.forEach((offset, idx) => {
+                    const dur = isFinal && idx === 2 ? 0.45 : 0.2;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(2850, now + offset);
+                    osc.frequency.linearRampToValueAtTime(2720, now + offset + dur);
+
+                    gain.gain.setValueAtTime(0.12, now + offset);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + offset + dur);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + offset);
+                    osc.stop(now + offset + dur + 0.02);
+                });
+            }
+
+            playGoalCheer() {
+                if (this.muted) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const notes = [392, 493.88, 587.33, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.16, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.55);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.56);
+                });
+            }
+        }
+
+        const sound = new SoundEngine();
+
+        function cycleCameraMode() {
+            state.cameraMode = (state.cameraMode + 1) % 3;
+            const labels = ['🎥 מצלמת שידור', '🎥 מצלמת אקשן', '🎥 מצלמת פרו'];
+            document.getElementById('btn-camera').textContent = labels[state.cameraMode];
+        }
+
+        // ==========================================
+        // בניית הסצנה התלת-ממדית, הדשא, האצטדיון והשערים
+        // ==========================================
+        function createPitchTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 640;
+            const ctx = canvas.getContext('2d');
+
+            // פסי דשא קצוץ
+            const stripes = 14;
+            const stripeW = canvas.width / stripes;
+            for (let i = 0; i < stripes; i++) {
+                ctx.fillStyle = i % 2 === 0 ? '#1b7a37' : '#218c41';
+                ctx.fillRect(i * stripeW, 0, stripeW, canvas.height);
+            }
+
+            // טקסטורת דשא עדינה
+            ctx.fillStyle = 'rgba(255,255,255,0.025)';
+            for (let i = 0; i < 3500; i++) {
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+
+            // קווי מגרש לבנים
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+            ctx.lineWidth = 6;
+            const padX = 44;
+            const padY = 36;
+            const w = canvas.width - padX * 2;
+            const h = canvas.height - padY * 2;
+
+            ctx.strokeRect(padX, padY, w, h);
+
+            // קו אמצע ועיגול אמצע
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, padY);
+            ctx.lineTo(canvas.width / 2, padY + h);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 72, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // רחבות שער משני הצדדים
+            const boxW = 148;
+            const boxH = 310;
+            ctx.strokeRect(padX, (canvas.height - boxH) / 2, boxW, boxH);
+            ctx.strokeRect(canvas.width - padX - boxW, (canvas.height - boxH) / 2, boxW, boxH);
+
+            const smallW = 56;
+            const smallH = 160;
+            ctx.strokeRect(padX, (canvas.height - smallH) / 2, smallW, smallH);
+            ctx.strokeRect(canvas.width - padX - smallW, (canvas.height - smallH) / 2, smallW, smallH);
+
+            // נקודות פנדל
+            ctx.beginPath();
+            ctx.arc(padX + 102, canvas.height / 2, 4.5, 0, Math.PI * 2);
+            ctx.arc(canvas.width - padX - 102, canvas.height / 2, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.anisotropy = 8;
+            return tex;
+        }
+
+        function createBallTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // מחומשים קלאסיים של כדורגל
+            ctx.fillStyle = '#111827';
+            const cols = 6;
+            const rows = 3;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cx = (c + (r % 2) * 0.5) * (canvas.width / cols) + 25;
+                    const cy = r * (canvas.height / rows) + 42;
+                    ctx.beginPath();
+                    for (let k = 0; k < 5; k++) {
+                        const a = (k * Math.PI * 2) / 5 - Math.PI / 2;
+                        const px = cx + Math.cos(a) * 20;
+                        const py = cy + Math.sin(a) * 20;
+                        if (k === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createLedBannerTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            grad.addColorStop(0, '#0f172a');
+            grad.addColorStop(0.5, '#1d4ed8');
+            grad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(0, 0, canvas.width, 4);
+            ctx.fillRect(0, canvas.height - 4, canvas.width, 4);
+
+            ctx.font = 'bold 28px Rubik, sans-serif';
+            ctx.fillStyle = '#f8fafc';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚽ PRO SOCCER 3D  ★  RAINBOW FLICK  ★  TURN-SPIN 360°  ★  BICYCLE KICK  ⚽', 512, 42);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.ClampToEdgeWrapping;
+            tex.repeat.set(3, 1);
+            return tex;
+        }
+
+        function createGoalStructure(xPos, facingDir) {
+            const group = new THREE.Group();
+            group.position.set(xPos, 0, 0);
+
+            const postMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                roughness: 0.25,
+                metalness: 0.4
+            });
+
+            const r = 0.09;
+            const h = PITCH.GOAL_H;
+            const halfD = PITCH.GOAL_HALF_D;
+            const depth = 1.9 * facingDir;
+
+            // שתי קורות קדמיות ומשקוף
+            const postGeo = new THREE.CylinderGeometry(r, r, h, 14);
+            const leftPost = new THREE.Mesh(postGeo, postMat);
+            leftPost.position.set(0, h / 2, -halfD);
+            leftPost.castShadow = true;
+            group.add(leftPost);
+
+            const rightPost = new THREE.Mesh(postGeo, postMat);
+            rightPost.position.set(0, h / 2, halfD);
+            rightPost.castShadow = true;
+            group.add(rightPost);
+
+            const barGeo = new THREE.CylinderGeometry(r, r, halfD * 2 + r * 2, 14);
+            const crossbar = new THREE.Mesh(barGeo, postMat);
+            crossbar.rotation.x = Math.PI / 2;
+            crossbar.position.set(0, h, 0);
+            crossbar.castShadow = true;
+            group.add(crossbar);
+
+            // מסגרת תמיכה אחורית
+            const backPostL = new THREE.Mesh(postGeo, postMat);
+            backPostL.position.set(depth, h / 2, -halfD);
+            group.add(backPostL);
+
+            const backPostR = new THREE.Mesh(postGeo, postMat);
+            backPostR.position.set(depth, h / 2, halfD);
+            group.add(backPostR);
+
+            const backBar = new THREE.Mesh(barGeo, postMat);
+            backBar.rotation.x = Math.PI / 2;
+            backBar.position.set(depth, h, 0);
+            group.add(backBar);
+
+            // רשת השער האחורית עם ורטקסים דינמיים לרטט בזמן גול
+            const netGeo = new THREE.PlaneGeometry(halfD * 2, h, 16, 10);
+            const basePositions = Float32Array.from(netGeo.attributes.position.array);
+            const netMat = new THREE.MeshBasicMaterial({
+                color: 0xe2e8f0,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.55
+            });
+            const backNet = new THREE.Mesh(netGeo, netMat);
+            backNet.position.set(depth, h / 2, 0);
+            backNet.rotation.y = Math.PI / 2;
+            group.add(backNet);
+
+            // רשתות צד ועליונה
+            const sideGeo = new THREE.PlaneGeometry(Math.abs(depth), h, 8, 10);
+            const sideNetL = new THREE.Mesh(sideGeo, netMat);
+            sideNetL.position.set(depth / 2, h / 2, -halfD);
+            group.add(sideNetL);
+
+            const sideNetR = new THREE.Mesh(sideGeo, netMat);
+            sideNetR.position.set(depth / 2, h / 2, halfD);
+            group.add(sideNetR);
+
+            const topGeo = new THREE.PlaneGeometry(Math.abs(depth), halfD * 2, 8, 16);
+            const topNet = new THREE.Mesh(topGeo, netMat);
+            topNet.rotation.x = Math.PI / 2;
+            topNet.position.set(depth / 2, h, 0);
+            group.add(topNet);
+
+            scene.add(group);
+            return {
+                mesh: backNet,
+                basePositions,
+                facingDir,
+                rippleTimer: 0,
+                hitY: h / 2,
+                hitZ: 0
+            };
+        }
+
+        function triggerNetRipple(netObj, y, z) {
+            if (!netObj) return;
+            netObj.rippleTimer = 1.2;
+            netObj.hitY = y;
+            netObj.hitZ = z;
+        }
+
+        function updateGoalNets(dt) {
+            [leftGoalNet, rightGoalNet].forEach((netObj) => {
+                if (!netObj || netObj.rippleTimer <= 0) return;
+                netObj.rippleTimer = Math.max(0, netObj.rippleTimer - dt);
+                const posAttr = netObj.mesh.geometry.attributes.position;
+                const base = netObj.basePositions;
+                const amp = netObj.rippleTimer * 0.45 * netObj.facingDir;
+
+                for (let i = 0; i < posAttr.count; i++) {
+                    const bx = base[i * 3];
+                    const by = base[i * 3 + 1];
+                    const dist = Math.hypot(bx - netObj.hitZ, (by + PITCH.GOAL_H / 2) - netObj.hitY);
+                    const wave = Math.exp(-dist * 0.55) * Math.sin(netObj.rippleTimer * 22 - dist * 2) * amp;
+                    posAttr.setZ(i, base[i * 3 + 2] + wave);
+                }
+                posAttr.needsUpdate = true;
+            });
+        }
+
+        function initThreeScene() {
+            const container = document.getElementById('canvas-wrapper');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060c1d);
+            scene.fog = new THREE.FogExp2(0x060c1d, 0.0085);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 220);
+            camera.position.set(0, 21.5, 26.5);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // תאורת אצטדיון וזרקורים
+            const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x14532d, 0.72);
+            scene.add(hemiLight);
+
+            const sunLight = new THREE.DirectionalLight(0xffffff, 0.95);
+            sunLight.position.set(16, 32, 20);
+            sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 2048;
+            sunLight.shadow.mapSize.height = 2048;
+            sunLight.shadow.camera.near = 5;
+            sunLight.shadow.camera.far = 90;
+            const d = 32;
+            sunLight.shadow.camera.left = -d;
+            sunLight.shadow.camera.right = d;
+            sunLight.shadow.camera.top = d;
+            sunLight.shadow.camera.bottom = -d;
+            sunLight.shadow.bias = -0.0005;
+            scene.add(sunLight);
+
+            const rimLight = new THREE.DirectionalLight(0x60a5fa, 0.35);
+            rimLight.position.set(-22, 18, -20);
+            scene.add(rimLight);
+
+            // משטח המגרש הירוק
+            const pitchTex = createPitchTexture();
+            const pitchGeo = new THREE.PlaneGeometry((PITCH.HALF_W + 2.2) * 2, (PITCH.HALF_D + 1.8) * 2);
+            const pitchMat = new THREE.MeshStandardMaterial({
+                map: pitchTex,
+                roughness: 0.85,
+                metalness: 0.05
+            });
+            const pitchMesh = new THREE.Mesh(pitchGeo, pitchMat);
+            pitchMesh.rotation.x = -Math.PI / 2;
+            pitchMesh.receiveShadow = true;
+            scene.add(pitchMesh);
+
+            // שלטי LED מסביב למגרש
+            ledTexture = createLedBannerTexture();
+            const ledMat = new THREE.MeshBasicMaterial({ map: ledTexture });
+            const boardH = 0.85;
+
+            const northBoard = new THREE.Mesh(new THREE.BoxGeometry((PITCH.HALF_W + 2.5) * 2, boardH, 0.25), ledMat);
+            northBoard.position.set(0, boardH / 2, -PITCH.HALF_D - 2.1);
+            scene.add(northBoard);
+
+            const southBoard = new THREE.Mesh(new THREE.BoxGeometry((PITCH.HALF_W + 2.5) * 2, boardH, 0.25), ledMat);
+            southBoard.position.set(0, boardH / 2, PITCH.HALF_D + 2.1);
+            scene.add(southBoard);
+
+            // יציעי אצטדיון וקהל צבעוני
+            const standMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+            const northStand = new THREE.Mesh(new THREE.BoxGeometry(62, 7, 10), standMat);
+            northStand.position.set(0, 3.2, -PITCH.HALF_D - 7.8);
+            northStand.rotation.x = 0.32;
+            scene.add(northStand);
+
+            const fanColors = [0x3b82f6, 0xef4444, 0xfacc15, 0x22c55e, 0xf8fafc, 0xa855f7];
+            const fanGeo = new THREE.BoxGeometry(0.45, 0.75, 0.45);
+            for (let row = 0; row < 4; row++) {
+                for (let col = -26; col <= 26; col += 1.35) {
+                    const mat = new THREE.MeshBasicMaterial({ color: fanColors[Math.floor(Math.random() * fanColors.length)] });
+                    const fan = new THREE.Mesh(fanGeo, mat);
+                    const baseY = 1.6 + row * 1.15;
+                    fan.position.set(col + (Math.random() - 0.5) * 0.4, baseY, -PITCH.HALF_D - 4.4 - row * 1.7);
+                    scene.add(fan);
+                    spectators.push({
+                        mesh: fan,
+                        baseY,
+                        speed: 3.5 + Math.random() * 2.5,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            // 4 דגלי קרן מתנפנפים
+            const flagPoleGeo = new THREE.CylinderGeometry(0.03, 0.03, 1.3, 8);
+            const flagPoleMat = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+            const flagClothGeo = new THREE.PlaneGeometry(0.45, 0.32);
+            const flagClothMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide });
+            [
+                [-PITCH.HALF_W, -PITCH.HALF_D],
+                [PITCH.HALF_W, -PITCH.HALF_D],
+                [-PITCH.HALF_W, PITCH.HALF_D],
+                [PITCH.HALF_W, PITCH.HALF_D]
+            ].forEach(([cx, cz], idx) => {
+                const pole = new THREE.Mesh(flagPoleGeo, flagPoleMat);
+                pole.position.set(cx, 0.65, cz);
+                scene.add(pole);
+
+                const flag = new THREE.Mesh(flagClothGeo, flagClothMat);
+                flag.position.set(cx + 0.22, 1.12, cz);
+                scene.add(flag);
+                cornerFlags.push({ mesh: flag, phase: idx * 1.3 });
+            });
+
+            // בניית שני השערים
+            leftGoalNet = createGoalStructure(-PITCH.HALF_W, -1);
+            rightGoalNet = createGoalStructure(PITCH.HALF_W, 1);
+
+            // יצירת הכדור התלת-ממדי, הצל, טבעת הנחיתה והילת היעף
+            const ballGeo = new THREE.SphereGeometry(PITCH.BALL_R, 24, 24);
+            const ballMat = new THREE.MeshStandardMaterial({
+                map: createBallTexture(),
+                roughness: 0.35,
+                metalness: 0.1
+            });
+            ballMesh = new THREE.Mesh(ballGeo, ballMat);
+            ballMesh.castShadow = true;
+            scene.add(ballMesh);
+
+            const shadowGeo = new THREE.CircleGeometry(PITCH.BALL_R * 1.15, 20);
+            const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.42 });
+            ballShadow = new THREE.Mesh(shadowGeo, shadowMat);
+            ballShadow.rotation.x = -Math.PI / 2;
+            scene.add(ballShadow);
+
+            const lRingGeo = new THREE.RingGeometry(0.32, 0.46, 28);
+            const lRingMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.78 });
+            landingRingMesh = new THREE.Mesh(lRingGeo, lRingMat);
+            landingRingMesh.rotation.x = -Math.PI / 2;
+            landingRingMesh.visible = false;
+            scene.add(landingRingMesh);
+
+            const lDotGeo = new THREE.CircleGeometry(0.12, 16);
+            const lDotMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, transparent: true, opacity: 0.85 });
+            landingDotMesh = new THREE.Mesh(lDotGeo, lDotMat);
+            landingDotMesh.rotation.x = -Math.PI / 2;
+            landingDotMesh.visible = false;
+            scene.add(landingDotMesh);
+
+            const vHaloGeo = new THREE.RingGeometry(PITCH.BALL_R * 1.35, PITCH.BALL_R * 1.62, 24);
+            const vHaloMat = new THREE.MeshBasicMaterial({ color: 0xf97316, side: THREE.DoubleSide, transparent: true, opacity: 0.78 });
+            volleyHaloMesh = new THREE.Mesh(vHaloGeo, vHaloMat);
+            volleyHaloMesh.visible = false;
+            scene.add(volleyHaloMesh);
+        }
+
+        // ==========================================
+        // בניית מודל שחקן מפרקי (ראש, גוף, ידיים, רגליים, מספר חולצה)
+        // ==========================================
+        function createJerseyTexture(jerseyCss, shirtNum) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = jerseyCss;
+            ctx.fillRect(0, 0, 256, 256);
+
+            // פסים עדינים על החולצה
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.fillRect(36, 0, 26, 256);
+            ctx.fillRect(194, 0, 26, 256);
+
+            // מספר שחקן על הגב והחזה
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 84px Rubik, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(shirtNum, 128, 128);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createArticulatedPlayer(jerseyHexNum, jerseyCss, shortsHexNum, ringHexNum, shirtNum, isKeeper = false) {
+            const root = new THREE.Group();
+
+            // טבעת זיהוי על הדשא
+            const ringGeo = new THREE.RingGeometry(0.54, 0.68, 28);
+            const ringMat = new THREE.MeshBasicMaterial({ color: ringHexNum, side: THREE.DoubleSide, transparent: true, opacity: 0.72 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 0.025;
+            root.add(ring);
+
+            // טבעת שליטה בכדור (נדלקת כשמכדררים צמוד לרגל)
+            const possGeo = new THREE.RingGeometry(0.74, 0.88, 32);
+            const possMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+            const possessionRing = new THREE.Mesh(possGeo, possMat);
+            possessionRing.rotation.x = -Math.PI / 2;
+            possessionRing.position.y = 0.03;
+            possessionRing.visible = false;
+            root.add(possessionRing);
+
+            // טבעת עוצמת בעיטה
+            const chargeGeo = new THREE.RingGeometry(0.88, 1.04, 32);
+            const chargeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
+            const chargeRing = new THREE.Mesh(chargeGeo, chargeMat);
+            chargeRing.rotation.x = -Math.PI / 2;
+            chargeRing.position.y = 0.035;
+            chargeRing.visible = false;
+            root.add(chargeRing);
+
+            const bodyPivot = new THREE.Group();
+            bodyPivot.position.y = 1.08;
+            root.add(bodyPivot);
+
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d, roughness: 0.65 });
+            const jerseyMat = new THREE.MeshStandardMaterial({
+                map: createJerseyTexture(jerseyCss, shirtNum),
+                roughness: 0.55
+            });
+            const shortsMat = new THREE.MeshStandardMaterial({ color: shortsHexNum, roughness: 0.6 });
+            const sockMat = new THREE.MeshStandardMaterial({ color: jerseyHexNum, roughness: 0.65 });
+            const bootMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.35 });
+            const gloveMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
+
+            // פלג גוף עליון ומכנסיים (פונה קדימה לכיוון +X מקומי)
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.66, 0.52), jerseyMat);
+            torso.position.y = 0.28;
+            torso.castShadow = true;
+            bodyPivot.add(torso);
+
+            const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.24, 0.48), shortsMat);
+            pelvis.position.y = -0.14;
+            pelvis.castShadow = true;
+            bodyPivot.add(pelvis);
+
+            // ראש ושיער
+            const headGroup = new THREE.Group();
+            headGroup.position.set(0, 0.78, 0);
+            bodyPivot.add(headGroup);
+
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.21, 16, 16), skinMat);
+            head.castShadow = true;
+            headGroup.add(head);
+
+            const hair = new THREE.Mesh(
+                new THREE.SphereGeometry(0.22, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.52),
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 })
+            );
+            hair.rotation.z = 0.2;
+            headGroup.add(hair);
+
+            // פונקציית עזר ליצירת רגל מפרקית (ירך + ברך + נעל)
+            function buildLeg(zOffset) {
+                const hip = new THREE.Group();
+                hip.position.set(0, -0.22, zOffset);
+                bodyPivot.add(hip);
+
+                const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.09, 0.42, 10), shortsMat);
+                thigh.position.y = -0.2;
+                thigh.castShadow = true;
+                hip.add(thigh);
+
+                const knee = new THREE.Group();
+                knee.position.set(0, -0.41, 0);
+                hip.add(knee);
+
+                const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.068, 0.42, 10), sockMat);
+                shin.position.y = -0.2;
+                shin.castShadow = true;
+                knee.add(shin);
+
+                const boot = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.11, 0.14), bootMat);
+                boot.position.set(0.06, -0.41, 0);
+                boot.castShadow = true;
+                knee.add(boot);
+
+                return { hip, knee };
+            }
+
+            // פונקציית עזר ליצירת יד מפרקית (כתף + מרפק + כף יד/כפפה)
+            function buildArm(zOffset) {
+                const shoulder = new THREE.Group();
+                shoulder.position.set(0, 0.54, zOffset);
+                bodyPivot.add(shoulder);
+
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.068, 0.30, 8), jerseyMat);
+                upperArm.position.y = -0.14;
+                upperArm.castShadow = true;
+                shoulder.add(upperArm);
+
+                const elbow = new THREE.Group();
+                elbow.position.set(0, -0.29, 0);
+                shoulder.add(elbow);
+
+                const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.055, 0.28, 8), skinMat);
+                forearm.position.y = -0.13;
+                elbow.add(forearm);
+
+                const hand = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.11, 0.12, 0.09),
+                    isKeeper ? gloveMat : skinMat
+                );
+                hand.position.y = -0.28;
+                elbow.add(hand);
+
+                return { shoulder, elbow };
+            }
+
+            const leftLeg = buildLeg(-0.14);
+            const rightLeg = buildLeg(0.14);
+            const leftArm = buildArm(-0.33);
+            const rightArm = buildArm(0.33);
+
+            scene.add(root);
+            return {
+                root,
+                bodyPivot,
+                headGroup,
+                leftLeg,
+                rightLeg,
+                leftArm,
+                rightArm,
+                ring,
+                possessionRing,
+                chargeRing
+            };
+        }
+
+        // ==========================================
+        // מחלקת שוער אקטיבי שמזנק להצלות
+        // ==========================================
+        class Goalkeeper {
+            constructor(teamId, goalX, facingAngle, jerseyHexNum, jerseyCss, ringHexNum) {
+                this.teamId = teamId;
+                this.goalX = goalX;
+                this.startAngle = facingAngle;
+
+                this.x = goalX;
+                this.y = 0;
+                this.z = 0;
+                this.angle = facingAngle;
+
+                this.diveTimer = 0;
+                this.diveDir = 0;
+                this.diveCooldown = 0;
+                this.saveCooldown = 0;
+
+                this.visual = createArticulatedPlayer(jerseyHexNum, jerseyCss, 0x111827, ringHexNum, '1', true);
+                this.syncVisual();
+            }
+
+            reset() {
+                this.x = this.goalX;
+                this.y = 0;
+                this.z = 0;
+                this.angle = this.startAngle;
+                this.diveTimer = 0;
+                this.diveDir = 0;
+                this.diveCooldown = 0;
+                this.saveCooldown = 0;
+                this.visual.bodyPivot.rotation.set(0, 0, 0);
+                this.visual.bodyPivot.position.y = 1.08;
+                this.syncVisual();
+            }
+
+            update(dt) {
+                if (this.diveCooldown > 0) this.diveCooldown = Math.max(0, this.diveCooldown - dt);
+                if (this.saveCooldown > 0) this.saveCooldown = Math.max(0, this.saveCooldown - dt);
+
+                const maxZ = PITCH.GOAL_HALF_D - 0.55;
+
+                // אם השוער באמצע זינוק הצלה
+                if (this.diveTimer > 0) {
+                    this.diveTimer = Math.max(0, this.diveTimer - dt);
+                    const progress = 1 - (this.diveTimer / 0.58);
+                    this.z += this.diveDir * 7.8 * dt;
+                    this.z = Math.max(-maxZ, Math.min(maxZ, this.z));
+                    this.y = Math.sin(progress * Math.PI) * 0.95;
+
+                    this.visual.bodyPivot.rotation.x = this.diveDir * 1.25 * Math.sin(progress * Math.PI);
+                    this.visual.leftArm.shoulder.rotation.z = 2.6;
+                    this.visual.rightArm.shoulder.rotation.z = 2.6;
+                } else {
+                    this.y = 0;
+                    this.visual.bodyPivot.rotation.set(0, 0, 0);
+                    this.visual.leftArm.shoulder.rotation.z = 0.25;
+                    this.visual.rightArm.shoulder.rotation.z = 0.25;
+
+                    // תנועת מיקום חכמה מול הכדור
+                    const targetZ = Math.max(-maxZ, Math.min(maxZ, ball.z * 0.85));
+                    const diffZ = targetZ - this.z;
+                    const moveSpd = state.diff === 'hard' ? 6.8 : state.diff === 'easy' ? 4.4 : 5.6;
+                    this.z += Math.sign(diffZ) * Math.min(Math.abs(diffZ), moveSpd * dt);
+
+                    // יציאה קלה קדימה כשהכדור מתקרב לרחבה
+                    const distToGoal = Math.abs(ball.x - this.goalX);
+                    const homeX = this.goalX + (this.goalX > 0 ? -0.45 : 0.45);
+                    const stepOutX = distToGoal < 9.5
+                        ? this.goalX + (this.goalX > 0 ? -1.45 : 1.45)
+                        : homeX;
+                    this.x += (stepOutX - this.x) * Math.min(1, dt * 5);
+
+                    // זינוק אקרובטי כשנבעטת בעיטה לעבר השער
+                    const headingToGoal = (this.goalX > 0 && ball.vx > 8.5) || (this.goalX < 0 && ball.vx < -8.5);
+                    if (headingToGoal && distToGoal < 11.5 && Math.abs(ball.z) < PITCH.GOAL_HALF_D + 1.2 && this.diveCooldown <= 0) {
+                        const relZ = ball.z - this.z;
+                        if (Math.abs(relZ) > 0.65) {
+                            this.diveTimer = 0.58;
+                            this.diveCooldown = 1.45;
+                            this.diveDir = Math.sign(relZ);
+                            sound.playSkillWhoosh(340);
+                        }
+                    }
+                }
+
+                // בדיקת עצירת הכדור ע"י השוער
+                if (this.saveCooldown <= 0 && ball.owner === null) {
+                    const dx = ball.x - this.x;
+                    const dz = ball.z - this.z;
+                    const horizDist = Math.hypot(dx, dz);
+                    const reachZ = this.diveTimer > 0 ? 1.55 : 0.92;
+                    const reachY = this.diveTimer > 0 ? 2.15 : 1.95;
+
+                    // צ'יפ גבוה מעל הראש יכול לעבור את השוער!
+                    const isChippedOver = ball.superEffect === 'chip' && ball.y > 1.78;
+
+                    if (!isChippedOver && Math.abs(dx) < 0.95 && Math.abs(dz) < reachZ && horizDist < 1.65 && ball.y < reachY) {
+                        this.saveCooldown = 0.45;
+                        const clearDirX = this.goalX > 0 ? -1 : 1;
+                        const clearDirZ = (Math.random() - 0.5) * 1.1;
+                        const len = Math.hypot(clearDirX, clearDirZ) || 1;
+
+                        ball.vx = (clearDirX / len) * 13.5;
+                        ball.vz = (clearDirZ / len) * 13.5;
+                        ball.vy = 4.8;
+                        ball.spinY = 0;
+                        ball.superEffect = null;
+                        ball.releaseTimer = 0.35;
+
+                        sound.playKick(1.15, false);
+                        showSkillToast('🧤 הצלה ענקית של השוער!');
+                        spawn3DParticles(ball.x, ball.y, ball.z, 0xfacc15, 16, 5.5);
+                    }
+                }
+
+                this.syncVisual();
+            }
+
+            syncVisual() {
+                this.visual.root.position.set(this.x, this.y, this.z);
+                this.visual.root.rotation.y = this.angle;
+            }
+        }
+
+        // ==========================================
+        // מחלקת שחקן שדה ריאליסטי + 6 סקילים + כדרור צמוד
+        // ==========================================
+        class SoccerPlayer {
+            constructor(id, startX, startZ, facingAngle, jerseyHexNum, jerseyCss, shortsHexNum, ringHexNum, shirtNum, controls, isAI = false) {
+                this.id = id;
+                this.startX = startX;
+                this.startZ = startZ;
+                this.startAngle = facingAngle;
+
+                this.x = startX;
+                this.y = 0;
+                this.z = startZ;
+                this.vx = 0;
+                this.vy = 0;
+                this.vz = 0;
+                this.angle = facingAngle;
+
+                this.controls = controls;
+                this.isAI = isAI;
+
+                this.chargeTime = 0;
+                this.wasKickPressed = false;
+                this.kickAnimTimer = 0;
+                this.tackleTimer = 0;
+
+                // Cooldowns ל-6 הסקילים
+                this.cooldowns = { rainbow: 0, bicycle: 0, dash: 0, curve: 0, chip: 0, spin: 0 };
+                this.maxCooldowns = { rainbow: 3.0, bicycle: 4.0, dash: 2.4, curve: 3.3, chip: 3.1, spin: 2.8 };
+
+                // טיימרים למצבי אנימציה מיוחדים
+                this.rainbowTimer = 0;
+                this.rainbowFlicked = false;
+                this.bicycleTimer = 0;
+                this.bicycleStruck = false;
+                this.bicycleSelfPop = false;
+                this.dashTimer = 0;
+                this.feintDir = 1;
+                this.spinTimer = 0;
+                this.spinDir = 1;
+                this.stunTimer = 0;
+                this.stunSide = 1;
+                this.runCycle = 0;
+
+                this.visual = createArticulatedPlayer(jerseyHexNum, jerseyCss, shortsHexNum, ringHexNum, shirtNum, false);
+                this.visual.possessionRing.visible = false;
+                this.syncVisual();
+            }
+
+            reset() {
+                this.x = this.startX;
+                this.y = 0;
+                this.z = this.startZ;
+                this.vx = 0;
+                this.vy = 0;
+                this.vz = 0;
+                this.angle = this.startAngle;
+                this.chargeTime = 0;
+                this.wasKickPressed = false;
+                this.kickAnimTimer = 0;
+                this.tackleTimer = 0;
+                this.rainbowTimer = 0;
+                this.rainbowFlicked = false;
+                this.bicycleTimer = 0;
+                this.bicycleStruck = false;
+                this.bicycleSelfPop = false;
+                this.dashTimer = 0;
+                this.spinTimer = 0;
+                this.stunTimer = 0;
+                this.visual.possessionRing.visible = false;
+                this.syncVisual();
+            }
+
+            update(dt) {
+                for (const k in this.cooldowns) {
+                    if (this.cooldowns[k] > 0) this.cooldowns[k] = Math.max(0, this.cooldowns[k] - dt);
+                }
+                if (this.kickAnimTimer > 0) this.kickAnimTimer = Math.max(0, this.kickAnimTimer - dt);
+                if (this.tackleTimer > 0) this.tackleTimer = Math.max(0, this.tackleTimer - dt);
+                if (this.dashTimer > 0) this.dashTimer = Math.max(0, this.dashTimer - dt);
+                if (this.spinTimer > 0) this.spinTimer = Math.max(0, this.spinTimer - dt);
+                if (this.stunTimer > 0) this.stunTimer = Math.max(0, this.stunTimer - dt);
+
+                let moveX = 0, moveZ = 0;
+                let kickHeld = false, tryRainbow = false, tryBicycle = false, tryDash = false, tryCurve = false, tryChip = false, trySpin = false;
+
+                if (this.stunTimer > 0) {
+                    this.vx *= Math.pow(0.08, dt);
+                    this.vz *= Math.pow(0.08, dt);
+                } else if (this.isAI) {
+                    const ai = computeAIActions(this);
+                    moveX = ai.mx;
+                    moveZ = ai.mz;
+                    kickHeld = ai.kick;
+                    tryRainbow = ai.rainbow;
+                    tryBicycle = ai.bicycle;
+                    tryDash = ai.dash;
+                    tryCurve = ai.curve;
+                    tryChip = ai.chip;
+                    trySpin = ai.spin;
+                } else {
+                    if (keys[this.controls.up]) moveZ -= 1;
+                    if (keys[this.controls.down]) moveZ += 1;
+                    if (keys[this.controls.left]) moveX -= 1;
+                    if (keys[this.controls.right]) moveX += 1;
+                    kickHeld = !!keys[this.controls.kick];
+                    tryRainbow = !!keys[this.controls.rainbow];
+                    tryBicycle = !!keys[this.controls.bicycle];
+                    tryDash = !!keys[this.controls.dash];
+                    tryCurve = !!keys[this.controls.curve];
+                    tryChip = !!keys[this.controls.chip];
+                    trySpin = !!keys[this.controls.spin];
+                }
+
+                // נרמול וקטור תנועה
+                const len = Math.hypot(moveX, moveZ);
+                if (len > 0) {
+                    moveX /= len;
+                    moveZ /= len;
+                    if (this.bicycleTimer <= 0 && this.rainbowTimer <= 0 && this.tackleTimer <= 0 && this.spinTimer <= 0) {
+                        const targetAngle = Math.atan2(-moveZ, moveX);
+                        this.angle = lerpAngle(this.angle, targetAngle, 0.25);
+                    }
+                }
+
+                // הפעלת 6 הסקילים
+                if (tryRainbow && this.cooldowns.rainbow <= 0 && this.stunTimer <= 0 && this.bicycleTimer <= 0 && this.spinTimer <= 0) {
+                    this.startRainbowFlick();
+                }
+                if (tryBicycle && this.cooldowns.bicycle <= 0 && this.stunTimer <= 0 && this.bicycleTimer <= 0) {
+                    this.startBicycleKick();
+                }
+                if (tryDash && this.cooldowns.dash <= 0 && this.stunTimer <= 0 && this.spinTimer <= 0) {
+                    this.startStepOverFeint(moveX, moveZ);
+                }
+                if (tryCurve && this.cooldowns.curve <= 0 && this.stunTimer <= 0) {
+                    this.executeFinesseCurveShot();
+                }
+                if (tryChip && this.cooldowns.chip <= 0 && this.stunTimer <= 0) {
+                    this.executeChipLob();
+                }
+                if (trySpin && this.cooldowns.spin <= 0 && this.stunTimer <= 0 && this.bicycleTimer <= 0 && this.spinTimer <= 0) {
+                    this.startTurnSpin(moveX, moveZ);
+                }
+
+                // עדכון שלבי ביצוע ריינבואו פליק, טרנספין ומספרת
+                this.processRainbowSequence(dt);
+                this.processTurnSpinSequence(dt);
+                this.processBicycleSequence(dt);
+
+                // בעיטה רגילה או תיקול גלישה
+                if (kickHeld && this.stunTimer <= 0 && this.bicycleTimer <= 0 && this.tackleTimer <= 0) {
+                    this.chargeTime = Math.min(1.0, this.chargeTime + dt * 1.95);
+                    this.wasKickPressed = true;
+                } else if (this.wasKickPressed) {
+                    this.performKickOrSlideTackle(this.chargeTime);
+                    this.chargeTime = 0;
+                    this.wasKickPressed = false;
+                }
+
+                // עדכון קשת הטעינה על הדשא
+                if (this.chargeTime > 0.05) {
+                    this.visual.chargeRing.visible = true;
+                    const s = 0.85 + this.chargeTime * 0.45;
+                    this.visual.chargeRing.scale.set(s, s, 1);
+                    this.visual.chargeRing.material.color.setHex(this.chargeTime > 0.78 ? 0xef4444 : 0xfacc15);
+                } else {
+                    this.visual.chargeRing.visible = false;
+                }
+
+                // חישוב תנועה אופקית
+                const aiMult = this.isAI ? getAIDiffStats().speed : 1.0;
+                const isRainbowRunning = ball && ball.rainbowCarrier === this;
+                const maxSpd = (this.dashTimer > 0 ? 15.4 : isRainbowRunning ? 10.8 : 9.1) * aiMult;
+                const accel = 45 * aiMult;
+
+                if (this.dashTimer <= 0 && this.stunTimer <= 0 && this.bicycleTimer <= 0 && this.tackleTimer <= 0 && this.spinTimer <= 0) {
+                    this.vx += moveX * accel * dt;
+                    this.vz += moveZ * accel * dt;
+
+                    const curSpd = Math.hypot(this.vx, this.vz);
+                    if (curSpd > maxSpd) {
+                        this.vx = (this.vx / curSpd) * maxSpd;
+                        this.vz = (this.vz / curSpd) * maxSpd;
+                    }
+                    if (len === 0) {
+                        this.vx *= Math.pow(0.001, dt);
+                        this.vz *= Math.pow(0.001, dt);
+                    }
+                } else if (this.tackleTimer > 0) {
+                    this.vx *= Math.pow(0.18, dt);
+                    this.vz *= Math.pow(0.18, dt);
+                }
+
+                // כוח כבידה בקפיצות
+                if (this.y > 0 || this.vy !== 0) {
+                    this.vy += PITCH.GRAVITY * dt;
+                    this.y += this.vy * dt;
+                    if (this.y <= 0) {
+                        this.y = 0;
+                        this.vy = 0;
+                    }
+                }
+
+                this.x += this.vx * dt;
+                this.z += this.vz * dt;
+
+                // גבולות המגרש
+                const maxX = PITCH.HALF_W + 1.1;
+                const maxZ = PITCH.HALF_D - PITCH.PLAYER_R;
+                if (this.x < -maxX) { this.x = -maxX; this.vx = 0; }
+                if (this.x > maxX) { this.x = maxX; this.vx = 0; }
+                if (this.z < -maxZ) { this.z = -maxZ; this.vz = 0; }
+                if (this.z > maxZ) { this.z = maxZ; this.vz = 0; }
+
+                // כדרור צמוד לרגל תוך כדי ריצה ופניות
+                this.handleNaturalDribble(dt);
+
+                // אנימציה מפרקית
+                this.animateArticulatedBody(dt);
+                this.syncVisual();
+            }
+
+            /**
+             * שליטה צמודה בכדור (Close Dribble Control)
+             */
+            handleNaturalDribble(dt) {
+                const possRing = this.visual.possessionRing;
+
+                if (this.rainbowTimer > 0 || this.bicycleTimer > 0 || ball.rainbowCarrier === this) {
+                    possRing.visible = false;
+                    return;
+                }
+
+                if (this.spinTimer > 0 && ball.owner === this) {
+                    possRing.visible = true;
+                    return;
+                }
+
+                if (ball.releaseTimer > 0 || ball.y > 0.88) {
+                    if (ball.owner === this) ball.owner = null;
+                    possRing.visible = false;
+                    return;
+                }
+
+                const dx = ball.x - this.x;
+                const dz = ball.z - this.z;
+                const distXZ = Math.hypot(dx, dz);
+                const opponent = this.id === 1 ? player2 : player1;
+
+                // בדיקת השתלטות או חטיפת כדור מיריב
+                if (ball.owner !== this && this.stunTimer <= 0) {
+                    const controlRadius = this.tackleTimer > 0 ? 1.65 : 1.35;
+                    if (distXZ < controlRadius && ball.y < 0.78) {
+                        if (ball.owner === null && ball.stealCooldown <= 0) {
+                            ball.owner = this;
+                            ball.stealCooldown = 0.30;
+                            sound.playKick(0.32, false);
+                        } else if (ball.owner === opponent && ball.stealCooldown <= 0) {
+                            if (opponent.spinTimer > 0) return;
+                            const canStealWithTackle = this.tackleTimer > 0 && distXZ < 1.58;
+                            const canStealWithPressure = distXZ < 1.02 && opponent.dashTimer <= 0;
+                            if (canStealWithTackle || canStealWithPressure) {
+                                ball.owner = this;
+                                ball.stealCooldown = 0.34;
+                                if (canStealWithTackle) {
+                                    opponent.stunTimer = Math.max(opponent.stunTimer, 0.32);
+                                }
+                                sound.playKick(0.45, false);
+                                spawn3DParticles(ball.x, 0.35, ball.z, 0x38bdf8, 8, 3.5);
+                            }
+                        }
+                    }
+                }
+
+                // הצמדה דינמית לרגל בזמן כדרור
+                if (ball.owner === this) {
+                    if (distXZ > 2.25 || this.stunTimer > 0) {
+                        ball.owner = null;
+                        possRing.visible = false;
+                        return;
+                    }
+
+                    possRing.visible = true;
+                    const pulse = 0.96 + Math.sin(performance.now() * 0.014) * 0.06;
+                    possRing.scale.set(pulse, pulse, 1);
+
+                    const dirX = Math.cos(this.angle);
+                    const dirZ = -Math.sin(this.angle);
+                    const rightX = Math.sin(this.angle);
+                    const rightZ = Math.cos(this.angle);
+
+                    const pSpd = Math.hypot(this.vx, this.vz);
+                    const isSprinting = this.dashTimer > 0 || pSpd > 8.1;
+                    const baseForward = isSprinting ? 0.92 : 0.74;
+                    const strideTap = pSpd > 0.6 ? Math.abs(Math.sin(this.runCycle)) * 0.08 : 0;
+                    const forwardDist = baseForward + strideTap;
+
+                    const lateralOffset = pSpd > 0.6
+                        ? Math.sin(this.runCycle) * 0.22
+                        : 0.12;
+
+                    const targetX = this.x + dirX * forwardDist + rightX * lateralOffset;
+                    const targetZ = this.z + dirZ * forwardDist + rightZ * lateralOffset;
+
+                    const pull = Math.min(1, dt * 22);
+                    ball.x += (targetX - ball.x) * pull;
+                    ball.z += (targetZ - ball.z) * pull;
+                    ball.y = PITCH.BALL_R;
+                    ball.vy = 0;
+                    ball.vx = this.vx;
+                    ball.vz = this.vz;
+                } else {
+                    possRing.visible = false;
+                }
+            }
+
+            performKickOrSlideTackle(powerRatio) {
+                const dx = ball.x - this.x;
+                const dz = ball.z - this.z;
+                const dist = Math.hypot(dx, dz);
+
+                if (dist <= PITCH.PLAYER_R + PITCH.BALL_R + 1.35 && ball.y < 2.2) {
+                    this.kickAnimTimer = 0.26;
+                    const dirX = Math.cos(this.angle);
+                    const dirZ = -Math.sin(this.angle);
+
+                    const speed = 13.8 + powerRatio * 14.7;
+                    const liftY = 1.7 + powerRatio * 6.8;
+
+                    ball.owner = null;
+                    ball.releaseTimer = 0.36;
+                    ball.vx = dirX * speed;
+                    ball.vz = dirZ * speed;
+                    ball.vy = liftY;
+                    ball.spinY = 0;
+                    ball.superEffect = powerRatio > 0.78 ? 'power' : null;
+
+                    sound.playKick(0.9 + powerRatio * 0.4, powerRatio > 0.78);
+                    spawn3DParticles(ball.x, ball.y + 0.25, ball.z, 0xffffff, 10, 4.5);
+                } else if (dist <= 3.7 && ball.y < 1.3) {
+                    this.tackleTimer = 0.42;
+                    const toBallAng = Math.atan2(-dz, dx);
+                    this.angle = toBallAng;
+                    this.vx = Math.cos(toBallAng) * 14.5;
+                    this.vz = -Math.sin(toBallAng) * 14.5;
+                    sound.playSkillWhoosh(260);
+                    spawn3DParticles(this.x, 0.15, this.z, 0x4ade80, 12, 4.0);
+                }
+            }
+
+            /**
+             * סקיל 1: ריינבואו פליק שחוזר לרגל!
+             */
+            startRainbowFlick() {
+                const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                if (dist > 2.75 || ball.y > 1.5) return;
+
+                ball.owner = null;
+                ball.rainbowCarrier = null;
+                ball.releaseTimer = 0.25;
+                this.cooldowns.rainbow = this.maxCooldowns.rainbow;
+                this.rainbowTimer = 0.34;
+                this.rainbowFlicked = false;
+                sound.playSkillWhoosh(380);
+                flashSkillSlot(this.id, 'rainbow');
+            }
+
+            processRainbowSequence(dt) {
+                if (this.rainbowTimer <= 0) return;
+                this.rainbowTimer = Math.max(0, this.rainbowTimer - dt);
+                const elapsed = 0.34 - this.rainbowTimer;
+
+                const dirX = Math.cos(this.angle);
+                const dirZ = -Math.sin(this.angle);
+
+                if (elapsed < 0.14 && !this.rainbowFlicked) {
+                    const t = elapsed / 0.14;
+                    ball.x = this.x - dirX * (0.42 - t * 0.28);
+                    ball.z = this.z - dirZ * (0.42 - t * 0.28);
+                    ball.y = PITCH.BALL_R + t * 1.55;
+                    ball.vx = this.vx;
+                    ball.vz = this.vz;
+                    ball.vy = 0;
+                } else if (!this.rainbowFlicked) {
+                    this.rainbowFlicked = true;
+                    ball.owner = null;
+                    ball.releaseTimer = 0.18;
+                    ball.rainbowCarrier = this;
+                    ball.rainbowArcTimer = 0.64;
+                    ball.rainbowArcDuration = 0.64;
+                    ball.rainbowStartX = this.x - dirX * 0.15;
+                    ball.rainbowStartY = 1.95;
+                    ball.rainbowStartZ = this.z - dirZ * 0.15;
+                    ball.superEffect = 'rainbow';
+
+                    this.vx = dirX * 10.6;
+                    this.vz = dirZ * 10.6;
+
+                    const opponent = this.id === 1 ? player2 : player1;
+                    if (opponent && Math.hypot(opponent.x - this.x, opponent.z - this.z) < 3.8) {
+                        opponent.stunTimer = 0.68;
+                        opponent.stunSide = Math.random() > 0.5 ? 1 : -1;
+                    }
+
+                    sound.playSkillWhoosh(620);
+                    showSkillToast('🌈 ריינבואו פליק מושלם!');
+                    const rainbowCols = [0xef4444, 0xf97316, 0xeab308, 0x22c55e, 0x3b82f6, 0xa855f7];
+                    rainbowCols.forEach(c => spawn3DParticles(ball.x, ball.y, ball.z, c, 4, 5));
+                }
+            }
+
+            /**
+             * סקיל 6: טרנספין / רולטה 360° לעבור שחקן
+             */
+            startTurnSpin(moveX, moveZ) {
+                const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                if (dist > 2.65 || ball.y > 1.35) return;
+
+                this.cooldowns.spin = this.maxCooldowns.spin;
+                this.spinTimer = 0.48;
+                ball.owner = this;
+                ball.rainbowCarrier = null;
+                ball.stealCooldown = 0.55;
+
+                const dirX = (moveX !== 0 || moveZ !== 0) ? moveX : Math.cos(this.angle);
+                const dirZ = (moveX !== 0 || moveZ !== 0) ? moveZ : -Math.sin(this.angle);
+                this.angle = Math.atan2(-dirZ, dirX);
+
+                const opponent = this.id === 1 ? player2 : player1;
+                if (opponent && Math.hypot(opponent.x - this.x, opponent.z - this.z) < 4.5) {
+                    const rightX = Math.sin(this.angle);
+                    const rightZ = Math.cos(this.angle);
+                    const relDot = (opponent.x - this.x) * rightX + (opponent.z - this.z) * rightZ;
+                    this.spinDir = relDot >= 0 ? -1 : 1;
+                } else {
+                    this.spinDir = Math.random() > 0.5 ? 1 : -1;
+                }
+
+                sound.playSkillWhoosh(510);
+                flashSkillSlot(this.id, 'spin');
+                spawn3DParticles(this.x, 0.25, this.z, 0x10b981, 14, 4.5);
+
+                if (opponent && Math.hypot(opponent.x - this.x, opponent.z - this.z) < 3.7) {
+                    opponent.stunTimer = 0.85;
+                    opponent.stunSide = -this.spinDir;
+                    const rightX = Math.sin(this.angle);
+                    const rightZ = Math.cos(this.angle);
+                    opponent.vx = -rightX * this.spinDir * 11.5;
+                    opponent.vz = -rightZ * this.spinDir * 11.5;
+                    showSkillToast('🔄 טרנספין 360°! עברת את השחקן!');
+                    spawn3DParticles(opponent.x, 1.5, opponent.z, 0x38bdf8, 14, 4.5);
+                } else {
+                    showSkillToast('🔄 טרנספין 360°!');
+                }
+            }
+
+            processTurnSpinSequence(dt) {
+                if (this.spinTimer <= 0) return;
+                const progress = 1 - (this.spinTimer / 0.48);
+
+                const fwdX = Math.cos(this.angle);
+                const fwdZ = -Math.sin(this.angle);
+                const rightX = Math.sin(this.angle);
+                const rightZ = Math.cos(this.angle);
+
+                const lateralCurve = Math.sin(progress * Math.PI) * 5.8 * this.spinDir;
+                const forwardBurst = 12.2;
+                this.vx = fwdX * forwardBurst + rightX * lateralCurve;
+                this.vz = fwdZ * forwardBurst + rightZ * lateralCurve;
+
+                if (ball.owner === this) {
+                    const spinAngle = this.angle + progress * Math.PI * 2 * this.spinDir;
+                    const orbitRadius = 0.78;
+                    ball.x = this.x + Math.cos(spinAngle) * orbitRadius;
+                    ball.z = this.z - Math.sin(spinAngle) * orbitRadius;
+                    ball.y = PITCH.BALL_R;
+                    ball.vx = this.vx;
+                    ball.vz = this.vz;
+                    ball.vy = 0;
+                }
+            }
+
+            /**
+             * סקיל 2: מספרת אקרובטית
+             */
+            startBicycleKick() {
+                this.cooldowns.bicycle = this.maxCooldowns.bicycle;
+                this.bicycleTimer = 0.60;
+                this.bicycleStruck = false;
+                this.bicycleSelfPop = false;
+                this.vy = 7.5;
+
+                const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                if (dist <= 2.6 && ball.y < 0.85 && ball.rainbowCarrier !== this) {
+                    this.bicycleSelfPop = true;
+                    ball.owner = null;
+                    ball.releaseTimer = 0.55;
+                    ball.y = 0.75;
+                    ball.vy = 7.2;
+                    ball.vx *= 0.35;
+                    ball.vz *= 0.35;
+                }
+
+                const goalX = this.id === 1 ? -PITCH.HALF_W : PITCH.HALF_W;
+                const toGoalAngle = Math.atan2(-(0 - this.z), goalX - this.x);
+                this.angle = toGoalAngle;
+
+                this.vx = -Math.cos(this.angle) * 2.4;
+                this.vz = Math.sin(this.angle) * 2.4;
+
+                sound.playSkillWhoosh(310);
+                flashSkillSlot(this.id, 'bicycle');
+            }
+
+            processBicycleSequence(dt) {
+                if (this.bicycleTimer <= 0) return;
+                this.bicycleTimer = Math.max(0, this.bicycleTimer - dt);
+                const elapsed = 0.60 - this.bicycleTimer;
+
+                if (!this.bicycleStruck && elapsed >= 0.15 && elapsed <= 0.40) {
+                    const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                    if (dist <= 3.8 && ball.y <= 4.7) {
+                        this.bicycleStruck = true;
+                        ball.rainbowCarrier = null;
+                        const goalX = this.id === 1 ? -PITCH.HALF_W : PITCH.HALF_W;
+                        const aimZ = (Math.random() - 0.5) * (PITCH.GOAL_HALF_D * 1.45);
+
+                        const dx = goalX - ball.x;
+                        const dz = aimZ - ball.z;
+                        const horizDist = Math.hypot(dx, dz) || 1;
+                        const volleySpeed = 29.5;
+                        const flightTime = horizDist / volleySpeed;
+
+                        const targetHeight = 1.45;
+                        const requiredVy = ((targetHeight - ball.y) - 0.5 * PITCH.GRAVITY * flightTime * flightTime) / flightTime;
+
+                        ball.owner = null;
+                        ball.releaseTimer = 0.45;
+                        ball.vx = (dx / horizDist) * volleySpeed;
+                        ball.vz = (dz / horizDist) * volleySpeed;
+                        ball.vy = Math.max(-6, Math.min(8.5, requiredVy));
+                        ball.spinY = 0;
+                        ball.superEffect = 'fire';
+
+                        state.shake = 0.48;
+                        sound.playKick(1.45, true);
+                        showSkillToast('🤸 מספרת אדירה לחיבורים!');
+                        spawn3DParticles(ball.x, ball.y, ball.z, 0xf97316, 26, 8.5);
+                        spawn3DParticles(ball.x, ball.y, ball.z, 0xfacc15, 16, 6.5);
+                    }
+                }
+            }
+
+            /**
+             * סקיל 3: פדלדה והטעיית כתף
+             */
+            startStepOverFeint(moveX, moveZ) {
+                this.cooldowns.dash = this.maxCooldowns.dash;
+                this.dashTimer = 0.34;
+                this.feintDir = Math.random() > 0.5 ? 1 : -1;
+
+                const dirX = (moveX !== 0 || moveZ !== 0) ? moveX : Math.cos(this.angle);
+                const dirZ = (moveX !== 0 || moveZ !== 0) ? moveZ : -Math.sin(this.angle);
+
+                const perpX = -dirZ * 0.42 * this.feintDir;
+                const perpZ = dirX * 0.42 * this.feintDir;
+                this.vx = (dirX + perpX) * 15.8;
+                this.vz = (dirZ + perpZ) * 15.8;
+
+                sound.playSkillWhoosh(480);
+                flashSkillSlot(this.id, 'dash');
+                spawn3DParticles(this.x, 0.3, this.z, 0x38bdf8, 14, 5);
+
+                const opponent = this.id === 1 ? player2 : player1;
+                if (opponent && Math.hypot(opponent.x - this.x, opponent.z - this.z) < 4.2) {
+                    opponent.stunTimer = 0.76;
+                    opponent.stunSide = -this.feintDir;
+                    opponent.vx = (-perpX) * 14;
+                    opponent.vz = (-perpZ) * 14;
+                    showSkillToast('⚡ הטעיית פדלדה קטלנית!');
+                    spawn3DParticles(opponent.x, 1.7, opponent.z, 0xfbbf24, 14, 4.5);
+                }
+            }
+
+            /**
+             * סקיל 4: בעיטת בננה מסובבת
+             */
+            executeFinesseCurveShot() {
+                const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                if (dist > PITCH.PLAYER_R + PITCH.BALL_R + 1.55 || ball.y > 2.2) return;
+
+                this.cooldowns.curve = this.maxCooldowns.curve;
+                this.kickAnimTimer = 0.32;
+
+                const goalX = this.id === 1 ? -PITCH.HALF_W : PITCH.HALF_W;
+                const cornerSign = ball.z >= 0 ? -1 : 1;
+                const targetZ = cornerSign * (PITCH.GOAL_HALF_D - 0.55);
+
+                const dx = goalX - ball.x;
+                const initialAimZ = targetZ + cornerSign * 4.3;
+                const dz = initialAimZ - ball.z;
+                const d = Math.hypot(dx, dz) || 1;
+
+                const speed = 23.0;
+                ball.owner = null;
+                ball.releaseTimer = 0.40;
+                ball.vx = (dx / d) * speed;
+                ball.vz = (dz / d) * speed;
+                ball.vy = 4.6;
+                ball.spinY = -cornerSign * 16.8;
+                ball.superEffect = 'curve';
+
+                sound.playKick(1.25, true);
+                showSkillToast('🌀 בעיטת בננה לחיבורים!');
+                flashSkillSlot(this.id, 'curve');
+                spawn3DParticles(ball.x, ball.y + 0.3, ball.z, 0xc084fc, 20, 6.5);
+            }
+
+            /**
+             * סקיל 5: הקפצה / צ'יפ מעל השוער
+             */
+            executeChipLob() {
+                const dist = Math.hypot(ball.x - this.x, ball.z - this.z);
+                if (dist > PITCH.PLAYER_R + PITCH.BALL_R + 1.55 || ball.y > 2.0) return;
+
+                this.cooldowns.chip = this.maxCooldowns.chip;
+                this.kickAnimTimer = 0.28;
+
+                const goalX = this.id === 1 ? -PITCH.HALF_W : PITCH.HALF_W;
+                const aimZ = Math.max(-PITCH.GOAL_HALF_D * 0.75, Math.min(PITCH.GOAL_HALF_D * 0.75, ball.z * 0.5));
+                const dx = goalX - ball.x;
+                const dz = aimZ - ball.z;
+                const horizDist = Math.hypot(dx, dz) || 1;
+
+                const chipSpeed = Math.max(10.5, Math.min(18.5, horizDist * 0.88));
+                const flightTime = horizDist / chipSpeed;
+                const targetDropY = 1.65;
+                const requiredVy = ((targetDropY - ball.y) - 0.5 * PITCH.GRAVITY * flightTime * flightTime) / flightTime;
+
+                ball.owner = null;
+                ball.releaseTimer = 0.42;
+                ball.vx = (dx / horizDist) * chipSpeed;
+                ball.vz = (dz / horizDist) * chipSpeed;
+                ball.vy = Math.max(8.8, Math.min(14.5, requiredVy));
+                ball.spinY = 0;
+                ball.superEffect = 'chip';
+
+                sound.playSkillWhoosh(540);
+                showSkillToast('🎯 צ׳יפ גאוני מעל השוער!');
+                flashSkillSlot(this.id, 'chip');
+                spawn3DParticles(ball.x, ball.y + 0.2, ball.z, 0x38bdf8, 18, 5.5);
+            }
+
+            animateArticulatedBody(dt) {
+                const { bodyPivot, headGroup, leftLeg, rightLeg, leftArm, rightArm, ring } = this.visual;
+                const speed = Math.hypot(this.vx, this.vz);
+
+                bodyPivot.rotation.set(0, 0, 0);
+
+                if (this.bicycleTimer > 0) {
+                    const p = 1 - (this.bicycleTimer / 0.60);
+                    bodyPivot.rotation.z = p * Math.PI * 2;
+                    rightLeg.hip.rotation.z = 1.35;
+                    rightLeg.knee.rotation.z = -0.15;
+                    leftLeg.hip.rotation.z = -0.55;
+                    leftLeg.knee.rotation.z = -0.65;
+                    leftArm.shoulder.rotation.z = -0.9;
+                    rightArm.shoulder.rotation.z = -0.9;
+                    return;
+                }
+
+                if (this.tackleTimer > 0) {
+                    bodyPivot.rotation.z = 1.25;
+                    bodyPivot.position.y = 0.52;
+                    rightLeg.hip.rotation.z = 1.15;
+                    rightLeg.knee.rotation.z = -0.1;
+                    leftLeg.hip.rotation.z = -0.4;
+                    leftLeg.knee.rotation.z = -1.2;
+                    return;
+                }
+
+                if (this.rainbowTimer > 0) {
+                    const p = 1 - (this.rainbowTimer / 0.34);
+                    bodyPivot.rotation.z = -0.28;
+                    leftLeg.hip.rotation.z = 0.25;
+                    leftLeg.knee.rotation.z = -0.25;
+                    rightLeg.hip.rotation.z = -Math.sin(p * Math.PI) * 1.15;
+                    rightLeg.knee.rotation.z = -Math.sin(p * Math.PI) * 1.45;
+                    return;
+                }
+
+                if (this.spinTimer > 0) {
+                    const p = 1 - (this.spinTimer / 0.48);
+                    bodyPivot.rotation.y = p * Math.PI * 2 * this.spinDir;
+                    bodyPivot.rotation.z = -0.22;
+                    bodyPivot.rotation.x = Math.sin(p * Math.PI) * 0.24 * this.spinDir;
+                    leftLeg.hip.rotation.z = 0.55;
+                    leftLeg.knee.rotation.z = -0.45;
+                    rightLeg.hip.rotation.z = -0.35;
+                    rightLeg.knee.rotation.z = -0.55;
+                    leftArm.shoulder.rotation.x = -0.75;
+                    rightArm.shoulder.rotation.x = 0.75;
+                    return;
+                }
+
+                if (this.dashTimer > 0) {
+                    const p = 1 - (this.dashTimer / 0.34);
+                    bodyPivot.rotation.x = Math.sin(p * Math.PI * 2) * 0.42 * this.feintDir;
+                    bodyPivot.rotation.z = -0.22;
+                    leftLeg.hip.rotation.z = Math.sin(p * Math.PI * 4) * 0.9;
+                    rightLeg.hip.rotation.z = -Math.sin(p * Math.PI * 4) * 0.9;
+                    leftLeg.knee.rotation.z = -0.6;
+                    rightLeg.knee.rotation.z = -0.6;
+                    return;
+                }
+
+                if (this.stunTimer > 0) {
+                    bodyPivot.rotation.x = 0.45 * this.stunSide;
+                    bodyPivot.rotation.y = Math.sin(this.stunTimer * 22) * 0.55;
+                    leftArm.shoulder.rotation.x = -0.8;
+                    rightArm.shoulder.rotation.x = 0.8;
+                    ring.material.color.setHex(0xfbbf24);
+                    return;
+                } else {
+                    ring.material.color.setHex(this.id === 1 ? 0x3b82f6 : 0xef4444);
+                }
+
+                if (speed > 0.5) {
+                    this.runCycle += dt * speed * 2.1;
+                    const swing = Math.sin(this.runCycle) * 0.82;
+
+                    leftLeg.hip.rotation.z = swing;
+                    rightLeg.hip.rotation.z = -swing;
+                    leftLeg.knee.rotation.z = -Math.max(0, -swing) * 1.15;
+                    rightLeg.knee.rotation.z = -Math.max(0, swing) * 1.15;
+
+                    leftArm.shoulder.rotation.z = -swing * 0.65;
+                    rightArm.shoulder.rotation.z = swing * 0.65;
+                    leftArm.elbow.rotation.z = 0.45 + Math.max(0, -swing) * 0.4;
+                    rightArm.elbow.rotation.z = 0.45 + Math.max(0, swing) * 0.4;
+
+                    bodyPivot.rotation.z = -Math.min(0.22, speed * 0.02);
+                    bodyPivot.position.y = 1.08 + Math.abs(Math.cos(this.runCycle)) * 0.07;
+                } else {
+                    leftLeg.hip.rotation.z *= 0.82;
+                    rightLeg.hip.rotation.z *= 0.82;
+                    leftLeg.knee.rotation.z *= 0.82;
+                    rightLeg.knee.rotation.z *= 0.82;
+                    leftArm.shoulder.rotation.z *= 0.82;
+                    rightArm.shoulder.rotation.z *= 0.82;
+                    leftArm.elbow.rotation.z = 0.25;
+                    rightArm.elbow.rotation.z = 0.25;
+                    bodyPivot.position.y = 1.08;
+                }
+
+                if (this.kickAnimTimer > 0) {
+                    const kp = Math.sin((this.kickAnimTimer / 0.26) * Math.PI);
+                    rightLeg.hip.rotation.z = kp * 1.25;
+                    rightLeg.knee.rotation.z = -kp * 0.25;
+                    bodyPivot.rotation.z = kp * 0.18;
+                }
+
+                if (ball) {
+                    const angleToBall = Math.atan2(-(ball.z - this.z), ball.x - this.x);
+                    let headYaw = angleToBall - this.angle;
+                    while (headYaw < -Math.PI) headYaw += Math.PI * 2;
+                    while (headYaw > Math.PI) headYaw -= Math.PI * 2;
+                    headGroup.rotation.y = Math.max(-0.55, Math.min(0.55, headYaw));
+                }
+            }
+
+            syncVisual() {
+                this.visual.root.position.set(this.x, this.y, this.z);
+                this.visual.root.rotation.y = this.angle;
+            }
+        }
+
+        // ==========================================
+        // מחלקת הכדור התלת-ממדי
+        // ==========================================
+        class SoccerBall {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = 0;
+                this.y = PITCH.BALL_R;
+                this.z = 0;
+                this.vx = 0;
+                this.vy = 0;
+                this.vz = 0;
+                this.spinY = 0;
+                this.superEffect = null;
+                this.owner = null;
+                this.rainbowCarrier = null;
+                this.rainbowArcTimer = 0;
+                this.rainbowArcDuration = 0.64;
+                this.rainbowStartX = 0;
+                this.rainbowStartY = 0;
+                this.rainbowStartZ = 0;
+                this.releaseTimer = 0;
+                this.stealCooldown = 0;
+                this.syncVisual();
+            }
+
+            update(dt) {
+                if (this.releaseTimer > 0) this.releaseTimer = Math.max(0, this.releaseTimer - dt);
+                if (this.stealCooldown > 0) this.stealCooldown = Math.max(0, this.stealCooldown - dt);
+
+                // מסלול קשת ריינבואו פליק שמחזירה את הכדור לרגל
+                if (this.rainbowCarrier) {
+                    const p = this.rainbowCarrier;
+                    if (p.stunTimer > 0) {
+                        this.rainbowCarrier = null;
+                    } else {
+                        this.rainbowArcTimer = Math.max(0, this.rainbowArcTimer - dt);
+                        const t = 1 - (this.rainbowArcTimer / this.rainbowArcDuration);
+
+                        const dirX = Math.cos(p.angle);
+                        const dirZ = -Math.sin(p.angle);
+                        const destX = p.x + dirX * 0.78;
+                        const destZ = p.z + dirZ * 0.78;
+
+                        const prevX = this.x;
+                        const prevZ = this.z;
+
+                        const easeT = t * t * (3 - 2 * t);
+                        this.x = this.rainbowStartX + (destX - this.rainbowStartX) * easeT;
+                        this.z = this.rainbowStartZ + (destZ - this.rainbowStartZ) * easeT;
+                        const baseLineY = this.rainbowStartY * (1 - t) + PITCH.BALL_R * t;
+                        this.y = baseLineY + Math.sin(t * Math.PI) * 1.95;
+
+                        this.vx = (this.x - prevX) / Math.max(0.001, dt);
+                        this.vz = (this.z - prevZ) / Math.max(0.001, dt);
+                        this.vy = Math.cos(t * Math.PI) * 6.0;
+
+                        const cols = [0xef4444, 0xfacc15, 0x22c55e, 0x38bdf8, 0xa855f7];
+                        spawn3DParticles(this.x, this.y, this.z, cols[Math.floor(Math.random() * cols.length)], 2, 1.8);
+
+                        ballMesh.rotation.z -= 12 * dt;
+                        this.syncVisual();
+
+                        if (this.rainbowArcTimer <= 0) {
+                            this.rainbowCarrier = null;
+                            this.owner = p;
+                            this.releaseTimer = 0;
+                            this.stealCooldown = 0.25;
+                            this.y = PITCH.BALL_R;
+                            this.vy = 0;
+                            this.superEffect = null;
+                            sound.playKick(0.35, false);
+                            spawn3DParticles(this.x, 0.35, this.z, 0x38bdf8, 10, 3.2);
+                        }
+                        return;
+                    }
+                }
+
+                if (this.owner) {
+                    const maxX = PITCH.HALF_W - PITCH.BALL_R;
+                    const maxZ = PITCH.HALF_D - PITCH.BALL_R;
+                    this.x = Math.max(-maxX, Math.min(maxX, this.x));
+                    this.z = Math.max(-maxZ, Math.min(maxZ, this.z));
+
+                    ballMesh.rotation.z -= (this.vx / PITCH.BALL_R) * dt * 0.85;
+                    ballMesh.rotation.x += (this.vz / PITCH.BALL_R) * dt * 0.85;
+                    this.syncVisual();
+                    return;
+                }
+
+                // אפקט מגנוס
+                if (Math.abs(this.spinY) > 0.1) {
+                    this.vz += this.spinY * dt * 1.55;
+                    this.spinY *= Math.pow(0.42, dt);
+                }
+
+                if (this.y > PITCH.BALL_R || this.vy > 0) {
+                    this.vy += PITCH.GRAVITY * dt;
+                }
+
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.z += this.vz * dt;
+
+                // אינטראקציה עם הדשא
+                if (this.y <= PITCH.BALL_R) {
+                    this.y = PITCH.BALL_R;
+                    if (this.vy < -2.0) {
+                        this.vy = -this.vy * 0.64;
+                        sound.playKick(0.42, false);
+                    } else {
+                        this.vy = 0;
+                        this.superEffect = null;
+                    }
+                    this.vx *= Math.pow(0.30, dt);
+                    this.vz *= Math.pow(0.30, dt);
+                } else {
+                    this.vx *= Math.pow(0.76, dt);
+                    this.vz *= Math.pow(0.76, dt);
+                }
+
+                // קירות רוחב (ציר Z)
+                const maxZ = PITCH.HALF_D - PITCH.BALL_R;
+                if (this.z < -maxZ) {
+                    this.z = -maxZ;
+                    this.vz = Math.abs(this.vz) * 0.78;
+                    sound.playKick(0.38, false);
+                } else if (this.z > maxZ) {
+                    this.z = maxZ;
+                    this.vz = -Math.abs(this.vz) * 0.78;
+                    sound.playKick(0.38, false);
+                }
+
+                // בדיקת שערים
+                const inGoalZ = Math.abs(this.z) < (PITCH.GOAL_HALF_D - PITCH.BALL_R * 0.35);
+                const underCrossbar = this.y < (PITCH.GOAL_H - PITCH.BALL_R * 0.25);
+
+                // שער שמאלי (-X -> כחול מבקיע!)
+                if (this.x < -PITCH.HALF_W + PITCH.BALL_R) {
+                    if (inGoalZ && underCrossbar) {
+                        if (this.x < -PITCH.HALF_W - PITCH.BALL_R * 0.65) {
+                            triggerNetRipple(leftGoalNet, this.y, this.z);
+                            onGoalScored(1);
+                            return;
+                        }
+                    } else {
+                        this.x = -PITCH.HALF_W + PITCH.BALL_R;
+                        this.vx = Math.abs(this.vx) * 0.78;
+                        if (inGoalZ && Math.abs(this.y - PITCH.GOAL_H) < 0.65) sound.playPostClang();
+                    }
+                }
+
+                // שער ימני (+X -> אדום מבקיע!)
+                if (this.x > PITCH.HALF_W - PITCH.BALL_R) {
+                    if (inGoalZ && underCrossbar) {
+                        if (this.x > PITCH.HALF_W + PITCH.BALL_R * 0.65) {
+                            triggerNetRipple(rightGoalNet, this.y, this.z);
+                            onGoalScored(2);
+                            return;
+                        }
+                    } else {
+                        this.x = PITCH.HALF_W - PITCH.BALL_R;
+                        this.vx = -Math.abs(this.vx) * 0.78;
+                        if (inGoalZ && Math.abs(this.y - PITCH.GOAL_H) < 0.65) sound.playPostClang();
+                    }
+                }
+
+                const spd = Math.hypot(this.vx, this.vy, this.vz);
+                if (this.superEffect && spd > 5.0) {
+                    let col = 0xffffff;
+                    if (this.superEffect === 'fire') col = Math.random() > 0.5 ? 0xf97316 : 0xfacc15;
+                    else if (this.superEffect === 'curve') col = 0xc084fc;
+                    else if (this.superEffect === 'chip') col = 0x38bdf8;
+                    else if (this.superEffect === 'rainbow') {
+                        const cols = [0xef4444, 0xfacc15, 0x22c55e, 0x38bdf8, 0xa855f7];
+                        col = cols[Math.floor(Math.random() * cols.length)];
+                    }
+                    spawn3DParticles(this.x, this.y, this.z, col, 2, 2.2);
+                }
+
+                ballMesh.rotation.z -= (this.vx / PITCH.BALL_R) * dt * 0.75;
+                ballMesh.rotation.x += (this.vz / PITCH.BALL_R) * dt * 0.75;
+                if (Math.abs(this.spinY) > 0.5) {
+                    ballMesh.rotation.y += this.spinY * dt * 0.8;
+                }
+
+                this.syncVisual();
+            }
+
+            syncVisual() {
+                ballMesh.position.set(this.x, this.y, this.z);
+                ballShadow.position.set(this.x, 0.02, this.z);
+                const heightScale = Math.max(0.35, 1 - this.y * 0.095);
+                ballShadow.scale.set(heightScale, heightScale, 1);
+                ballShadow.material.opacity = Math.max(0.15, 0.45 - this.y * 0.04);
+
+                const airborne = this.y > PITCH.BALL_R + 0.16;
+                landingRingMesh.visible = airborne;
+                landingDotMesh.visible = airborne;
+                if (airborne) {
+                    landingRingMesh.position.set(this.x, 0.03, this.z);
+                    landingDotMesh.position.set(this.x, 0.032, this.z);
+                    const pulse = 0.85 + Math.sin(performance.now() * 0.012) * 0.14;
+                    landingRingMesh.scale.set(pulse, pulse, 1);
+                }
+
+                const volleyReady = this.y >= 0.85 && this.y <= 4.6;
+                volleyHaloMesh.visible = volleyReady;
+                if (volleyReady) {
+                    volleyHaloMesh.lookAt(camera.position);
+                    const vScale = 0.95 + Math.sin(performance.now() * 0.018) * 0.12;
+                    volleyHaloMesh.scale.set(vScale, vScale, 1);
+                }
+            }
+        }
+
+        // ==========================================
+        // בינה מלאכותית (AI) שמבצעת את כל 6 הסקילים
+        // ==========================================
+        function getAIDiffStats() {
+            if (state.diff === 'easy') return { speed: 0.72, skillChance: 0.006 };
+            if (state.diff === 'hard') return { speed: 1.03, skillChance: 0.055 };
+            return { speed: 0.88, skillChance: 0.024 };
+        }
+
+        function computeAIActions(ai) {
+            const stats = getAIDiffStats();
+            const targetGoalX = PITCH.HALF_W;
+            const ownGoalX = -PITCH.HALF_W;
+
+            const lookAhead = 0.25;
+            const predX = Math.max(-PITCH.HALF_W + 0.5, Math.min(PITCH.HALF_W - 0.5, ball.x + ball.vx * lookAhead));
+            const predZ = Math.max(-PITCH.HALF_D + 0.5, Math.min(PITCH.HALF_D - 0.5, ball.z + ball.vz * lookAhead));
+
+            let destX = predX;
+            let destZ = predZ;
+            let kick = false, rainbow = false, bicycle = false, dash = false, curve = false, chip = false, spin = false;
+
+            if (predX < ai.x - 0.5 && ball.owner !== ai) {
+                destX = Math.max(ownGoalX + 1.5, predX - 2.2);
+                destZ = predZ > ai.z ? Math.max(-PITCH.HALF_D + 1.5, predZ - 2.8) : Math.min(PITCH.HALF_D - 1.5, predZ + 2.8);
+            } else if (ball.owner === ai) {
+                const weaveOffset = Math.sin(performance.now() * 0.004) * 3.2;
+                destX = targetGoalX - 3.5;
+                destZ = Math.max(-PITCH.GOAL_HALF_D * 1.4, Math.min(PITCH.GOAL_HALF_D * 1.4, weaveOffset));
+
+                const distToDef = Math.hypot(player1.x - ai.x, player1.z - ai.z);
+                if (distToDef < 3.4 && ai.cooldowns.spin <= 0 && Math.random() < stats.skillChance * 4.8) {
+                    spin = true;
+                } else if (distToDef < 3.6 && ai.cooldowns.rainbow <= 0 && Math.random() < stats.skillChance * 4.5) {
+                    rainbow = true;
+                } else if (distToDef < 4.2 && ai.cooldowns.dash <= 0 && Math.random() < stats.skillChance * 3.5) {
+                    dash = true;
+                } else if (ai.x > 11.5 && ai.cooldowns.chip <= 0 && Math.random() < stats.skillChance * 4.2) {
+                    chip = true;
+                } else if (ai.x > 7.5 && ai.cooldowns.curve <= 0 && Math.random() < stats.skillChance * 4.5) {
+                    curve = true;
+                } else if (ai.x > 9.5 && Math.random() < 0.06) {
+                    kick = true;
+                }
+            } else {
+                const ang = Math.atan2(0 - predZ, targetGoalX - predX);
+                destX = predX - Math.cos(ang) * 0.72;
+                destZ = predZ - Math.sin(ang) * 0.72;
+
+                const distToBall = Math.hypot(ball.x - ai.x, ball.z - ai.z);
+                if (distToBall < 2.6) {
+                    if (ball.y > 1.35 && ai.cooldowns.bicycle <= 0 && Math.random() < stats.skillChance * 10) {
+                        bicycle = true;
+                    } else if (distToBall < 2.0 && ball.owner === player1) {
+                        kick = true;
+                    }
+                }
+            }
+
+            if (Math.hypot(destX - ai.x, destZ - ai.z) > 9 && ai.cooldowns.dash <= 0 && Math.random() < stats.skillChance) {
+                dash = true;
+            }
+
+            const dx = destX - ai.x;
+            const dz = destZ - ai.z;
+            const d = Math.hypot(dx, dz);
+            if (d < 0.35) return { mx: 0, mz: 0, kick, rainbow, bicycle, dash, curve, chip, spin };
+            return { mx: dx / d, mz: dz / d, kick, rainbow, bicycle, dash, curve, chip, spin };
+        }
+
+        // ==========================================
+        // חלקיקים תלת-ממדיים וקונפטי בשערים
+        // ==========================================
+        function spawn3DParticles(x, y, z, colorHex, count, speedScale = 5) {
+            const geo = new THREE.SphereGeometry(0.12, 6, 6);
+            const mat = new THREE.MeshBasicMaterial({ color: colorHex });
+            for (let i = 0; i < count; i++) {
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(x, y, z);
+                scene.add(mesh);
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const spd = (0.3 + Math.random() * 0.7) * speedScale;
+                particles3D.push({
+                    mesh,
+                    vx: Math.sin(phi) * Math.cos(theta) * spd,
+                    vy: Math.abs(Math.cos(phi)) * spd + 1.5,
+                    vz: Math.sin(phi) * Math.sin(theta) * spd,
+                    life: 1.0
+                });
+            }
+        }
+
+        function update3DParticles(dt) {
+            for (let i = particles3D.length - 1; i >= 0; i--) {
+                const p = particles3D[i];
+                p.vy += PITCH.GRAVITY * 0.38 * dt;
+                p.mesh.position.x += p.vx * dt;
+                p.mesh.position.y += p.vy * dt;
+                p.mesh.position.z += p.vz * dt;
+                p.life -= dt * 1.45;
+                p.mesh.scale.setScalar(Math.max(0.01, p.life));
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    particles3D.splice(i, 1);
+                }
+            }
+        }
+
+        // ==========================================
+        // ממשק, זרימת משחק ומצלמה
+        // ==========================================
+        let toastTimeout = null;
+        function showSkillToast(text) {
+            const el = document.getElementById('skill-toast');
+            el.textContent = text;
+            el.classList.add('visible');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => el.classList.remove('visible'), 1350);
+        }
+
+        function flashSkillSlot(playerId, skillKey) {
+            const slot = document.getElementById(`p${playerId}-skill-${skillKey}`);
+            if (!slot) return;
+            slot.classList.add('active-flash');
+            setTimeout(() => slot.classList.remove('active-flash'), 260);
+        }
+
+        function onGoalScored(scorerId) {
+            if (state.phase !== 'playing') return;
+            state.phase = 'goal';
+            state.goalTimer = 2.8;
+            state.slowMoTimer = 1.25;
+            state.lastScorer = scorerId;
+            state.shake = 0.72;
+
+            sound.playGoalCheer();
+
+            const confettiCols = [0x3b82f6, 0xef4444, 0xfacc15, 0x22c55e, 0xffffff];
+            confettiCols.forEach(c => spawn3DParticles(ball.x, 1.8, ball.z, c, 18, 9.0));
+
+            if (scorerId === 1) {
+                state.p1Score++;
+            } else {
+                state.p2Score++;
+            }
+
+            updateHUD();
+
+            const ann = document.getElementById('center-announcer');
+            const title = document.getElementById('announcer-title');
+            const sub = document.getElementById('announcer-sub');
+            title.textContent = 'גוללללל! ⚽';
+            title.style.color = scorerId === 1 ? '#60a5fa' : '#f87171';
+            sub.textContent = scorerId === 1 ? 'שער לקבוצה הכחולה!' : (state.mode === 'ai' ? 'המחשב הבקיע!' : 'שער לקבוצה האדומה!');
+            ann.classList.add('show');
+        }
+
+        function afterGoalReset() {
+            document.getElementById('center-announcer').classList.remove('show');
+
+            if (state.limitType === 'goals' && (state.p1Score >= state.limitVal || state.p2Score >= state.limitVal)) {
+                finishMatch();
+                return;
+            }
+
+            ball.reset();
+            player1.reset();
+            player2.reset();
+            gkBlue.reset();
+            gkRed.reset();
+            state.phase = 'playing';
+            sound.playWhistle(false);
+        }
+
+        function finishMatch() {
+            state.phase = 'gameover';
+            sound.playWhistle(true);
+            document.getElementById('center-announcer').classList.remove('show');
+
+            const h = document.getElementById('winner-heading');
+            const p2Name = state.mode === 'ai' ? 'המחשב' : 'האדום';
+            if (state.p1Score > state.p2Score) {
+                h.textContent = 'הכחול ניצח! 🏆';
+            } else if (state.p2Score > state.p1Score) {
+                h.textContent = `${p2Name} ניצח! 🏆`;
+            } else {
+                h.textContent = 'תיקו מרתק! 🤝';
+            }
+            document.getElementById('final-score-lbl').textContent = `תוצאה סופית: ${state.p1Score} - ${state.p2Score}`;
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            document.getElementById('score-p1').textContent = state.p1Score;
+            document.getElementById('score-p2').textContent = state.p2Score;
+
+            const t = state.limitType === 'time' ? Math.max(0, Math.ceil(state.remaining)) : Math.floor(state.elapsed);
+            const m = String(Math.floor(t / 60)).padStart(2, '0');
+            const s = String(t % 60).padStart(2, '0');
+            document.getElementById('timer-text').textContent = `${m}:${s}`;
+
+            if (player1 && player2) {
+                document.getElementById('p1-power-bar').style.width = `${player1.chargeTime * 100}%`;
+                document.getElementById('p2-power-bar').style.width = `${player2.chargeTime * 100}%`;
+
+                ['rainbow', 'bicycle', 'dash', 'curve', 'chip', 'spin'].forEach(sk => {
+                    const p1Ratio = player1.cooldowns[sk] / player1.maxCooldowns[sk];
+                    document.getElementById(`p1-cd-${sk}`).style.height = `${p1Ratio * 100}%`;
+                    document.getElementById(`p1-skill-${sk}`).classList.toggle('ready', p1Ratio <= 0);
+
+                    const p2Ratio = player2.cooldowns[sk] / player2.maxCooldowns[sk];
+                    document.getElementById(`p2-cd-${sk}`).style.height = `${p2Ratio * 100}%`;
+                    document.getElementById(`p2-skill-${sk}`).classList.toggle('ready', p2Ratio <= 0);
+                });
+            }
+        }
+
+        function startMatch() {
+            sound.init();
+            sound.playWhistle(false);
+
+            if (player1) scene.remove(player1.visual.root);
+            if (player2) scene.remove(player2.visual.root);
+            if (gkBlue) scene.remove(gkBlue.visual.root);
+            if (gkRed) scene.remove(gkRed.visual.root);
+
+            state.p1Score = 0;
+            state.p2Score = 0;
+            state.elapsed = 0;
+            state.remaining = state.limitVal;
+            state.phase = 'playing';
+
+            document.getElementById('lbl-p2').textContent = state.mode === 'ai' ? 'מחשב' : 'אדום';
+            document.getElementById('p2-panel-title').textContent = state.mode === 'ai' ? 'מחשב (AI #7)' : 'שחקן 2 (אדום #7)';
+            document.getElementById('rule-text').textContent = state.limitType === 'goals'
+                ? `עד ${state.limitVal} שערים`
+                : 'משחק של 2 דקות';
+
+            player1 = new SoccerPlayer(
+                1, 10.5, 0, Math.PI,
+                0x2563eb, '#2563eb', 0xffffff, 0x3b82f6, '10',
+                { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', kick: 'Space', rainbow: 'KeyQ', bicycle: 'KeyE', dash: 'ShiftLeft', curve: 'KeyC', chip: 'KeyF', spin: 'KeyR' },
+                false
+            );
+
+            player2 = new SoccerPlayer(
+                2, -10.5, 0, 0,
+                0xdc2626, '#dc2626', 0x111827, 0xef4444, '7',
+                { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', kick: 'Enter', rainbow: 'Period', bicycle: 'Slash', dash: 'Comma', curve: 'KeyM', chip: 'KeyL', spin: 'KeyK' },
+                state.mode === 'ai'
+            );
+
+            gkBlue = new Goalkeeper(1, PITCH.HALF_W - 0.65, Math.PI, 0xfacc15, '#facc15', 0x3b82f6);
+            gkRed = new Goalkeeper(2, -PITCH.HALF_W + 0.65, 0, 0x10b981, '#10b981', 0xef4444);
+
+            if (!ball) ball = new SoccerBall();
+            else ball.reset();
+
+            document.getElementById('menu-modal').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.add('hidden');
+            document.getElementById('center-announcer').classList.remove('show');
+            updateHUD();
+        }
+
+        function lerpAngle(a, b, t) {
+            let diff = b - a;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            return a + diff * t;
+        }
+
+        function updateEnvironmentAndCamera(dt, nowSec) {
+            if (ledTexture) {
+                ledOffset += dt * 0.14;
+                ledTexture.offset.x = ledOffset % 1;
+            }
+
+            for (let i = 0; i < cornerFlags.length; i++) {
+                const cf = cornerFlags[i];
+                cf.mesh.rotation.y = Math.sin(nowSec * 6.5 + cf.phase) * 0.35;
+            }
+
+            const goalBoost = state.phase === 'goal' ? 0.38 : 0.06;
+            const freqBoost = state.phase === 'goal' ? 3.4 : 1.0;
+            for (let i = 0; i < spectators.length; i++) {
+                const sp = spectators[i];
+                sp.mesh.position.y = sp.baseY + Math.abs(Math.sin(nowSec * sp.speed * freqBoost + sp.phase)) * goalBoost;
+            }
+
+            const bx = ball ? ball.x : 0;
+            const bz = ball ? ball.z : 0;
+
+            const targetPos = new THREE.Vector3();
+            const lookTarget = new THREE.Vector3(bx * 0.45, 0.5, bz * 0.35);
+
+            if (state.phase === 'goal' && state.slowMoTimer > 0) {
+                const goalX = state.lastScorer === 1 ? -PITCH.HALF_W : PITCH.HALF_W;
+                targetPos.set(goalX * 0.65, 7.2, 11.5);
+                lookTarget.set(goalX, 1.3, bz * 0.6);
+            } else if (state.cameraMode === 0) {
+                targetPos.set(bx * 0.34, 21.5, 26.5 + bz * 0.25);
+            } else if (state.cameraMode === 1) {
+                targetPos.set(bx * 0.55, 13.0, 18.0 + bz * 0.35);
+                lookTarget.set(bx * 0.72, 1.1, bz * 0.5);
+            } else {
+                targetPos.set(34.5 + bx * 0.22, 15.5, bz * 0.42);
+                lookTarget.set(bx * 0.35, 0.8, bz * 0.35);
+            }
+
+            if (state.shake > 0) {
+                targetPos.x += (Math.random() - 0.5) * state.shake;
+                targetPos.y += (Math.random() - 0.5) * state.shake;
+                state.shake = Math.max(0, state.shake - dt * 2.2);
+            }
+
+            camera.position.lerp(targetPos, Math.min(1, dt * 5.2));
+            camera.lookAt(lookTarget);
+        }
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            if (!state.lastTime) state.lastTime = now;
+            const rawDt = Math.min((now - state.lastTime) / 1000, 0.05);
+            state.lastTime = now;
+
+            if (state.phase === 'playing') {
+                state.elapsed += rawDt;
+                if (state.limitType === 'time') {
+                    state.remaining -= rawDt;
+                    if (state.remaining <= 0) {
+                        state.remaining = 0;
+                        updateHUD();
+                        finishMatch();
+                    }
+                }
+
+                player1.update(rawDt);
+                player2.update(rawDt);
+                gkBlue.update(rawDt);
+                gkRed.update(rawDt);
+                ball.update(rawDt);
+
+                const dx = player2.x - player1.x;
+                const dz = player2.z - player1.z;
+                const dist = Math.hypot(dx, dz);
+                const minD = PITCH.PLAYER_R * 2;
+                if (dist < minD && dist > 0) {
+                    const overlap = (minD - dist) * 0.5;
+                    const nx = dx / dist;
+                    const nz = dz / dist;
+                    player1.x -= nx * overlap;
+                    player1.z -= nz * overlap;
+                    player2.x += nx * overlap;
+                    player2.z += nz * overlap;
+                }
+
+                updateHUD();
+            } else if (state.phase === 'goal') {
+                const timeScale = state.slowMoTimer > 0 ? 0.32 : 1.0;
+                if (state.slowMoTimer > 0) state.slowMoTimer = Math.max(0, state.slowMoTimer - rawDt);
+                const simDt = rawDt * timeScale;
+
+                state.goalTimer -= rawDt;
+                ball.vx *= Math.pow(0.25, simDt);
+                ball.vz *= Math.pow(0.25, simDt);
+                ball.x += ball.vx * simDt;
+                ball.z += ball.vz * simDt;
+                ball.syncVisual();
+
+                if (state.goalTimer <= 0) {
+                    afterGoalReset();
+                }
+            }
+
+            updateGoalNets(rawDt);
+            update3DParticles(rawDt);
+            updateEnvironmentAndCamera(rawDt, now * 0.001);
+            renderer.render(scene, camera);
+        }
+
+        function bindUI() {
+            document.querySelectorAll('#opt-mode .choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#opt-mode .choice-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.mode = btn.dataset.val;
+                    const diffWrap = document.getElementById('diff-wrapper');
+                    const p2Info = document.getElementById('p2-ctrl-info');
+                    if (state.mode === 'ai') {
+                        diffWrap.classList.remove('hidden');
+                        p2Info.innerHTML = `<strong style="color:#f87171; font-size:0.9rem;">🔴 מחשב (AI #7 - תוקף ימינה)</strong><br>נשלט ע"י בינה מלאכותית חכמה עם שוער פעיל בשער<br>מבצע ריינבואו פליק, טרנספין 360°, מספרת, פדלדה, בננה וצ'יפ!`;
+                    } else {
+                        diffWrap.classList.add('hidden');
+                        p2Info.innerHTML = `<strong style="color:#f87171; font-size:0.9rem;">🔴 שחקן 2 (אדום #7 - תוקף ימינה)</strong><br>ריצה: <kbd>חצים</kbd> | בעיטה / גלישה: <kbd>Enter</kbd><br>🌈 ריינבואו: <kbd>.</kbd> | 🔄 טרנספין: <kbd>K</kbd> | ⚡ פדלדה: <kbd>,</kbd><br>🤸 מספרת: <kbd>/</kbd> | 🌀 בננה: <kbd>M</kbd> | 🎯 צ'יפ: <kbd>L</kbd>`;
+                    }
+                });
+            });
+
+            document.querySelectorAll('#opt-diff .choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#opt-diff .choice-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.diff = btn.dataset.val;
+                });
+            });
+
+            document.querySelectorAll('#opt-limit .choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#opt-limit .choice-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.limitType = btn.dataset.type;
+                    state.limitVal = parseInt(btn.dataset.val, 10);
+                });
+            });
+
+            document.getElementById('btn-start').addEventListener('click', startMatch);
+            document.getElementById('btn-rematch').addEventListener('click', startMatch);
+
+            const goMenu = () => {
+                state.phase = 'menu';
+                document.getElementById('gameover-modal').classList.add('hidden');
+                document.getElementById('center-announcer').classList.remove('show');
+                document.getElementById('menu-modal').classList.remove('hidden');
+            };
+            document.getElementById('btn-menu').addEventListener('click', goMenu);
+            document.getElementById('btn-to-menu').addEventListener('click', goMenu);
+
+            document.getElementById('btn-mute').addEventListener('click', (e) => {
+                const muted = sound.toggle();
+                e.currentTarget.textContent = muted ? '🔇' : '🔊';
+            });
+
+            document.getElementById('btn-camera').addEventListener('click', cycleCameraMode);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        window.onload = function () {
+            initThreeScene();
+            bindUI();
+            requestAnimationFrame(animate);
+        };
+    </script>
+
+<style>#sa-credit{position:fixed;bottom:8px;left:8px;z-index:2147483647;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 16px);padding:5px 12px;border-radius:999px;background:rgba(12,10,32,.85);color:#fff;font:600 12px/1.3 system-ui,Arial,sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.35);user-select:auto;-webkit-user-select:auto;cursor:default}#sa-credit a{color:#ffd23f;text-decoration:underline;white-space:nowrap}#sa-credit .sa-i{display:none}#sa-credit.min{bottom:auto;top:50%;left:0;transform:translateY(-50%);padding:6px 7px;border-radius:0 10px 10px 0;cursor:pointer;opacity:.75}#sa-credit.min>*{display:none}#sa-credit.min .sa-i{display:inline}</style><div id="sa-credit" dir="rtl" title="מי בנה את המשחק"><span class="sa-i">🏷️</span><span>🚧 בבנייה ·</span><span>נבנה ע״י <b>יונירורן</b> בסטודיו המשחקים</span><a href="../">עוד משחקים</a></div><script>(function(){var c=document.getElementById("sa-credit");function m(){c.classList.add("min")}setTimeout(m,6000);addEventListener("keydown",m,{once:true});c.addEventListener("click",function(e){if(c.classList.contains("min")){e.preventDefault();c.classList.remove("min");setTimeout(m,5000)}})})()</script>
+</body>
+</html>

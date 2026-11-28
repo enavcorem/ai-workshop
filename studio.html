@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <meta name="theme-color" content="#14112a">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%8E%AE%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>הסטודיו — סטודיו משחקים</title>
@@ -192,6 +193,11 @@
   .field label small{font-weight:500; color:var(--ink-faint);}
   .field input[type=text], .field textarea, .field select{width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 12px; color:var(--ink); font:inherit; font-size:16px;}
   .field textarea{min-height:70px; resize:vertical;}
+  .name-tip{font-size:13px; line-height:1.5; color:var(--ink-soft, var(--ink)); background:var(--surface-2); border-radius:10px; padding:8px 10px;}
+  .name-tip.warn{border-inline-start:3px solid #ffd23f;}
+  .name-tip .btn{margin:4px 0;}
+  .google-link{margin:10px 2px 0; font-size:14px; color:var(--ink-faint);}
+  .google-link a{color:#ffd23f; font-weight:700;}
   .field input:focus, .field textarea:focus{outline:2px solid var(--purple); border-color:transparent;}
   .file-drop{border:2px dashed var(--border); border-radius:14px; padding:16px; text-align:center; cursor:pointer; color:var(--ink-soft); font-size:14px;}
   .file-drop.ok{border-color:var(--green); color:var(--green);}
@@ -316,6 +322,7 @@
       <div><b>המשחק שלכם בחנות</b><small>גם אם הוא לא גמור: מסמנים 🚧 "בבנייה", והשחקנים עוזרים לכם עם 🐞 ו-💡. אחרי אישור המורה הוא עולה.</small></div>
       <button class="btn main" type="button" id="uploadBtn">⬆️ העלאה לחנות</button>
     </div>
+    <p class="google-link">🌍 <a href="arcade/" target="_blank" rel="noopener">המשחקים שאפשר למצוא בגוגל</a>: משחקים מהחנות שקיבלו כתובת קבועה, ואפשר לשלוח אותה לחברים.</p>
     <div class="games" id="games"></div>
     <div class="pending" id="pending"></div>
   </section>
@@ -778,7 +785,10 @@
     pickedFile = null;
     openModal('<div class="big-e">🚀</div><h3>העלאה לחנות</h3><p class="sub">המשחק לא חייב להיות גמור. הוא צריך רק להיפתח, ושאפשר יהיה לשחק בו 30 שניות. אחרי אישור המורה הוא בחנות.</p>'
       + '<div class="field"><label>קובץ המשחק <small>(קובץ ה-HTML שהורדתם מ-Canvas)</small></label><label class="file-drop" id="drop"><input type="file" id="gFile" accept=".html,.htm,text/html"><span id="dropTxt">📂 לחצו כאן לבחירת הקובץ</span></label></div>'
-      + '<div class="field"><label for="gName">שם המשחק <small>(גרסה חדשה? אותו שם בדיוק, והלבבות נשמרים)</small></label><input type="text" id="gName" maxlength="40"></div>'
+      + '<div class="field"><label for="gName">שם המשחק <small>(גרסה חדשה? אותו שם בדיוק, והלבבות נשמרים)</small></label><input type="text" id="gName" maxlength="40">'
+        + '<div class="name-tip">🔎 <b>רוצים שימצאו את המשחק בגוגל?</b> תנו לו שם ייחודי. "כדורגל" לא יימצא אף פעם. רעיון: מילה מומצאת, או חיבור של שתי מילים. '
+        + '<button type="button" class="btn small ghost" id="gSearch">לבדוק את השם בגוגל</button> הרבה תוצאות? כנראה שיהיה קשה למצוא אתכם.</div>'
+        + '<div class="name-tip warn">🙈 <b>בלי שמות אמיתיים</b>: לא שלכם ולא של אף אחד מהקבוצה. לא בשם המשחק, לא בכינוי ולא בתוך המשחק (דמויות, טקסטים, קרדיטים).</div></div>'
       + '<div class="field"><label>האייקון של המשחק</label><div class="chips" id="gEmo">'+GAME_EMO.map(function(x, i){ return '<button type="button"'+(i===0?' class="sel"':'')+'>'+x+'</button>'; }).join("")+'</div></div>'
       + '<div class="field"><label for="gFor">למי המשחק, ולמה ישחקו בו? 🎯</label><input type="text" id="gFor" maxlength="100" placeholder="למשל: למי שיש לו 2 דקות בהפסקה ואוהב להתחרות"></div>'
       + '<div class="field"><label>איפה המשחק עומד?</label><div class="chips" id="gState"><button type="button" class="sel" data-wip="1">🚧 בבנייה</button><button type="button" data-wip="0">✅ גמור</button></div></div>'
@@ -991,6 +1001,14 @@
     pickedFile = file; drop.classList.add("ok"); txt.textContent = "✓ " + file.name;
     var nameIn = document.getElementById("gName");
     if(!nameIn.value) nameIn.value = file.name.replace(/\.html?$/i, "").replace(/[-_]+/g, " ").slice(0, 40);
+  });
+
+  // בדיקת שם בגוגל: פותח חיפוש של השם המדויק בלשונית חדשה
+  document.addEventListener("click", function(e){
+    if(!e.target.closest("#gSearch")) return;
+    var n = (document.getElementById("gName") || {}).value || "";
+    if(!n.trim()){ document.getElementById("gName").focus(); return; }
+    window.open("https://www.google.com/search?q=" + encodeURIComponent('"' + n.trim() + '" משחק'), "_blank", "noopener");
   });
 
   // ---------- קונפטי ----------

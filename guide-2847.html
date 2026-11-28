@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'90'%3E%F0%9F%93%98%3C%2Ftext%3E%3C%2Fsvg%3E">
 <title>מדריך למורה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -262,6 +263,11 @@
       <tr><td><b>Supabase</b></td><td>מסד נתונים אמיתי (SQL), חזק.</td><td>חשבון חדש מחוץ לגוגל, מפתחות והרשאות (RLS), ותנאי גיל בשירות.</td><td>לא לחטיבה. אולי תיכון מתקדם</td></tr>
       <tr><td><b>Google Sheets + Apps Script</b> (כמו האתר שלנו)</td><td>החשבון שכבר יש להם. רואים כל שורה בגיליון. עובד מכל מקום.</td><td>איטי (שנייה-שתיים), בלי זמן אמת. חשבון חינוך עלול לחסום פריסה עם גישה "Anyone".</td><td><b>ההמלצה</b> כשצריך מידע משותף</td></tr>
     </table>
+    <h3 class="sub" id="google">🌍 משחקים בגוגל: <code>arcade/</code> (נוסף ב-27.11)</h3>
+    <div class="principle"><div class="dot"></div><p><b>מה זה:</b> משחק מהחנות מקבל דף קבוע, <code>arcade/&lt;כתובת&gt;/</code>, עם כותרת ותיאור. גוגל יכול לסרוק אותו ולהכניס אותו לחיפוש. בדף מופיע <b>רק הכינוי</b>. אין בו טופס ואין בו חיבור לגיליון. הסטודיו, לוח המורה והמדריך מסומנים <code>noindex</code>, ולכן גוגל לא מציג אותם.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>משחק חדש לגוגל (עם Claude):</b> 1. מאשרים בגיליון כרגיל. 2. בודקים שאין במשחק שמות אמיתיים, לוגואים או מותגים. 3. מוסיפים שורה ל-<code>_src/arcade-google.json</code>: הכתובת באנגלית ו-<code>key</code> = "כינוי|שם המשחק". 4. <code>node _src/publish-arcade.js</code> (מתיקיית site), וקוראים את הטקסטים שהוא מדפיס. 5. push. 6. ב-Search Console: בדיקת URL ← בקשת הוספה לאינדקס.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>גרסה חדשה:</b> מריצים שוב את הסקריפט ועושים push. הכתובת נשארת, וגוגל מתעדכן לבד. <b>הרבה באגים:</b> <code>"paused": true</code> בשורה של המשחק, והדף מציג "בתיקונים". <b>שינוי שם:</b> מעדכנים רק את <code>key</code>. הכתובת לא משתנה, אבל הלבבות בסטודיו מתחילים מאפס. <b>מחיקה:</b> מוחקים את השורה ומריצים. גוגל מוריד את הדף לבד תוך ימים עד שבועות. במקרה דחוף (למשל שם אמיתי בדף), משתמשים בכלי ההסרות של Search Console.</p></div>
+    <div class="principle"><div class="dot"></div><p><b>Search Console (פעם אחת):</b> נכס מסוג URL-prefix, <code>https://enavcorem.github.io/ai-workshop/</code>. האימות בקובץ HTML שגוגל נותן, ואותו מכניסים ל-<code>site/</code> ועושים push. אחר כך שולחים את <code>sitemap.xml</code>. בדרך כלל לוקח לגוגל בין כמה ימים לשבועיים. כדי לבדוק: <code>site:enavcorem.github.io/ai-workshop</code>.</p></div>
   </section>
 
   <section id="ideas">
